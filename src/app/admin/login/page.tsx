@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -16,7 +16,6 @@ export default function LoginPage() {
     const router = useRouter()
 
     const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>()
-
     const onSubmit = async (data: LoginForm) => {
         setIsLoading(true)
         setError('')
@@ -31,6 +30,7 @@ export default function LoginPage() {
             if (result?.error) {
                 setError('Email atau password tidak valid')
             } else {
+                // Setelah login, cek session lagi
                 const session = await getSession()
                 if (session) {
                     router.push('/admin/dashboard')

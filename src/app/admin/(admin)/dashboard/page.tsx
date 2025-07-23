@@ -7,15 +7,23 @@ import {
     TrendingUp,
     Eye
 } from "lucide-react"
+import Link from "next/link"
 
 type RecentNewsItem = {
-    id_berita: number
+    id_berita: bigint
     judul_berita: string
-    tanggal_post: string | Date
-    status_berita: string
-    hits?: number
+    tanggal_post: Date | null
+    status_berita: "publish" | "draft"
+    hits?: number | null
     user: {
         name: string
+    }
+    slug_berita: string
+    thumbnail?: string | null
+    gambar?: string | null
+    icon?: string | null
+    kategori?: {
+        nama_kategori: string
     }
 }
 
@@ -33,12 +41,12 @@ async function getDashboardStats() {
             prisma.beritas.count(),
             prisma.jadwalDokters.count(),
             prisma.beritas.count({
-                where: { status_berita: 'published' }
+                where: { status_berita: 'publish' } // enum value from schema
             }),
-            prisma.berita.aggregate({
+            prisma.beritas.aggregate({
                 _sum: { hits: true }
             }),
-            prisma.berita.findMany({
+            prisma.beritas.findMany({
                 take: 5,
                 orderBy: { tanggal_post: 'desc' },
                 include: { user: true }
@@ -151,16 +159,16 @@ export default async function AdminDashboard() {
                                         {news.judul_berita}
                                     </p>
                                     <p className="text-xs text-gray-500">
-                                        {news.user.name} • {new Date(news.tanggal_post).toLocaleDateString('id-ID')}
+                                        {news.user.name} • {news.tanggal_post ? new Date(news.tanggal_post).toLocaleDateString('id-ID') : "-"}
                                     </p>
                                     <div className="flex items-center space-x-2 mt-1">
-                                        <span className={`px-2 py-1 text-xs rounded-full ${news.status_berita === 'published'
+                                        <span className={`px-2 py-1 text-xs rounded-full ${news.status_berita === 'publish'
                                             ? 'bg-green-100 text-green-800'
                                             : 'bg-yellow-100 text-yellow-800'
                                             }`}>
                                             {news.status_berita}
                                         </span>
-                                        {news.hits && (
+                                        {(news.hits ?? 0) > 0 && (
                                             <span className="text-xs text-gray-500 flex items-center">
                                                 <Eye className="w-3 h-3 mr-1" />
                                                 {news.hits}
@@ -182,7 +190,7 @@ export default async function AdminDashboard() {
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
                     <div className="space-y-3">
-                        <a
+                        <Link
                             href="/admin/berita/create"
                             className="block w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
                         >
@@ -190,8 +198,8 @@ export default async function AdminDashboard() {
                                 <FileText className="w-5 h-5 text-blue-600" />
                                 <span className="font-medium text-blue-900">Buat Berita Baru</span>
                             </div>
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             href="/admin/dokter/create"
                             className="block w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200"
                         >
@@ -199,8 +207,8 @@ export default async function AdminDashboard() {
                                 <Users className="w-5 h-5 text-green-600" />
                                 <span className="font-medium text-green-900">Tambah Dokter</span>
                             </div>
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             href="/admin/jadwal-dokter/create"
                             className="block w-full text-left px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200"
                         >
@@ -208,8 +216,8 @@ export default async function AdminDashboard() {
                                 <Calendar className="w-5 h-5 text-purple-600" />
                                 <span className="font-medium text-purple-900">Atur Jadwal Dokter</span>
                             </div>
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             href="/admin/settings"
                             className="block w-full text-left px-4 py-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors duration-200"
                         >
@@ -217,7 +225,7 @@ export default async function AdminDashboard() {
                                 <Activity className="w-5 h-5 text-orange-600" />
                                 <span className="font-medium text-orange-900">Pengaturan Website</span>
                             </div>
-                        </a>
+                        </Link>
                     </div>
                 </div>
             </div>

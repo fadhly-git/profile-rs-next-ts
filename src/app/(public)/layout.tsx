@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Inter } from 'next/font/google'
-import './globals.css'
+import { Poppins } from 'next/font/google'
+import '../globals.css'
 import Header from "@/components/ui/Header";
 import Footer from "@/components/ui/Footer";
-import { Providers } from "./providers";
+import { Providers } from "../providers";
 import { prisma } from '@/lib/prisma'
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({ subsets: ['latin'], weight: ['500', '800'] })
 
 async function getWebsiteSetting() {
   try {
@@ -39,7 +39,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} antialiased`}
+        className={`${poppins.className} antialiased`}
       >
         <Providers>
           <div className="flex flex-col min-h-screen">
