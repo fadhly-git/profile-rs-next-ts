@@ -2,20 +2,19 @@
 
 import * as React from "react"
 import {
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  LifeBuoy,
-  Map,
-  PieChart,
+  ChartNoAxesCombinedIcon,
+  Folders,
+  Hospital,
+  ImageIcon,
+  LayoutDashboard,
+  MessageSquareWarning,
+  NewspaperIcon,
   Send,
   Settings2,
-  SquareTerminal,
+  SquareUser,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -27,6 +26,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import Image from "next/image"
+import Link from "next/link"
 
 const data = {
   user: {
@@ -36,82 +37,67 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
+      title: "Dashboard",
+      url: "/admin/dashboard",
+      icon: LayoutDashboard,
       isActive: true,
+    },
+    {
+      title: "Kritik & Saran",
+      url: "#",
+      icon: MessageSquareWarning,
+      isActive: true,
+    },
+    {
+      title: "Kategori",
+      url: "#",
+      icon: Folders,
+    },
+    {
+      title: "Berita",
+      url: "#",
+      icon: NewspaperIcon,
+    },
+    {
+      title: "Hero Section / Banner",
+      url: "#",
+      icon: ImageIcon,
+    },
+    {
+      title: "Indikator Mutu",
+      url: "#",
+      icon: ChartNoAxesCombinedIcon,
+    },
+    {
+      title: "Manajemen Pengguna",
+      url: "",
+      icon: SquareUser,
       items: [
         {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
+          title: "User List",
           url: "#",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
+      title: "Konfigurasi Website",
+      url: "",
       icon: Settings2,
       items: [
         {
-          title: "General",
+          title: "Website Settings",
           url: "#",
         },
         {
-          title: "Team",
+          title: "Tentang Kami",
           url: "#",
         },
         {
-          title: "Billing",
+          title: "Promosi",
+          url: "#",
+        },
+        {
+          title: "Layanan",
           url: "#",
         },
         {
@@ -120,64 +106,69 @@ const data = {
         },
       ],
     },
+    {
+      title: "Manajemen Dokter",
+      url: "",
+      icon: Hospital,
+      items: [
+        {
+          title: "Data Dokter",
+          url: "#",
+        },
+        {
+          title: "Jadwal Dokter",
+          url: "#",
+        },
+        {
+          title: "Kategori Spesialis",
+          url: "#",
+        },
+      ]
+    },
   ],
   navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
     {
       title: "Feedback",
       url: "#",
       icon: Send,
     },
   ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & { appName?: string }
+
+export function AppSidebar(props: AppSidebarProps) {
+  const { appName, ...rest } = props
   return (
     <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
-      {...props}
+      {...rest}
     >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
+              <Link href="/admin/dashboard">
+                <div className="bg-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                  <Image
+                    src={'/logo.png'}
+                    alt="logo"
+                    width={16}
+                    height={16}
+                    style={{ width: "auto", height: "auto" }}
+                    className="w-6 h-6"
+                  />
                 </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Acme Inc</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                <div className="grid flex-1 text-left text-sm leading-tight whitespace-normal break-words">
+                  <span className="font-medium text-foreground">{appName}</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
