@@ -11,6 +11,7 @@
 !.yarn/versions
 /prisma/seed.ts
 /prisma/*
+
 # testing
 /coverage
 
@@ -42,3 +43,7 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# uploads
+/public/uploads/*
+!/public/uploads/.gitkeep

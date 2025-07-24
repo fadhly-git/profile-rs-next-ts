@@ -19,6 +19,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export function NavMain({
   items,
@@ -34,17 +35,23 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const path = usePathname()
+  const isActive = (url: string) => {
+    return path.includes(url)
+  }
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Admin Panel RS</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+          <Collapsible key={item.title} asChild defaultOpen={isActive(item.url)}>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title}>
+              <SidebarMenuButton asChild tooltip={item.title} isActive={isActive(item.url)}>
                 <Link href={item.url}>
                   <item.icon />
-                  <span>{item.title}</span>
+                  <span>
+                    {item.title}
+                  </span>
                 </Link>
               </SidebarMenuButton>
               {item.items?.length ? (

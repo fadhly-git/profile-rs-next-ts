@@ -116,10 +116,10 @@ export default async function AdminDashboard() {
     ]
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 min-h-screen p-6 bg-background">
             <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-                <div className="text-sm text-gray-500">
+                <h1 className="text-3xl font-bold text-primary/70">Dashboard</h1>
+                <div className="text-sm text-primary">
                     Selamat datang di panel admin
                 </div>
             </div>
@@ -129,14 +129,14 @@ export default async function AdminDashboard() {
                 {statsCards.map((card, index) => {
                     const IconComponent = card.icon
                     return (
-                        <div key={index} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                        <div key={index} className="bg-secondary p-6 rounded-lg shadow-sm border border-foreground">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm text-gray-600 mb-1">{card.title}</p>
-                                    <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+                                    <p className="text-sm mb-1">{card.title}</p>
+                                    <p className="text-2xl font-bold">{card.value}</p>
                                 </div>
                                 <div className={`p-3 rounded-full ${card.color}`}>
-                                    <IconComponent className="w-6 h-6 text-white" />
+                                    <IconComponent className="w-6 h-6" />
                                 </div>
                             </div>
                         </div>
@@ -146,23 +146,23 @@ export default async function AdminDashboard() {
 
             {/* Recent News */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="bg-secondary p-6 rounded-lg shadow-sm border border-foreground">
                     <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold text-gray-900">Berita Terbaru</h2>
-                        <Activity className="w-5 h-5 text-gray-400" />
+                        <h2 className="text-lg font-semibold text-primary/70">Berita Terbaru</h2>
+                        <Activity className="w-5 h-5 " />
                     </div>
                     <div className="space-y-4">
                         {stats.recentNews.map((news: RecentNewsItem) => (
-                            <div key={news.id_berita} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg">
+                            <div key={news.id_berita} className="flex items-start space-x-3 p-3 hover:bg-accent rounded-lg">
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                    <p className="text-sm font-medium truncate">
                                         {news.judul_berita}
                                     </p>
                                     <p className="text-xs text-gray-500">
                                         {news.user.name} • {news.tanggal_post ? new Date(news.tanggal_post).toLocaleDateString('id-ID') : "-"}
                                     </p>
                                     <div className="flex items-center space-x-2 mt-1">
-                                        <span className={`px-2 py-1 text-xs rounded-full ${news.status_berita === 'publish'
+                                        <span className={`px-2 py-1 text-xs rounded-lg ${news.status_berita === 'publish'
                                             ? 'bg-green-100 text-green-800'
                                             : 'bg-yellow-100 text-yellow-800'
                                             }`}>
@@ -187,48 +187,55 @@ export default async function AdminDashboard() {
                 </div>
 
                 {/* Quick Actions */}
-                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+                <div className="bg-secondary p-6 rounded-lg shadow-sm border border-foreground">
+                    <h2 className="text-lg font-semibold text-primary/70 mb-4">Quick Actions</h2>
                     <div className="space-y-3">
                         <Link
                             href="/admin/berita/create"
-                            className="block w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+                            className="block w-full text-left px-4 py-3 bg-blue-700 hover:bg-blue-500 rounded-lg transition-colors duration-200"
                         >
                             <div className="flex items-center space-x-3">
-                                <FileText className="w-5 h-5 text-blue-600" />
-                                <span className="font-medium text-blue-900">Buat Berita Baru</span>
+                                <FileText className="w-5 h-5 text-blue-100" />
+                                <span className="font-medium text-blue-200">Buat Berita Baru</span>
                             </div>
                         </Link>
                         <Link
                             href="/admin/dokter/create"
-                            className="block w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors duration-200"
+                            className="block w-full text-left px-4 py-3 bg-green-700 hover:bg-green-500 rounded-lg transition-colors duration-200"
                         >
                             <div className="flex items-center space-x-3">
-                                <Users className="w-5 h-5 text-green-600" />
-                                <span className="font-medium text-green-900">Tambah Dokter</span>
+                                <Users className="w-5 h-5 text-green-50" />
+                                <span className="font-medium text-green-100">Tambah Dokter</span>
                             </div>
                         </Link>
                         <Link
                             href="/admin/jadwal-dokter/create"
-                            className="block w-full text-left px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors duration-200"
+                            className="block w-full text-left px-4 py-3 bg-purple-700 hover:bg-purple-500 rounded-lg transition-colors duration-200"
                         >
                             <div className="flex items-center space-x-3">
-                                <Calendar className="w-5 h-5 text-purple-600" />
-                                <span className="font-medium text-purple-900">Atur Jadwal Dokter</span>
+                                <Calendar className="w-5 h-5 text-purple-50" />
+                                <span className="font-medium text-purple-100">Atur Jadwal Dokter</span>
                             </div>
                         </Link>
                         <Link
                             href="/admin/settings"
-                            className="block w-full text-left px-4 py-3 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors duration-200"
+                            className="block w-full text-left px-4 py-3 bg-orange-700 hover:bg-orange-500 rounded-lg transition-colors duration-200"
                         >
                             <div className="flex items-center space-x-3">
-                                <Activity className="w-5 h-5 text-orange-600" />
-                                <span className="font-medium text-orange-900">Pengaturan Website</span>
+                                <Activity className="w-5 h-5 text-orange-50" />
+                                <span className="font-medium text-orange-100">Pengaturan Website</span>
                             </div>
                         </Link>
                     </div>
                 </div>
             </div>
+            <p>
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae est alias quas modi, eius, incidunt aliquid obcaecati, nesciunt cumque aperiam fuga eveniet eligendi? Libero placeat expedita repudiandae dolorem porro reprehenderit?
+                Animi quibusdam reprehenderit adipisci, dolorem corporis dolor beatae nam! Voluptas eaque dolorem harum vero voluptatem explicabo suscipit delectus deserunt ipsa perferendis pariatur quidem eveniet odit, culpa, accusantium earum itaque. Aperiam?
+                Sed repellendus facilis illo fugiat asperiores vitae omnis similique, dolorem et? Mollitia quos nihil dolore dicta culpa dolorem unde dolor eum magnam? Incidunt corporis, ipsum distinctio recusandae animi libero laboriosam.
+                Tempora quas dicta aut rerum totam error ullam hic iure sequi ducimus modi ut inventore ratione labore, tempore recusandae nulla nobis incidunt. Magni ullam voluptate, distinctio non eveniet rerum laudantium!
+                Quia voluptatem, exercitationem nihil enim assumenda perspiciatis? Officiis voluptatum blanditiis minus modi voluptates repudiandae exercitationem mollitia tempora. Deleniti unde optio amet modi officiis, cumque, adipisci illum sapiente fuga corrupti aliquam!
+            </p>
         </div>
     )
 }
