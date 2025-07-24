@@ -30,11 +30,6 @@ import Image from "next/image"
 import Link from "next/link"
 
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   navMain: [
     {
       title: "Dashboard",
@@ -44,13 +39,13 @@ const data = {
     },
     {
       title: "Kritik & Saran",
-      url: "#",
+      url: "/admin/kritik-saran",
       icon: MessageSquareWarning,
       isActive: true,
     },
     {
       title: "Kategori",
-      url: "#",
+      url: "/admin/kategori",
       icon: Folders,
     },
     {
@@ -70,7 +65,7 @@ const data = {
     },
     {
       title: "Manajemen Pengguna",
-      url: "",
+      url: "#",
       icon: SquareUser,
       items: [
         {
@@ -81,7 +76,7 @@ const data = {
     },
     {
       title: "Konfigurasi Website",
-      url: "",
+      url: "#",
       icon: Settings2,
       items: [
         {
@@ -108,7 +103,7 @@ const data = {
     },
     {
       title: "Manajemen Dokter",
-      url: "",
+      url: "#",
       icon: Hospital,
       items: [
         {
@@ -172,7 +167,7 @@ export function AppSidebar(props: AppSidebarProps) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   )
