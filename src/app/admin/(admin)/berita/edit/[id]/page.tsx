@@ -1,7 +1,10 @@
+// app/admin/berita/[id]/edit/page.tsx
+// app/admin/berita/[id]/edit/page.tsx
 "use client"
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +15,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { RichTextEditor } from '@/components/editor/TiptapEditor';
 import { toast } from 'sonner';
-import { createBeritaAction } from '../createBeritaAction';
+import { updateBeritaAction } from './updateBeritaAction';
+import { getBeritaByIdAction } from './getBeritaAction';
+import { Beritas, EnumStatusBerita, EnumBeritasBahasa } from '@/types';
+import { Kategori } from '@/types';
 import {
     ArrowLeft,
     FileText,
@@ -23,27 +29,29 @@ import {
     Image as ImageIcon,
     Settings,
     Lightbulb,
-    Calendar
+    Calendar,
+    Loader2
 } from 'lucide-react';
 
-interface Kategori {
-    id_kategori: string; // Changed from bigint to string
-    nama_kategori: string;
-    slug_kategori: string;
-}
+export default function EditBeritaPage() {
+    const router = useRouter();
+    const params = useParams();
+    const beritaId = params.id as string;
 
-export default function CreateBeritaPage() {
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingData, setIsLoadingData] = useState(true);
     const [kategoris, setKategoris] = useState<Kategori[]>([]);
     const [isLoadingKategoris, setIsLoadingKategoris] = useState(true);
+    const [beritaData, setBeritaData] = useState<Beritas | null>(null);
+
     const [formData, setFormData] = useState({
         judul_berita: "",
         slug_berita: "",
         isi: "",
         id_kategori: "",
-        status_berita: "draft",
+        status_berita: "draft" as EnumStatusBerita,
         jenis_berita: "artikel",
-        bahasa: "ID",
+        bahasa: "ID" as EnumBeritasBahasa,
         keywords: "",
         thumbnail: "",
         gambar: "",
@@ -51,17 +59,59 @@ export default function CreateBeritaPage() {
         tanggal_post: new Date().toISOString().slice(0, 16),
     });
 
+    // Load berita data
+    useEffect(() => {
+        const loadBeritaData = async () => {
+            setIsLoadingData(true);
+            try {
+                const result = await getBeritaByIdAction(beritaId);
+
+                if (result.success && result.data) {
+                    setBeritaData(result.data);
+
+                    // Set form data dari data berita yang dimuat
+                    setFormData({
+                        judul_berita: result.data.judul_berita,
+                        slug_berita: result.data.slug_berita,
+                        isi: result.data.isi,
+                        id_kategori: result.data.id_kategori.toString(),
+                        status_berita: result.data.status_berita,
+                        jenis_berita: result.data.jenis_berita,
+                        bahasa: result.data.bahasa,
+                        keywords: result.data.keywords || "",
+                        thumbnail: result.data.thumbnail || "",
+                        gambar: result.data.gambar || "",
+                        icon: result.data.icon || "",
+                        tanggal_post: result.data.tanggal_post ?
+                            new Date(result.data.tanggal_post).toISOString().slice(0, 16) :
+                            new Date().toISOString().slice(0, 16),
+                    });
+                } else {
+                    toast.error(result.error || "Berita tidak ditemukan");
+                }
+            } catch (error) {
+                console.error('Error loading berita:', error);
+                toast.error("Gagal memuat data berita");
+            } finally {
+                setIsLoadingData(false);
+            }
+        };
+
+        if (beritaId) {
+            loadBeritaData();
+        }
+    }, [beritaId]);
+
+    // Load kategoris
     useEffect(() => {
         const fetchKategoris = async () => {
             setIsLoadingKategoris(true);
             try {
-                // Use API endpoint for client-side data fetching
                 const response = await fetch('/api/kategori');
                 const result = await response.json();
 
                 if (result.success) {
                     setKategoris(result.data);
-                    // console.log('Categories loaded via API endpoint:', result.data.length);
                 } else {
                     throw new Error(result.error || 'Failed to load categories');
                 }
@@ -92,6 +142,32 @@ export default function CreateBeritaPage() {
         }));
     };
 
+    const handleDeleteImage = async (type: 'gambar' | 'thumbnail') => {
+        const imageUrl = formData[type];
+
+        if (!imageUrl) return;
+
+        try {
+            const response = await fetch('/api/admin/upload/image/berita/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: imageUrl }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                setFormData(prev => ({ ...prev, [type]: '' }));
+                toast.success('Gambar berhasil dihapus');
+            } else {
+                toast.error(result.error || 'Gagal menghapus gambar');
+            }
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            toast.error('Terjadi kesalahan saat menghapus gambar');
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -102,10 +178,10 @@ export default function CreateBeritaPage() {
                 form.append(key, value);
             });
 
-            await createBeritaAction(form);
-            // Don't call toast.success here because createBeritaAction will redirect
+            await updateBeritaAction(beritaId, form);
+            console.log('Berita updated successfully');
+            toast.success("Berita berhasil diperbarui");
         } catch (error: unknown) {
-            // Check if it's a redirect error (which is normal behavior)
             const isRedirectError = error &&
                 typeof error === 'object' &&
                 error !== null &&
@@ -114,13 +190,13 @@ export default function CreateBeritaPage() {
                 (error as { digest: string }).digest.includes('NEXT_REDIRECT');
 
             if (isRedirectError) {
-                // This is a successful redirect, not an actual error
-                return;
+                toast.success("Berita berhasil diperbarui");
+                router.push('/admin/berita');
+            } else {
+                toast.error("Gagal mengupdate berita", {
+                    description: error instanceof Error ? error.message : "Terjadi kesalahan",
+                });
             }
-
-            toast.error("Gagal membuat berita", {
-                description: error instanceof Error ? error.message : "Terjadi kesalahan"
-            });
         } finally {
             setIsLoading(false);
         }
@@ -132,16 +208,13 @@ export default function CreateBeritaPage() {
             return;
         }
 
-        // Simpan draft dan buka preview
         const previewData = {
             ...formData,
-            status_berita: "draft"
+            id_berita: beritaId,
+            status_berita: "draft" as EnumStatusBerita
         };
 
-        // Simpan ke localStorage untuk preview
         localStorage.setItem('preview_berita', JSON.stringify(previewData));
-
-        // Buka tab baru untuk preview
         window.open('/admin/berita/preview', '_blank');
     };
 
@@ -158,10 +231,8 @@ export default function CreateBeritaPage() {
                 form.append(key, value);
             });
 
-            await createBeritaAction(form);
-            // Don't call toast.success here because createBeritaAction will redirect
+            await updateBeritaAction(beritaId, form);
         } catch (error: unknown) {
-            // Check if it's a redirect error (which is normal behavior)
             const isRedirectError = error &&
                 typeof error === 'object' &&
                 error !== null &&
@@ -170,47 +241,47 @@ export default function CreateBeritaPage() {
                 (error as { digest: string }).digest.includes('NEXT_REDIRECT');
 
             if (isRedirectError) {
-                // This is a successful redirect, not an actual error
-                return;
+                toast.success("Berita berhasil diperbarui");
+                router.push('/admin/berita');
+            } else {
+                toast.error("Gagal mengupdate berita", {
+                    description: error instanceof Error ? error.message : "Terjadi kesalahan",
+                });
             }
-
-            toast.error("Gagal menyimpan draft", {
-                description: error instanceof Error ? error.message : "Terjadi kesalahan"
-            });
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleDeleteImage = async (type: 'gambar' | 'thumbnail') => {
-        const imageUrl = formData[type];
-
-        if (!imageUrl) return;
-
-        try {
-            const response = await fetch('/api/admin/upload/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: imageUrl }),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Update state untuk menghapus URL gambar
-                setFormData(prev => ({ ...prev, [type]: '' }));
-                toast.success('Gambar berhasil dihapus');
-            } else {
-                toast.error(result.error || 'Gagal menghapus gambar');
-            }
-        } catch (error) {
-            console.error('Error deleting image:', error);
-            toast.error('Terjadi kesalahan saat menghapus gambar');
-        }
-    };
-
     const wordCount = formData.isi.replace(/<[^>]*>/g, '').length;
     const estimatedReadTime = Math.ceil(wordCount / 200);
+
+    if (isLoadingData) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+                    <p className="text-muted-foreground">Memuat data berita...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!beritaData) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-destructive mb-4">Berita tidak ditemukan</p>
+                    <Link href="/admin/berita">
+                        <Button variant="outline">
+                            <ArrowLeft className="w-4 h-4 mr-2" />
+                            Kembali ke Daftar Berita
+                        </Button>
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background">
@@ -226,9 +297,9 @@ export default function CreateBeritaPage() {
                                 </Button>
                             </Link>
                             <div>
-                                <h1 className="text-2xl font-bold text-foreground">Buat Berita Baru</h1>
+                                <h1 className="text-2xl font-bold text-foreground">Edit Berita</h1>
                                 <p className="text-muted-foreground text-sm mt-1">
-                                    Buat dan publikasikan berita dengan editor yang lengkap
+                                    Edit dan update berita: {beritaData.judul_berita}
                                 </p>
                             </div>
                         </div>
@@ -268,7 +339,7 @@ export default function CreateBeritaPage() {
                                         Informasi Dasar
                                     </CardTitle>
                                     <CardDescription>
-                                        Masukkan informasi dasar berita Anda
+                                        Edit informasi dasar berita Anda
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
@@ -310,7 +381,7 @@ export default function CreateBeritaPage() {
                                 <CardHeader>
                                     <CardTitle>Konten Berita</CardTitle>
                                     <CardDescription>
-                                        Tulis konten berita menggunakan editor lengkap dengan fitur formatting
+                                        Edit konten berita menggunakan editor lengkap dengan fitur formatting
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
@@ -320,7 +391,7 @@ export default function CreateBeritaPage() {
                                         placeholder="Mulai tulis berita Anda di sini..."
                                         onImageDelete={async (url) => {
                                             // Hapus gambar dari server
-                                            await fetch('/api/admin/upload/delete', {
+                                            await fetch('/api/admin/upload/image/berita/delete', {
                                                 method: 'POST',
                                                 headers: { 'Content-Type': 'application/json' },
                                                 body: JSON.stringify({ url }),
@@ -342,7 +413,7 @@ export default function CreateBeritaPage() {
                                         Media
                                     </CardTitle>
                                     <CardDescription>
-                                        Upload gambar thumbnail dan gambar utama untuk berita
+                                        Upload atau ganti gambar thumbnail dan gambar utama untuk berita
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
@@ -364,20 +435,6 @@ export default function CreateBeritaPage() {
                             </Card>
                         </div>
 
-                        {/* Debug Info - remove in production */}
-                        {/* {process.env.NODE_ENV === 'development' && (
-                            <Card className="bg-muted/50">
-                                <CardContent className="p-4">
-                                    <div className="text-xs space-y-1">
-                                        <p><strong>Debug Info:</strong></p>
-                                        <p>Loading Kategoris: {isLoadingKategoris ? 'Yes' : 'No'}</p>
-                                        <p>Kategoris Count: {kategoris.length}</p>
-                                        <p>Kategoris: {JSON.stringify(kategoris.map(k => k.nama_kategori))}</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )} */}
-
                         {/* Sidebar - 1 column */}
                         <div className="space-y-6">
                             {/* Publish Settings */}
@@ -393,7 +450,7 @@ export default function CreateBeritaPage() {
                                         <Label>Status</Label>
                                         <Select
                                             value={formData.status_berita}
-                                            onValueChange={(value) => setFormData(prev => ({ ...prev, status_berita: value }))}
+                                            onValueChange={(value) => setFormData(prev => ({ ...prev, status_berita: value as EnumStatusBerita }))}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue />
@@ -435,7 +492,7 @@ export default function CreateBeritaPage() {
                                         className="w-full"
                                         disabled={isLoading || !formData.judul_berita || !formData.isi}
                                     >
-                                        {isLoading ? "Menyimpan..." : "Publikasikan"}
+                                        {isLoading ? "Mengupdate..." : "Update Berita"}
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -466,22 +523,12 @@ export default function CreateBeritaPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {kategoris.map((kategori) => (
-                                                    <SelectItem key={kategori.id_kategori} value={kategori.id_kategori}>
+                                                    <SelectItem key={kategori.id_kategori.toString()} value={kategori.id_kategori.toString()}>
                                                         {kategori.nama_kategori}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        {kategoris.length === 0 && !isLoadingKategoris && (
-                                            <p className="text-xs text-destructive">
-                                                Tidak ada kategori aktif. Pastikan ada kategori yang aktif di database.
-                                            </p>
-                                        )}
-                                        {isLoadingKategoris && (
-                                            <p className="text-xs text-muted-foreground">
-                                                Memuat kategori dari database...
-                                            </p>
-                                        )}
                                     </div>
 
                                     <div className="space-y-2">
@@ -509,7 +556,7 @@ export default function CreateBeritaPage() {
                                         </Label>
                                         <Select
                                             value={formData.bahasa}
-                                            onValueChange={(value) => setFormData(prev => ({ ...prev, bahasa: value }))}
+                                            onValueChange={(value) => setFormData(prev => ({ ...prev, bahasa: value as EnumBeritasBahasa }))}
                                         >
                                             <SelectTrigger>
                                                 <SelectValue />
@@ -567,31 +614,67 @@ export default function CreateBeritaPage() {
                                 </CardContent>
                             </Card>
 
+                            {/* Article Info */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Info Artikel</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Dibuat:</span>
+                                            <span>{beritaData.createdAt ? new Date(beritaData.createdAt).toLocaleDateString('id-ID') : '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Diupdate:</span>
+                                            <span>{beritaData.updatedAt ? new Date(beritaData.updatedAt).toLocaleDateString('id-ID') : '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Penulis:</span>
+                                            <span>{beritaData.user?.name ?? '-'}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Hits:</span>
+                                            <span>{beritaData.hits || 0}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">Status:</span>
+                                            <span className={`px-2 py-1 rounded text-xs ${beritaData.status_berita === 'publish'
+                                                ? 'bg-green-100 text-green-800'
+                                                : 'bg-yellow-100 text-yellow-800'
+                                                }`}>
+                                                {beritaData.status_berita === 'publish' ? 'Published' : 'Draft'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
                             {/* Quick Tips */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Lightbulb className="w-5 h-5" />
-                                        Tips Menulis
+                                        Tips Edit
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-2 text-sm text-muted-foreground">
                                         <div className="flex items-start gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                                            <p>Gunakan judul yang menarik dan informatif</p>
+                                            <p>Simpan sebagai draft untuk melihat perubahan tanpa publish</p>
                                         </div>
                                         <div className="flex items-start gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                                            <p>Tambahkan gambar untuk menarik perhatian</p>
+                                            <p>Gunakan preview untuk melihat tampilan final</p>
                                         </div>
                                         <div className="flex items-start gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                                            <p>Isi keywords SEO untuk optimasi pencarian</p>
+                                            <p>Ubah slug URL jika diperlukan untuk SEO</p>
                                         </div>
                                         <div className="flex items-start gap-2">
                                             <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2"></div>
-                                            <p>Preview sebelum publikasi</p>
+                                            <p>Update keywords untuk optimasi pencarian</p>
                                         </div>
                                     </div>
                                 </CardContent>
