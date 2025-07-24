@@ -80,17 +80,17 @@ export interface Beritas {
     isi: string;
     status_berita: EnumStatusBerita;
     jenis_berita: string;
-    keywords?: string;
-    thumbnail?: string;
-    gambar?: string;
-    icon?: string;
-    hits?: number;
-    urutan?: number;
-    tanggal_post?: Date;
-    createdAt?: Date;
-    updatedAt?: Date;
-    user?: User;
-    kategori?: Kategori;
+    keywords: string | null;
+    thumbnail: string | null;
+    gambar: string | null;
+    icon: string | null;
+    hits: number | null; // <-- ubah di sini
+    urutan: number | null; // <-- ubah di sini
+    tanggal_post: string | null;
+    createdAt?: Date | null;
+    updatedAt?: Date | null;
+    user?: User | null;
+    kategori?: Kategori | null;
 }
 
 export type EnumStatusBerita = 'draft' | 'publish';

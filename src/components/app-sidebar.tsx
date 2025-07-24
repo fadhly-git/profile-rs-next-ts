@@ -50,7 +50,7 @@ const data = {
     },
     {
       title: "Berita",
-      url: "#",
+      url: "/admin/berita",
       icon: NewspaperIcon,
     },
     {

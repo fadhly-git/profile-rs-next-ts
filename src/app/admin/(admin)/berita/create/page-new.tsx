@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,34 +9,38 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { RichTextEditor } from '@/components/editor/TiptapEditor';
 import { toast } from 'sonner';
 import { createBeritaAction } from '../createBeritaAction';
+import { getKategoriOptions } from './_data';
 import {
     ArrowLeft,
     FileText,
     Save,
     Eye,
+    Clock,
     Tag,
     Globe,
     Image as ImageIcon,
     Settings,
     Lightbulb,
-    Calendar
+    Calendar,
+    Upload
 } from 'lucide-react';
 
 interface Kategori {
-    id_kategori: string; // Changed from bigint to string
+    id_kategori: bigint;
     nama_kategori: string;
     slug_kategori: string;
 }
 
 export default function CreateBeritaPage() {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [kategoris, setKategoris] = useState<Kategori[]>([]);
-    const [isLoadingKategoris, setIsLoadingKategoris] = useState(true);
     const [formData, setFormData] = useState({
         judul_berita: "",
         slug_berita: "",
@@ -53,23 +58,11 @@ export default function CreateBeritaPage() {
 
     useEffect(() => {
         const fetchKategoris = async () => {
-            setIsLoadingKategoris(true);
             try {
-                // Use API endpoint for client-side data fetching
-                const response = await fetch('/api/kategori');
-                const result = await response.json();
-
-                if (result.success) {
-                    setKategoris(result.data);
-                    // console.log('Categories loaded via API endpoint:', result.data.length);
-                } else {
-                    throw new Error(result.error || 'Failed to load categories');
-                }
+                const data = await getKategoriOptions();
+                setKategoris(data);
             } catch (error) {
-                console.error('Failed to load categories:', error);
-                toast.error("Gagal memuat kategori. Silakan refresh halaman.");
-            } finally {
-                setIsLoadingKategoris(false);
+                toast.error("Gagal memuat kategori");
             }
         };
         fetchKategoris();
@@ -103,23 +96,11 @@ export default function CreateBeritaPage() {
             });
 
             await createBeritaAction(form);
-            // Don't call toast.success here because createBeritaAction will redirect
-        } catch (error: unknown) {
-            // Check if it's a redirect error (which is normal behavior)
-            const isRedirectError = error &&
-                typeof error === 'object' &&
-                error !== null &&
-                'digest' in error &&
-                typeof (error as { digest: unknown }).digest === 'string' &&
-                (error as { digest: string }).digest.includes('NEXT_REDIRECT');
-
-            if (isRedirectError) {
-                // This is a successful redirect, not an actual error
-                return;
-            }
-
+            toast.success("Berita berhasil dibuat!");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
             toast.error("Gagal membuat berita", {
-                description: error instanceof Error ? error.message : "Terjadi kesalahan"
+                description: error.message
             });
         } finally {
             setIsLoading(false);
@@ -159,53 +140,13 @@ export default function CreateBeritaPage() {
             });
 
             await createBeritaAction(form);
-            // Don't call toast.success here because createBeritaAction will redirect
-        } catch (error: unknown) {
-            // Check if it's a redirect error (which is normal behavior)
-            const isRedirectError = error &&
-                typeof error === 'object' &&
-                error !== null &&
-                'digest' in error &&
-                typeof (error as { digest: unknown }).digest === 'string' &&
-                (error as { digest: string }).digest.includes('NEXT_REDIRECT');
-
-            if (isRedirectError) {
-                // This is a successful redirect, not an actual error
-                return;
-            }
-
+            toast.success("Draft berhasil disimpan!");
+        } catch (error: any) {
             toast.error("Gagal menyimpan draft", {
-                description: error instanceof Error ? error.message : "Terjadi kesalahan"
+                description: error.message
             });
         } finally {
             setIsLoading(false);
-        }
-    };
-
-    const handleDeleteImage = async (type: 'gambar' | 'thumbnail') => {
-        const imageUrl = formData[type];
-
-        if (!imageUrl) return;
-
-        try {
-            const response = await fetch('/api/admin/upload/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: imageUrl }),
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                // Update state untuk menghapus URL gambar
-                setFormData(prev => ({ ...prev, [type]: '' }));
-                toast.success('Gambar berhasil dihapus');
-            } else {
-                toast.error(result.error || 'Gagal menghapus gambar');
-            }
-        } catch (error) {
-            console.error('Error deleting image:', error);
-            toast.error('Terjadi kesalahan saat menghapus gambar');
         }
     };
 
@@ -318,14 +259,6 @@ export default function CreateBeritaPage() {
                                         content={formData.isi}
                                         onChange={(content) => setFormData(prev => ({ ...prev, isi: content }))}
                                         placeholder="Mulai tulis berita Anda di sini..."
-                                        onImageDelete={async (url) => {
-                                            // Hapus gambar dari server
-                                            await fetch('/api/admin/upload/delete', {
-                                                method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ url }),
-                                            });
-                                        }}
                                     />
                                     <div className="flex justify-between text-xs text-muted-foreground mt-2">
                                         <span>{wordCount} karakter</span>
@@ -351,32 +284,16 @@ export default function CreateBeritaPage() {
                                             label="Thumbnail"
                                             currentImage={formData.thumbnail}
                                             onImageUpload={(url) => setFormData(prev => ({ ...prev, thumbnail: url }))}
-                                            onImageRemove={() => handleDeleteImage('thumbnail')}
                                         />
                                         <ImageUpload
                                             label="Gambar Utama"
                                             currentImage={formData.gambar}
                                             onImageUpload={(url) => setFormData(prev => ({ ...prev, gambar: url }))}
-                                            onImageRemove={() => handleDeleteImage('gambar')}
                                         />
                                     </div>
                                 </CardContent>
                             </Card>
                         </div>
-
-                        {/* Debug Info - remove in production */}
-                        {/* {process.env.NODE_ENV === 'development' && (
-                            <Card className="bg-muted/50">
-                                <CardContent className="p-4">
-                                    <div className="text-xs space-y-1">
-                                        <p><strong>Debug Info:</strong></p>
-                                        <p>Loading Kategoris: {isLoadingKategoris ? 'Yes' : 'No'}</p>
-                                        <p>Kategoris Count: {kategoris.length}</p>
-                                        <p>Kategoris: {JSON.stringify(kategoris.map(k => k.nama_kategori))}</p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )} */}
 
                         {/* Sidebar - 1 column */}
                         <div className="space-y-6">
@@ -455,33 +372,18 @@ export default function CreateBeritaPage() {
                                             value={formData.id_kategori}
                                             onValueChange={(value) => setFormData(prev => ({ ...prev, id_kategori: value }))}
                                             required
-                                            disabled={isLoadingKategoris}
                                         >
                                             <SelectTrigger>
-                                                <SelectValue placeholder={
-                                                    isLoadingKategoris ? "Memuat kategori..." :
-                                                        kategoris.length === 0 ? "Tidak ada kategori tersedia" :
-                                                            "Pilih kategori"
-                                                } />
+                                                <SelectValue placeholder="Pilih kategori" />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {kategoris.map((kategori) => (
-                                                    <SelectItem key={kategori.id_kategori} value={kategori.id_kategori}>
+                                                    <SelectItem key={kategori.id_kategori.toString()} value={kategori.id_kategori.toString()}>
                                                         {kategori.nama_kategori}
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        {kategoris.length === 0 && !isLoadingKategoris && (
-                                            <p className="text-xs text-destructive">
-                                                Tidak ada kategori aktif. Pastikan ada kategori yang aktif di database.
-                                            </p>
-                                        )}
-                                        {isLoadingKategoris && (
-                                            <p className="text-xs text-muted-foreground">
-                                                Memuat kategori dari database...
-                                            </p>
-                                        )}
                                     </div>
 
                                     <div className="space-y-2">

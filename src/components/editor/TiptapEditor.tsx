@@ -44,14 +44,13 @@ import {
     Type,
     Upload,
     Loader2,
-    Palette
 } from 'lucide-react'
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from '@/components/ui/popover'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
 const lowlight = createLowlight()
@@ -60,9 +59,130 @@ interface RichTextEditorProps {
     content: string
     onChange: (content: string) => void
     placeholder?: string
+    onImageDelete?: (url: string) => void
 }
 
-export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
+// Global variable untuk callback
+let globalImageDeleteCallback: ((url: string) => void) | null = null
+
+// Custom Image Extension dengan kontrol untuk hapus dan ganti
+const CustomImage = Image.extend({
+    addNodeView() {
+        return ({ node, editor, getPos }) => {
+            const container = document.createElement('div')
+            container.className = 'relative inline-block group'
+
+            const img = document.createElement('img')
+            img.src = node.attrs.src
+            img.alt = node.attrs.alt || ''
+            img.className = 'max-w-full h-auto rounded-lg'
+
+            // Kontrol overlay
+            const overlay = document.createElement('div')
+            overlay.className = 'absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2'
+
+            // Tombol hapus
+            const deleteBtn = document.createElement('button')
+            deleteBtn.innerHTML = '🗑️'
+            deleteBtn.className = 'bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm'
+            deleteBtn.title = 'Hapus gambar'
+            deleteBtn.onclick = async (e) => {
+                e.preventDefault()
+
+                // Panggil callback untuk hapus gambar dari server
+                if (globalImageDeleteCallback) {
+                    await globalImageDeleteCallback(node.attrs.src)
+                }
+
+                // Hapus node dari editor
+                const pos = getPos()
+                if (typeof pos === 'number') {
+                    editor.chain().focus().deleteRange({ from: pos, to: pos + 1 }).run()
+                }
+            }
+
+            // Tombol ganti
+            const replaceBtn = document.createElement('button')
+            replaceBtn.innerHTML = '✏️'
+            replaceBtn.className = 'bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm'
+            replaceBtn.title = 'Ganti gambar'
+            replaceBtn.onclick = (e) => {
+                e.preventDefault()
+
+                // Buat input file untuk ganti gambar
+                const fileInput = document.createElement('input')
+                fileInput.type = 'file'
+                fileInput.accept = 'image/*'
+                fileInput.style.display = 'none'
+
+                fileInput.onchange = async (event) => {
+                    const file = (event.target as HTMLInputElement).files?.[0]
+                    if (file) {
+                        try {
+                            // Upload gambar baru
+                            const formData = new FormData()
+                            formData.append('file', file)
+
+                            const response = await fetch('/api/admin/upload/image/berita', {
+                                method: 'POST',
+                                body: formData,
+                                credentials: 'include',
+                            })
+
+                            const result = await response.json()
+
+                            if (result.success) {
+                                // Hapus gambar lama dari server
+                                if (globalImageDeleteCallback) {
+                                    await globalImageDeleteCallback(node.attrs.src)
+                                }
+
+                                // Update node dengan gambar baru menggunakan view.dispatch
+                                const pos = getPos()
+                                if (typeof pos === 'number') {
+                                    const { tr } = editor.state
+                                    tr.setNodeMarkup(pos, null, {
+                                        ...node.attrs,
+                                        src: result.url
+                                    })
+                                    editor.view.dispatch(tr)
+                                }
+
+                                toast.success('Gambar berhasil diganti')
+                            } else {
+                                toast.error(result.error || 'Gagal mengupload gambar')
+                            }
+                        } catch (error) {
+                            console.error('Error replacing image:', error)
+                            toast.error('Terjadi kesalahan saat mengganti gambar')
+                        }
+                    }
+                }
+
+                document.body.appendChild(fileInput)
+                fileInput.click()
+                document.body.removeChild(fileInput)
+            }
+
+            overlay.appendChild(deleteBtn)
+            overlay.appendChild(replaceBtn)
+            container.appendChild(img)
+            container.appendChild(overlay)
+
+            return {
+                dom: container,
+                update: (updatedNode) => {
+                    if (updatedNode.type.name !== 'image') return false
+                    img.src = updatedNode.attrs.src
+                    img.alt = updatedNode.attrs.alt || ''
+                    return true
+                }
+            }
+        }
+    }
+})
+
+export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEditorProps) {
     const [linkUrl, setLinkUrl] = useState('')
     const [imageUrl, setImageUrl] = useState('')
     const [isLinkOpen, setIsLinkOpen] = useState(false)
@@ -74,11 +194,9 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         immediatelyRender: false,
         extensions: [
             StarterKit,
-            Image.configure({
+            CustomImage.configure({
                 HTMLAttributes: {
                     class: 'max-w-full h-auto rounded-lg',
-                    inline: true,
-                    allowBase64: true,
                 },
             }),
             Link.configure({
@@ -123,6 +241,70 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
         },
     })
 
+    // Fungsi untuk menghapus gambar dari server
+    const deleteImageFromServer = useCallback(async (imageUrl: string) => {
+        try {
+            const response = await fetch('/api/admin/upload/image/berita/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: imageUrl }),
+            })
+
+            const result = await response.json()
+
+            if (result.success) {
+                console.log('Gambar berhasil dihapus dari server:', imageUrl)
+            } else {
+                console.error('Gagal menghapus gambar:', result.error)
+            }
+        } catch (error) {
+            console.error('Error deleting image:', error)
+        }
+    }, [])
+
+    // Setup callback untuk penghapusan gambar
+    useEffect(() => {
+        // Set global callback
+        globalImageDeleteCallback = onImageDelete || deleteImageFromServer
+
+        // Cleanup saat component unmount
+        return () => {
+            globalImageDeleteCallback = null
+        }
+    }, [onImageDelete, deleteImageFromServer])
+
+    // Listener untuk keyboard delete
+    useEffect(() => {
+        if (!editor) return
+
+        const handleTransaction = () => {
+            // Cek apakah ada node image yang dihapus
+            const { selection } = editor.state
+            const { from, to } = selection
+
+            if (from === to) return // Tidak ada selection
+
+            // Cek node yang mungkin dihapus
+            editor.state.doc.nodesBetween(from, to, (node) => {
+                if (node.type.name === 'image') {
+                    // Delay untuk memastikan node benar-benar dihapus
+                    setTimeout(() => {
+                        const callback = onImageDelete || deleteImageFromServer
+                        if (callback) {
+                            callback(node.attrs.src)
+                        }
+                    }, 100)
+                }
+            })
+        }
+
+        editor.on('transaction', handleTransaction)
+
+        return () => {
+            editor.off('transaction', handleTransaction)
+        }
+    }, [editor, onImageDelete, deleteImageFromServer])
+
     const handleFileUpload = useCallback(async (file: File) => {
         if (!file) return
 
@@ -145,16 +327,17 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
             const formData = new FormData()
             formData.append('file', file)
 
-            const response = await fetch('/api/admin/upload', {
+            const response = await fetch('/api/admin/upload/image/berita', {
                 method: 'POST',
                 body: formData,
-                credentials: 'include', // memastikan cookie session NextAuth dikirim
+                credentials: 'include',
             })
 
             const result = await response.json()
 
             if (result.success) {
                 editor?.chain().focus().setImage({ src: result.url }).run()
+                setIsImageOpen(false)
                 toast.success('Gambar berhasil diupload')
             } else {
                 toast.error(result.error || 'Gagal mengupload gambar')
@@ -166,7 +349,6 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
             setIsUploading(false)
         }
     }, [editor])
-
 
     if (!editor) {
         return null
@@ -205,11 +387,12 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
     return (
         <div className="border border-foreground rounded-lg overflow-hidden">
-            {/* Toolbar */}
+            {/* Toolbar - sama seperti sebelumnya */}
             <div className="border-b bg-background p-3">
                 <div className="flex flex-wrap gap-1">
                     {/* Text Formatting */}
                     <Button
+                        type="button"
                         variant={editor.isActive('bold') ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleBold().run()}
@@ -217,6 +400,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <Bold className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive('italic') ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleItalic().run()}
@@ -224,6 +408,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <Italic className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive('underline') ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleUnderline().run()}
@@ -231,6 +416,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <UnderlineIcon className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive('strike') ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleStrike().run()}
@@ -238,6 +424,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <Strikethrough className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive('code') ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleCode().run()}
@@ -249,6 +436,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
                     {/* Headings */}
                     <Button
+                        type="button"
                         variant={editor.isActive('heading', { level: 1 }) ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
@@ -256,6 +444,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <Heading1 className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive('heading', { level: 2 }) ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
@@ -263,6 +452,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <Heading2 className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive('heading', { level: 3 }) ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
@@ -274,6 +464,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
                     {/* Lists */}
                     <Button
+                        type="button"
                         variant={editor.isActive('bulletList') ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -281,6 +472,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <List className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive('orderedList') ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -288,6 +480,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <ListOrdered className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive('blockquote') ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().toggleBlockquote().run()}
@@ -299,6 +492,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
                     {/* Alignment */}
                     <Button
+                        type="button"
                         variant={editor.isActive({ textAlign: 'left' }) ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().setTextAlign('left').run()}
@@ -306,6 +500,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <AlignLeft className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive({ textAlign: 'center' }) ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().setTextAlign('center').run()}
@@ -313,6 +508,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <AlignCenter className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive({ textAlign: 'right' }) ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().setTextAlign('right').run()}
@@ -320,6 +516,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <AlignRight className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant={editor.isActive({ textAlign: 'justify' }) ? 'default' : 'ghost'}
                         size="sm"
                         onClick={() => editor.chain().focus().setTextAlign('justify').run()}
@@ -332,7 +529,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                     {/* Color & Highlight */}
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" size="sm">
+                            <Button type="button" variant="ghost" size="sm">
                                 <Type className="w-4 h-4" />
                             </Button>
                         </PopoverTrigger>
@@ -342,6 +539,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                                 <div className="flex gap-2 flex-wrap">
                                     {['#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'].map((color) => (
                                         <button
+                                            type="button"
                                             key={color}
                                             className="w-6 h-6 rounded border"
                                             style={{ backgroundColor: color }}
@@ -355,7 +553,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" type="button">
                                 <Highlighter className="w-4 h-4" />
                             </Button>
                         </PopoverTrigger>
@@ -365,6 +563,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                                 <div className="flex gap-2 flex-wrap">
                                     {['#ffff00', '#ff00ff', '#00ffff', '#ff0000', '#00ff00', '#0000ff'].map((color) => (
                                         <button
+                                            type="button"
                                             key={color}
                                             className="w-6 h-6 rounded border"
                                             style={{ backgroundColor: color }}
@@ -381,7 +580,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                     {/* Link */}
                     <Popover open={isLinkOpen} onOpenChange={setIsLinkOpen}>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" size="sm">
+                            <Button type="button" variant="ghost" size="sm">
                                 <LinkIcon className="w-4 h-4" />
                             </Button>
                         </PopoverTrigger>
@@ -393,7 +592,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                                     value={linkUrl}
                                     onChange={(e) => setLinkUrl(e.target.value)}
                                 />
-                                <Button onClick={addLink} size="sm">
+                                <Button type="button" onClick={addLink} size="sm">
                                     Add Link
                                 </Button>
                             </div>
@@ -403,7 +602,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                     {/* Image */}
                     <Popover open={isImageOpen} onOpenChange={setIsImageOpen}>
                         <PopoverTrigger asChild>
-                            <Button variant="ghost" size="sm">
+                            <Button type="button" variant="ghost" size="sm">
                                 <ImageIcon className="w-4 h-4" />
                             </Button>
                         </PopoverTrigger>
@@ -411,7 +610,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                             <div className="space-y-4">
                                 <div className="space-y-2">
                                     <Label>Upload Gambar</Label>
-                                    <Button
+                                    <Button type="button"
                                         variant="outline"
                                         size="sm"
                                         onClick={openFileDialog}
@@ -452,7 +651,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                                         value={imageUrl}
                                         onChange={(e) => setImageUrl(e.target.value)}
                                     />
-                                    <Button onClick={addImage} size="sm" className="w-full">
+                                    <Button onClick={addImage} size="sm" className="w-full" type="button">
                                         Tambah Gambar
                                     </Button>
                                 </div>
@@ -460,9 +659,8 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         </PopoverContent>
                     </Popover>
 
-
                     {/* Table */}
-                    <Button
+                    <Button type="button"
                         variant="ghost"
                         size="sm"
                         onClick={addTable}
@@ -474,6 +672,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
 
                     {/* Undo/Redo */}
                     <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => editor.chain().focus().undo().run()}
@@ -482,6 +681,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
                         <Undo className="w-4 h-4" />
                     </Button>
                     <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => editor.chain().focus().redo().run()}

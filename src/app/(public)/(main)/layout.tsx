@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Poppins } from 'next/font/google'
 import '@/app/globals.css'
-import { Providers } from "../providers";
+import Header from "@/components/ui/Header";
+import Footer from "@/components/ui/Footer";
+import { Providers } from "@/app/providers";
 import { prisma } from '@/lib/prisma'
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['500', '800'] })
@@ -28,20 +30,19 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default async function RootLayout({
+export default async function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const websiteSettings = await getWebsiteSetting();
   return (
-    <html lang="en">
-      <body
-        className={`${poppins.className} antialiased`}
-      >
-        <Providers>
-          {children}
-        </Providers>
-      </body>
-    </html>
+    <div className="flex flex-col min-h-screen">
+      <Header settings={websiteSettings} />
+      <main className="flex-grow">
+        {children}
+      </main>
+      <Footer settings={websiteSettings} />
+    </div>
   );
 }
