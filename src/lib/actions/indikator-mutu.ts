@@ -16,10 +16,76 @@ export type UpdateIndikatorMutuInput = CreateIndikatorMutuInput & {
     id: number
 }
 
+// NEW: Server Action untuk mendapatkan judul unik
+export async function getUniqueJuduls(): Promise<string[]> {
+    try {
+        const juduls = await prisma.indikatormutu.findMany({
+            distinct: ['judul'],
+            select: {
+                judul: true
+            },
+            where: {
+                judul: {
+                    not: null // Filter out null judul entries
+                }
+            }
+        })
+        return juduls.map(item => item.judul as string).filter(Boolean)
+    } catch (error) {
+        console.error('Error fetching unique juduls:', error)
+        return []
+    }
+}
+
+// Tambahan functions untuk handle judul
+export async function getExistingTitles(): Promise<string[]> {
+    try {
+        const titles = await prisma.indikatormutu.findMany({
+            select: { judul: true },
+            distinct: ['judul'],
+            where: { judul: { not: null } }
+        })
+        return titles.map(t => t.judul!).filter(Boolean)
+    } catch (error) {
+        console.error('Error fetching titles:', error)
+        return []
+    }
+}
+
+export async function getPeriodsForTitle(judul: string): Promise<string[]> {
+    try {
+        const periods = await prisma.indikatormutu.findMany({
+            select: { period: true },
+            where: { judul },
+            orderBy: { period: 'desc' }
+        })
+        return periods.map(p => p.period!).filter(Boolean)
+    } catch (error) {
+        console.error('Error fetching periods for title:', error)
+        return []
+    }
+}
+
+export async function checkDuplicateEntry(judul: string, period: string): Promise<boolean> {
+    try {
+        const existing = await prisma.indikatormutu.findFirst({
+            where: { judul, period }
+        })
+        return !!existing
+    } catch (error) {
+        console.error('Error checking duplicate:', error)
+        return false
+    }
+}
+
+// Update existing functions...
 export async function getIndikatorMutu(): Promise<IndikatorMutu[]> {
     try {
         const data = await prisma.indikatormutu.findMany({
-            orderBy: { createdAt: 'desc' }
+            orderBy: [
+                { judul: 'asc' },
+                { period: 'desc' }
+            ]
         })
         return data
     } catch (error) {
@@ -28,20 +94,17 @@ export async function getIndikatorMutu(): Promise<IndikatorMutu[]> {
     }
 }
 
-export async function getIndikatorMutuById(id: number): Promise<IndikatorMutu | null> {
-    try {
-        const data = await prisma.indikatormutu.findUnique({
-            where: { id }
-        })
-        return data
-    } catch (error) {
-        console.error('Error fetching indikator mutu by id:', error)
-        return null
-    }
-}
-
 export async function createIndikatorMutu(input: CreateIndikatorMutuInput) {
     try {
+        // Check for duplicate
+        const isDuplicate = await checkDuplicateEntry(input.judul, input.period)
+        if (isDuplicate) {
+            return {
+                success: false,
+                message: `Data untuk "${input.judul}" pada periode "${input.period}" sudah ada`
+            }
+        }
+
         await prisma.indikatormutu.create({
             data: {
                 ...input,
@@ -54,6 +117,18 @@ export async function createIndikatorMutu(input: CreateIndikatorMutuInput) {
     } catch (error) {
         console.error('Error creating indikator mutu:', error)
         return { success: false, message: 'Gagal menambahkan indikator mutu' }
+    }
+}
+
+export async function getIndikatorMutuById(id: number): Promise<IndikatorMutu | null> {
+    try {
+        const data = await prisma.indikatormutu.findUnique({
+            where: { id }
+        })
+        return data
+    } catch (error) {
+        console.error('Error fetching indikator mutu by id:', error)
+        return null
     }
 }
 

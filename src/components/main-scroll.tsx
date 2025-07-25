@@ -1,8 +1,11 @@
 "use client"
 import { useScrollAreaScroll } from "@/hooks/use-scroll-direction"
 import * as ScrollArea from "@radix-ui/react-scroll-area"
+interface MainScrollAreaProps extends React.HTMLAttributes<HTMLDivElement> {
+    children: React.ReactNode;
+}
 
-export function MainScrollArea({ children }: { children: React.ReactNode }) {
+export function MainScrollArea({ children, ...props }: MainScrollAreaProps) {
     const { scrollAreaRef } = useScrollAreaScroll();
 
     return (
@@ -11,7 +14,10 @@ export function MainScrollArea({ children }: { children: React.ReactNode }) {
                 ref={scrollAreaRef}
                 className="h-full w-full"
             >
-                <div className="w-full flex-grow p-4 md:p-6 lg:p-8 no-scrollbar ">
+                <div
+                    className="w-full flex-grow p-4 md:p-6 lg:p-8 no-scrollbar"
+                    {...props}
+                >
                     {children}
                 </div>
             </ScrollArea.Viewport>

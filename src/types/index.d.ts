@@ -3,6 +3,12 @@ export interface BreadcrumbItem {
     href: string;
 }
 
+export interface ActionsProps {
+    onEdit: (data: IndikatorMutu) => void
+    onDelete: (id: number) => void
+    onDetail: (data: IndikatorMutu) => void
+}
+
 export interface MediaFile {
     name: string
     path: string

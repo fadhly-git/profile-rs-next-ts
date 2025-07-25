@@ -1,5 +1,49 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+// lib/utils.ts (tambahkan ke file utils yang sudah ada)
+import { format } from "date-fns"
+import { id } from "date-fns/locale"
+
+export function formatPeriod(period: string | null): string {
+  if (!period) return '-'
+
+  try {
+    // Convert YYYY-MM to readable format
+    const [year, month] = period.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+    return format(date, "MMMM yyyy", { locale: id })
+  } catch {
+    return period // Fallback to original value if parsing fails
+  }
+}
+
+export function formatPeriodShort(period: string | null): string {
+  if (!period) return '-'
+
+  try {
+    const [year, month] = period.split('-')
+    const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+    return format(date, "MMM yyyy", { locale: id })
+  } catch {
+    return period
+  }
+}
+
+// Untuk badge/chip style
+export function getPeriodBadgeInfo(period: string | null) {
+  if (!period) return { text: '-', variant: 'secondary' as const }
+
+  const currentDate = new Date()
+  const currentPeriod = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`
+
+  if (period === currentPeriod) {
+    return { text: formatPeriodShort(period), variant: 'default' as const }
+  } else if (period > currentPeriod) {
+    return { text: formatPeriodShort(period), variant: 'outline' as const }
+  } else {
+    return { text: formatPeriodShort(period), variant: 'secondary' as const }
+  }
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
