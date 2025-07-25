@@ -55,7 +55,7 @@ const data = {
     },
     {
       title: "Hero Section / Banner",
-      url: "#",
+      url: "/admin/hero-section-or-banner",
       icon: ImageIcon,
     },
     {

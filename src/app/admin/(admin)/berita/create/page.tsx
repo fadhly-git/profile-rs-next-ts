@@ -318,14 +318,6 @@ export default function CreateBeritaPage() {
                                         content={formData.isi}
                                         onChange={(content) => setFormData(prev => ({ ...prev, isi: content }))}
                                         placeholder="Mulai tulis berita Anda di sini..."
-                                        onImageDelete={async (url) => {
-                                            // Hapus gambar dari server
-                                            await fetch('/api/admin/upload/delete', {
-                                                method: 'POST',
-                                                headers: { 'Content-Type': 'application/json' },
-                                                body: JSON.stringify({ url }),
-                                            });
-                                        }}
                                     />
                                     <div className="flex justify-between text-xs text-muted-foreground mt-2">
                                         <span>{wordCount} karakter</span>
@@ -352,12 +344,14 @@ export default function CreateBeritaPage() {
                                             currentImage={formData.thumbnail}
                                             onImageUpload={(url) => setFormData(prev => ({ ...prev, thumbnail: url }))}
                                             onImageRemove={() => handleDeleteImage('thumbnail')}
+                                            url='/api/admin/upload/image/berita-thumb'
                                         />
                                         <ImageUpload
                                             label="Gambar Utama"
                                             currentImage={formData.gambar}
                                             onImageUpload={(url) => setFormData(prev => ({ ...prev, gambar: url }))}
                                             onImageRemove={() => handleDeleteImage('gambar')}
+                                            url='/api/admin/upload/image/berita-thumb'
                                         />
                                     </div>
                                 </CardContent>

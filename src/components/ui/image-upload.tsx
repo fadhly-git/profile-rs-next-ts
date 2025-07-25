@@ -18,6 +18,7 @@ interface ImageUploadProps {
     maxSizeMB?: number;
     className?: string;
     disabled?: boolean;
+    url?: string; // Optional URL for the image
 }
 
 export function ImageUpload({
@@ -28,6 +29,7 @@ export function ImageUpload({
     accept = "image/*",
     maxSizeMB = 5,
     className = "",
+    url = "",
     disabled = false
 }: ImageUploadProps) {
     const [isUploading, setIsUploading] = useState(false);
@@ -56,7 +58,7 @@ export function ImageUpload({
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('/api/admin/upload', {
+            const response = await fetch(url ?? "/api/admin/upload/image", {
                 method: 'POST',
                 body: formData,
                 credentials: 'include',

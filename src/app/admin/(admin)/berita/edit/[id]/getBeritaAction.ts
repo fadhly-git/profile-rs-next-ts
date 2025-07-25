@@ -2,7 +2,7 @@
 "use server"
 
 import { prisma } from '@/lib/prisma';
-import { Beritas } from '@/types'; // Import interface yang benar
+import { Beritas } from '@/types';
 
 export async function getBeritaByIdAction(id: string) {
     try {

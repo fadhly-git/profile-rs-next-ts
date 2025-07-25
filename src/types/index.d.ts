@@ -3,6 +3,16 @@ export interface BreadcrumbItem {
     href: string;
 }
 
+export interface MediaFile {
+    name: string
+    path: string
+    url: string
+    size: number
+    type: string
+    lastModified: Date
+    category: string
+}
+
 export interface User {
     id?: number;
     name?: string;
@@ -157,24 +167,24 @@ export interface FeatureBlocks {
 export interface HeroSection {
     id: number;
     headline: string;
-    subheading?: string;
-    background_image?: string;
-    cta_button_text_1?: string;
-    cta_button_link_1?: string;
-    cta_button_text_2?: string;
-    cta_button_link_2?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+    subheading?: string | null;
+    background_image?: string | null;
+    cta_button_text_1?: string | null;
+    cta_button_link_1?: string | null;
+    cta_button_text_2?: string | null;
+    cta_button_link_2?: string | null;
+    createdAt?: Date | null;
+    updatedAt?: Date | null;
 }
 
-export interface Indikatormutu {
-    id: number;
-    period?: string;
-    judul?: string;
-    capaian?: string;
-    target?: string;
-    createdAt?: Date;
-    updatedAt?: Date;
+export interface IndikatorMutu {
+    id: number
+    period: string | null
+    judul: string | null
+    capaian: string | null
+    target: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
 }
 
 export interface JadwalDokters {
