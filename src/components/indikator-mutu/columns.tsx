@@ -2,22 +2,25 @@
 "use client"
 
 import { ColumnDef } from "@tanstack/react-table"
-import { MoreHorizontal, Edit, Trash2, ArrowUpDown } from "lucide-react"
+import { MoreHorizontal, Edit, Trash2, ArrowUpDown, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { BadgeStatus } from "@/components/ui/badge-status"
-import { IndikatorMutu } from "@/types"
-import { formatDate } from "@/lib/utils"
+import { type IndikatorMutu } from "@/types"
+import { formatDate, formatPeriod, getPeriodBadgeInfo } from "@/lib/utils"
+import { Badge } from "../ui/badge"
 
 interface ActionsProps {
     onEdit: (data: IndikatorMutu) => void
     onDelete: (id: number) => void
+    onDetail: (data: IndikatorMutu) => void // NEW: Tambahkan onDetail
 }
 
 const getStatusBadge = (capaian: string, target: string) => {
@@ -33,7 +36,7 @@ const getStatusBadge = (capaian: string, target: string) => {
     }
 }
 
-export const createColumns = ({ onEdit, onDelete }: ActionsProps): ColumnDef<IndikatorMutu>[] => [
+export const createColumns = ({ onEdit, onDelete, onDetail }: ActionsProps): ColumnDef<IndikatorMutu>[] => [
     {
         accessorKey: "period",
         header: ({ column }) => {
@@ -48,9 +51,21 @@ export const createColumns = ({ onEdit, onDelete }: ActionsProps): ColumnDef<Ind
                 </Button>
             )
         },
-        cell: ({ row }) => (
-            <div className="font-medium">{row.getValue("period")}</div>
-        ),
+        cell: ({ row }) => {
+            const period = row.getValue("period") as string
+            const badgeInfo = getPeriodBadgeInfo(period)
+            return
+            (
+                <div className="space-y-1">
+                    <Badge variant={badgeInfo.variant} className="text-xs">
+                        {badgeInfo.text}
+                    </Badge>
+                    <div className="text-xs text-muted-foreground">
+                        {formatPeriod(period)}
+                    </div>
+                </div>
+            )
+        },
     },
     {
         accessorKey: "judul",
@@ -117,6 +132,11 @@ export const createColumns = ({ onEdit, onDelete }: ActionsProps): ColumnDef<Ind
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => onDetail(data)}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat Detail
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => onEdit(data)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
