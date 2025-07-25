@@ -1,3 +1,5 @@
+/* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useEditor, EditorContent } from '@tiptap/react'
@@ -64,6 +66,8 @@ interface RichTextEditorProps {
 
 // Global variable untuk callback
 let globalImageDeleteCallback: ((url: string) => void) | null = null
+let deletingImages = new Set<string>()
+let processedImages = new Set<string>()
 
 // Custom Image Extension dengan kontrol untuk hapus dan ganti
 const CustomImage = Image.extend({
@@ -88,17 +92,24 @@ const CustomImage = Image.extend({
             deleteBtn.title = 'Hapus gambar'
             deleteBtn.onclick = async (e) => {
                 e.preventDefault()
+                e.stopPropagation()
 
-                // Panggil callback untuk hapus gambar dari server
-                if (globalImageDeleteCallback) {
-                    await globalImageDeleteCallback(node.attrs.src)
-                }
+                const imageUrl = node.attrs.src
+
+                // Cek apakah gambar sudah diproses
+                if (deletingImages.has(imageUrl)) return;
 
                 // Hapus node dari editor
                 const pos = getPos()
                 if (typeof pos === 'number') {
                     editor.chain().focus().deleteRange({ from: pos, to: pos + 1 }).run()
                 }
+
+                // Panggil callback untuk hapus gambar dari server
+                if (globalImageDeleteCallback) {
+                    await globalImageDeleteCallback(node.attrs.src)
+                }
+
             }
 
             // Tombol ganti
@@ -243,6 +254,9 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
 
     // Fungsi untuk menghapus gambar dari server
     const deleteImageFromServer = useCallback(async (imageUrl: string) => {
+        // Cek apakah gambar sudah diproses
+        if (deletingImages.has(imageUrl)) return;
+        deletingImages.add(imageUrl);
         try {
             const response = await fetch('/api/admin/upload/image/berita/delete', {
                 method: 'POST',
@@ -259,6 +273,11 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
             }
         } catch (error) {
             console.error('Error deleting image:', error)
+        } finally {
+            // hapus dari set setelah selesai
+            setTimeout(() => {
+                deletingImages.delete(imageUrl)
+            }, 1000)
         }
     }, [])
 
@@ -270,6 +289,9 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
         // Cleanup saat component unmount
         return () => {
             globalImageDeleteCallback = null
+            // bersihkan set
+            deletingImages.clear()
+            processedImages.clear()
         }
     }, [onImageDelete, deleteImageFromServer])
 
@@ -277,23 +299,36 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
     useEffect(() => {
         if (!editor) return
 
-        const handleTransaction = () => {
+        const handleTransaction = (transaction: any) => {
+            // hanya proses jika ada perubahan pada dokumen
+            if (!transaction.docChanged) return;
             // Cek apakah ada node image yang dihapus
-            const { selection } = editor.state
-            const { from, to } = selection
+            const prevDoc = transaction.before
+            const newDoc = transaction.doc
 
-            if (from === to) return // Tidak ada selection
-
-            // Cek node yang mungkin dihapus
-            editor.state.doc.nodesBetween(from, to, (node) => {
+            prevDoc.descendants((node: any, pos: number) => {
                 if (node.type.name === 'image') {
-                    // Delay untuk memastikan node benar-benar dihapus
-                    setTimeout(() => {
-                        const callback = onImageDelete || deleteImageFromServer
-                        if (callback) {
-                            callback(node.attrs.src)
+                    const imageUrl = node.attrs.src
+                    // Cek apakah node ini ada di dokumen baru
+                    let stillExists = false
+                    newDoc.descendants((newNode: any) => {
+                        if (newNode.type.name === 'image' && newNode.attrs.src === imageUrl) {
+                            stillExists = true
                         }
-                    }, 100)
+                    })
+                    // Jika tidak ada di dokumen baru, panggil callback untuk hapus
+                    if (!stillExists && !processedImages.has(imageUrl)) {
+                        processedImages.add(imageUrl)
+                        // delay untuk memastikan callback tidak dipanggil berulang kali
+                        setTimeout(() => {
+                            const callback = globalImageDeleteCallback || deleteImageFromServer
+                            if (callback) callback(imageUrl);
+                            // Hapus dari set setelah callback dipanggil
+                            setTimeout(() => {
+                                processedImages.delete(imageUrl)
+                            }, 5000)
+                        }, 200)
+                    }
                 }
             })
         }

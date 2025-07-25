@@ -22,7 +22,6 @@ import { Separator } from "@/components/ui/separator"
 import { createKategoriAction, getKategoriList } from "./createKategoriAction"
 import {
     FolderTree,
-    Image,
     Info,
     ListOrdered,
     Menu,
@@ -77,7 +76,7 @@ export default function CreateKategoriPage() {
                 setTimeout(() => {
                     router.push("/admin/kategori")
                 }, 1500)
-            } catch (error) {
+            } catch {
                 toast.error("Gagal membuat kategori", {
                     description: "Silakan coba lagi atau hubungi administrator."
                 })
