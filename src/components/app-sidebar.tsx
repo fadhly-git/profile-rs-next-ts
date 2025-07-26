@@ -89,15 +89,15 @@ const data = {
         },
         {
           title: "Promosi",
-          url: "#",
+          url: "/admin/promosi",
         },
         {
           title: "Layanan",
-          url: "#",
+          url: "/admin/layanan",
         },
         {
           title: "Halaman",
-          url: "#",
+          url: "/admin/halaman",
         },
       ],
     },
@@ -108,15 +108,15 @@ const data = {
       items: [
         {
           title: "Data Dokter",
-          url: "#",
+          url: "/admin/data-dokter",
         },
         {
           title: "Jadwal Dokter",
-          url: "#",
+          url: "/admin/jadwal-dokter",
         },
         {
           title: "Kategori Spesialis",
-          url: "#",
+          url: "/admin/kategori-spesialis",
         },
       ]
     },

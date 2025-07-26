@@ -57,7 +57,15 @@ export function AboutUsForm({ initialData, mode }: AboutUsFormProps) {
                     }, 1000)
                 }
             } else if (initialData) {
-                await updateAboutUs(initialData.id, formData)
+                const res = await updateAboutUs(initialData.id, formData)
+                if (!res.success) {
+                    throw new Error('Gagal membuat About Us')
+                } else {
+                    toast.success('About Us berhasil dibuat')
+                    setTimeout(() => {
+                        router.push('/admin/tentang-kami')
+                    }, 1000)
+                }
             }
         } catch {
             setErrors({ general: 'Terjadi kesalahan saat menyimpan data' })
@@ -142,7 +150,11 @@ export function AboutUsForm({ initialData, mode }: AboutUsFormProps) {
                             placeholder="https://example.com/about-us atau /about-us"
                             helperText="Link menuju halaman lengkap About Us (opsional)"
                             type="text"
-                            error={isValidUrl(formData.read_more_link || '') ? '' : 'Link tidak valid'}
+                            error={
+                                formData.read_more_link && !isValidUrl(formData.read_more_link)
+                                    ? 'Link tidak valid'
+                                    : ''
+                            }
                         />
 
                         <div className="flex gap-4 pt-6">
