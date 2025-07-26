@@ -20,19 +20,6 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: `Admin Panel - ${setting?.website_name || "Website"}`,
         description: "Manage your website settings and content",
-        openGraph: {
-            title: `Admin Panel - ${setting?.website_name || "Website"}`,
-            description: "Manage your website settings and content",
-            url: `${process.env.NEXT_PUBLIC_BASE_URL}/admin`,
-            siteName: setting?.website_name || "Website",
-            images: [
-                {
-                    url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og-image?title=Admin Panel - ${setting?.website_name || "Website"}`,
-                    width: 1200,
-                    height: 630,
-                },
-            ],
-        },
         icons: setting?.favicon_url,
 
     }

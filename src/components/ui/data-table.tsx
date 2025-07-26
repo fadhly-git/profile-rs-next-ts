@@ -1,5 +1,5 @@
 // components/ui/data-table.tsx
-"use client"
+'use client'
 
 import {
     ColumnDef,
@@ -10,9 +10,8 @@ import {
     getSortedRowModel,
     SortingState,
     getFilteredRowModel,
-    ColumnFiltersState,
-} from "@tanstack/react-table"
-import { useState } from "react"
+} from '@tanstack/react-table'
+import { useState } from 'react'
 import {
     Table,
     TableBody,
@@ -20,16 +19,18 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { ChevronLeft, ChevronRight, Search } from "lucide-react"
+} from '@/components/ui/table'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
     data: TData[]
     searchPlaceholder?: string
     searchColumn?: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rowWrapper?: (row: any, children: React.ReactNode) => React.ReactNode
 }
 
 export function DataTable<TData, TValue>({
@@ -37,22 +38,28 @@ export function DataTable<TData, TValue>({
     data,
     searchPlaceholder = "Search...",
     searchColumn,
+    rowWrapper,
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
-    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [globalFilter, setGlobalFilter] = useState('')
 
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        onSortingChange: setSorting,
         getSortedRowModel: getSortedRowModel(),
-        onColumnFiltersChange: setColumnFilters,
         getFilteredRowModel: getFilteredRowModel(),
+        onSortingChange: setSorting,
+        onGlobalFilterChange: setGlobalFilter,
         state: {
             sorting,
-            columnFilters,
+            globalFilter,
+        },
+        initialState: {
+            pagination: {
+                pageSize: 10,
+            },
         },
     })
 
@@ -60,27 +67,22 @@ export function DataTable<TData, TValue>({
         <div className="space-y-4">
             {searchColumn && (
                 <div className="flex items-center space-x-2">
-                    <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input
-                            placeholder={searchPlaceholder}
-                            value={(table.getColumn(searchColumn)?.getFilterValue() as string) ?? ""}
-                            onChange={(event) =>
-                                table.getColumn(searchColumn)?.setFilterValue(event.target.value)
-                            }
-                            className="pl-10"
-                        />
-                    </div>
+                    <Input
+                        placeholder={searchPlaceholder}
+                        value={globalFilter ?? ''}
+                        onChange={(event) => setGlobalFilter(event.target.value)}
+                        className="max-w-sm"
+                    />
                 </div>
             )}
 
-            <div className="rounded-md border bg-card">
+            <div className="rounded-md border">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="font-semibold">
+                                    <TableHead key={header.id}>
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -94,19 +96,23 @@ export function DataTable<TData, TValue>({
                     </TableHeader>
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow
-                                    key={row.id}
-                                    data-state={row.getIsSelected() && "selected"}
-                                    className="hover:bg-muted/50 transition-colors"
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
+                            table.getRowModel().rows.map((row) => {
+                                const rowContent = (
+                                    <TableRow
+                                        key={row.id}
+                                        data-state={row.getIsSelected() && "selected"}
+                                        className="cursor-context-menu"
+                                    >
+                                        {row.getVisibleCells().map((cell) => (
+                                            <TableCell key={cell.id}>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        ))}
+                                    </TableRow>
+                                )
+
+                                return rowWrapper ? rowWrapper(row, rowContent) : rowContent
+                            })
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
@@ -118,10 +124,14 @@ export function DataTable<TData, TValue>({
                 </Table>
             </div>
 
-            <div className="flex items-center justify-between space-x-2">
-                <div className="text-sm text-muted-foreground">
-                    Showing {table.getFilteredRowModel().rows.length} of{" "}
-                    {table.getCoreRowModel().rows.length} results
+            <div className="flex items-center justify-between space-x-2 py-4">
+                <div className="flex-1 text-sm text-muted-foreground">
+                    Showing {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1} to{' '}
+                    {Math.min(
+                        (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                        table.getFilteredRowModel().rows.length
+                    )}{' '}
+                    of {table.getFilteredRowModel().rows.length} entries
                 </div>
                 <div className="flex items-center space-x-2">
                     <Button
@@ -133,10 +143,6 @@ export function DataTable<TData, TValue>({
                         <ChevronLeft className="h-4 w-4" />
                         Previous
                     </Button>
-                    <div className="text-sm font-medium">
-                        Page {table.getState().pagination.pageIndex + 1} of{" "}
-                        {table.getPageCount()}
-                    </div>
                     <Button
                         variant="outline"
                         size="sm"
