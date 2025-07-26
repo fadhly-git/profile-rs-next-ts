@@ -13,7 +13,6 @@ import { SiteHeader } from '@/components/site-header'
 import { getWebsiteSetting } from '@/lib/prisma'
 import { WebsiteSettings } from '@/types'
 import { Metadata } from 'next'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { MainScrollArea } from '@/components/main-scroll'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -21,6 +20,21 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: `Admin Panel - ${setting?.website_name || "Website"}`,
         description: "Manage your website settings and content",
+        openGraph: {
+            title: `Admin Panel - ${setting?.website_name || "Website"}`,
+            description: "Manage your website settings and content",
+            url: `${process.env.NEXT_PUBLIC_BASE_URL}/admin`,
+            siteName: setting?.website_name || "Website",
+            images: [
+                {
+                    url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og-image?title=Admin Panel - ${setting?.website_name || "Website"}`,
+                    width: 1200,
+                    height: 630,
+                },
+            ],
+        },
+        icons: setting?.favicon_url,
+
     }
 }
 
@@ -39,7 +53,7 @@ export default async function AdminLayout({
                 <SidebarProvider className="flex flex-col flex-1">
                     <SiteHeader />
                     <div className="flex flex-1">
-                        <AppSidebar appName={websiteSettings?.website_name ?? "Admin"} />
+                        <AppSidebar appName={websiteSettings?.website_name ?? "Admin"} logoUrl={websiteSettings?.logo_url ?? undefined} />
                         <SidebarInset className="flex flex-1 overflow-hidden">
                             <div className="h-full">
                                 <MainScrollArea>
