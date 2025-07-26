@@ -54,7 +54,6 @@ export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFo
                 }
 
                 router.push('/admin/website-settings')
-                router.refresh()
             } catch (error) {
                 console.error('Error saving website settings:', error)
                 toast.error(`Failed to ${mode} website settings`)
