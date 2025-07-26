@@ -88,7 +88,7 @@ export function ImagePreview({ src, alt, onRemove, className = "" }: ImagePrevie
                                         {alt || 'Image Preview'}
                                     </div>
                                 </DialogTitle>
-                                <div className="relative aspect-video">
+                                <div className="relative aspect-video rounded-lg">
                                     <Image
                                         src={src}
                                         alt={alt}
