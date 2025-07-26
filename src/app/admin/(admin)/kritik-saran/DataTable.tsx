@@ -178,7 +178,7 @@ export function DataTable({
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="h-8 px-2 font-semibold text-xs uppercase tracking-wider hover:bg-neutral-100"
+                    className="h-8 px-2 font-semibold text-xs uppercase tracking-wider "
                 >
                     Pengirim
                     {column.getIsSorted() === "asc" ? (
@@ -197,7 +197,7 @@ export function DataTable({
                 return (
                     <div className="flex flex-col min-w-[180px] space-y-1">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm text-gray-900">
+                            <span className="font-semibold text-sm">
                                 {row.getValue("nama")}
                             </span>
                             <div className="flex gap-1">
@@ -261,7 +261,7 @@ export function DataTable({
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                    className="h-8 px-2 font-semibold text-xs uppercase tracking-wider hover:bg-neutral-100"
+                    className="h-8 px-2 font-semibold text-xs uppercase tracking-wider"
                 >
                     <Calendar className="mr-1 h-4 w-4" />
                     Tanggal
@@ -282,7 +282,7 @@ export function DataTable({
 
                 return (
                     <div className="flex flex-col gap-1 min-w-[100px]">
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-medium">
                             {date.toLocaleDateString('id-ID', {
                                 day: '2-digit',
                                 month: 'short'
@@ -322,7 +322,7 @@ export function DataTable({
                         <DropdownMenuTrigger asChild>
                             <Button
                                 variant="ghost"
-                                className="h-8 w-8 p-0 data-[state=open]:bg-muted hover:bg-neutral-100"
+                                className="h-8 w-8 p-0 data-[state=open]:bg-muted"
                             >
                                 <span className="sr-only">Buka menu</span>
                                 <MoreHorizontal className="h-4 w-4" />
@@ -479,7 +479,7 @@ export function DataTable({
 
 
     return (
-        <div className="w-full space-y-6 bg-gray-50 min-h-screen p-6">
+        <div className="w-full space-y-6 min-h-screen p-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <Card className="border-l-4 border-l-blue-500">
@@ -659,7 +659,7 @@ export function DataTable({
 
                     {/* Selected Actions */}
                     {table.getFilteredSelectedRowModel().rows.length > 0 && (
-                        <div className="flex items-center gap-3 mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center gap-3 mt-4 p-3 border rounded-lg">
                             <Badge variant="secondary" className="font-medium">
                                 {table.getFilteredSelectedRowModel().rows.length} item dipilih
                             </Badge>
@@ -691,13 +691,13 @@ export function DataTable({
             <Card className="shadow-sm">
                 <div className="overflow-hidden">
                     <Table>
-                        <TableHeader className="bg-gray-50">
+                        <TableHeader>
                             {table.getHeaderGroups().map((headerGroup) => (
-                                <TableRow key={headerGroup.id} className="border-b-2 border-gray-200">
+                                <TableRow key={headerGroup.id} className="border-b-2">
                                     {headerGroup.headers.map((header) => (
                                         <TableHead
                                             key={header.id}
-                                            className="px-4 py-4 text-left font-bold text-gray-700 bg-gray-50"
+                                            className="px-4 py-4 text-left font-bold"
                                             style={{ width: header.getSize() }}
                                         >
                                             {header.isPlaceholder
@@ -711,7 +711,7 @@ export function DataTable({
                                 </TableRow>
                             ))}
                         </TableHeader>
-                        <TableBody className="bg-white">
+                        <TableBody className="">
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row, index) => (
                                     <ContextMenu key={row.id}>
@@ -720,9 +720,7 @@ export function DataTable({
                                                 data-state={row.getIsSelected() && "selected"}
                                                 className={`
                                                     cursor-pointer transition-all duration-200 
-                                                    hover:bg-blue-50 hover:shadow-sm
-                                                    ${row.getIsSelected() ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''}
-                                                    ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}
+                                                    hover:shadow-sm
                                                 `}
                                                 onClick={() => {
                                                     setSelectedDetail(row.original);
@@ -796,10 +794,10 @@ export function DataTable({
                                                 <FileText className="h-12 w-12 text-gray-400" />
                                             </div>
                                             <div className="text-center">
-                                                <h3 className="text-lg font-semibold text-gray-900">
+                                                <h3 className="text-lg font-semibold">
                                                     Belum Ada Data
                                                 </h3>
-                                                <p className="text-sm text-gray-500 mt-1">
+                                                <p className="text-sm mt-1">
                                                     Belum ada kritik atau saran yang masuk. Data akan muncul di sini setelah ada yang mengirim.
                                                 </p>
                                             </div>
@@ -895,17 +893,17 @@ export function DataTable({
 
             {/* Enhanced Detail Dialog */}
             <Dialog open={openDetail} onOpenChange={setOpenDetail}>
-                <DialogContent className="!max-w-6xl w-[95%] h-[90vh] p-0">
+                <DialogContent className="!max-w-6xl w-[95%] min-h-0 p-0">
                     {selectedDetail && (
                         <>
-                            <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-                                <DialogTitle className="flex items-center gap-3 text-xl font-bold text-gray-900">
-                                    <div className="p-2 bg-blue-100 rounded-lg">
+                            <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r">
+                                <DialogTitle className="flex items-center gap-3 text-xl font-bold">
+                                    <div className="p-2 bg-accent rounded-lg">
                                         <MessageCircle className="h-6 w-6 text-blue-600" />
                                     </div>
                                     Detail Kritik & Saran
                                 </DialogTitle>
-                                <DialogDescription className="text-gray-600 mt-2">
+                                <DialogDescription className="mt-2">
                                     Masukan dari <strong>{selectedDetail.nama}</strong> • {new Date(selectedDetail.createdAt).toLocaleDateString('id-ID', {
                                         day: 'numeric',
                                         month: 'long',
@@ -917,47 +915,47 @@ export function DataTable({
                             </DialogHeader>
 
                             <ScrollArea className="h-[calc(90vh-12rem)] px-6 py-4">
-                                <div className="space-y-6">
+                                <div className="space-y-4">
                                     {/* Contact & Service Info Grid */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                         {/* Contact Information */}
                                         <Card className="border-l-4 border-l-blue-500">
-                                            <CardHeader className="pb-3">
+                                            <CardHeader>
                                                 <CardTitle className="text-lg flex items-center gap-2">
                                                     <User className="h-5 w-5 text-blue-600" />
                                                     Informasi Kontak
                                                 </CardTitle>
                                             </CardHeader>
-                                            <CardContent className="space-y-4">
-                                                <div className="grid grid-cols-1 gap-4">
-                                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                            <CardContent className="space-y-2">
+                                                <div className="grid grid-cols-1 gap-1">
+                                                    <div className="flex items-center gap-2 p-2 rounded-lg">
                                                         <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                                         <div>
-                                                            <Label className="text-xs text-gray-500 uppercase tracking-wider">Nama Lengkap</Label>
-                                                            <p className="font-semibold text-gray-900">{selectedDetail.nama}</p>
+                                                            <Label className="text-xs uppercase tracking-wider">Nama Lengkap</Label>
+                                                            <p className="font-semibold">{selectedDetail.nama}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <Mail className="h-4 w-4 text-gray-500" />
+                                                    <div className="flex items-center gap-2 p-2 rounded-lg">
+                                                        <Mail className="h-4 w-4" />
                                                         <div className="flex-1">
-                                                            <Label className="text-xs text-gray-500 uppercase tracking-wider">Email</Label>
-                                                            <p className="font-mono text-sm text-gray-900 break-all">{selectedDetail.email}</p>
+                                                            <Label className="text-xs uppercase tracking-wider">Email</Label>
+                                                            <p className="font-mono text-sm break-all">{selectedDetail.email}</p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <Phone className="h-4 w-4 text-gray-500" />
+                                                    <div className="flex items-center gap-2 p-2 rounded-lg">
+                                                        <Phone className="h-4 w-4" />
                                                         <div>
-                                                            <Label className="text-xs text-gray-500 uppercase tracking-wider">Telepon</Label>
-                                                            <p className="font-mono text-sm text-gray-900">
+                                                            <Label className="text-xs uppercase tracking-wider">Telepon</Label>
+                                                            <p className="font-mono text-sm">
                                                                 {selectedDetail.telepon || '-'}
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <Building className="h-4 w-4 text-gray-500 mt-0.5" />
+                                                    <div className="flex items-start gap-2 p-2 rounded-lg">
+                                                        <Building className="h-4 w-4 mt-0.5" />
                                                         <div>
-                                                            <Label className="text-xs text-gray-500 uppercase tracking-wider">Alamat</Label>
-                                                            <p className="text-sm text-gray-900 leading-relaxed">
+                                                            <Label className="text-xs uppercase tracking-wider">Alamat</Label>
+                                                            <p className="text-sm leading-relaxed">
                                                                 {selectedDetail.alamat || '-'}
                                                             </p>
                                                         </div>
@@ -974,41 +972,41 @@ export function DataTable({
                                                     Informasi Layanan
                                                 </CardTitle>
                                             </CardHeader>
-                                            <CardContent className="space-y-4">
-                                                <div className="grid grid-cols-1 gap-4">
-                                                    <div className="p-3 bg-gray-50 rounded-lg">
-                                                        <Label className="text-xs text-gray-500 uppercase tracking-wider">Jenis Perawatan</Label>
+                                            <CardContent className="space-y-2">
+                                                <div className="grid grid-cols-1 gap-1">
+                                                    <div className="p-2 rounded-lg">
+                                                        <Label className="text-xs uppercase tracking-wider">Jenis Perawatan</Label>
                                                         <div className="mt-2">
                                                             <Badge className="bg-green-100 text-green-800 border-green-300">
                                                                 {selectedDetail.perawatan_terakait}
                                                             </Badge>
                                                         </div>
                                                     </div>
-                                                    <div className="p-3 bg-gray-50 rounded-lg">
-                                                        <Label className="text-xs text-gray-500 uppercase tracking-wider">Unit/Poli</Label>
+                                                    <div className="p-2 rounded-lg">
+                                                        <Label className="text-xs uppercase tracking-wider">Unit/Poli</Label>
                                                         <div className="mt-2">
                                                             <Badge variant="outline" className="border-gray-300">
                                                                 {selectedDetail.nama_poli}
                                                             </Badge>
                                                         </div>
                                                     </div>
-                                                    <div className="p-3 bg-gray-50 rounded-lg">
-                                                        <Label className="text-xs text-gray-500 uppercase tracking-wider">Ruang/Kamar</Label>
+                                                    <div className="p-2 rounded-lg">
+                                                        <Label className="text-xs uppercase tracking-wider">Ruang/Kamar</Label>
                                                         <div className="mt-2">
                                                             {selectedDetail.nama_kmr_no_kmr ? (
                                                                 <Badge className="bg-blue-100 text-blue-800 border-blue-300">
                                                                     {selectedDetail.nama_kmr_no_kmr}
                                                                 </Badge>
                                                             ) : (
-                                                                <span className="text-sm text-gray-500">Tidak disebutkan</span>
+                                                                <span className="text-sm">Tidak disebutkan</span>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <div className="p-3 bg-gray-50 rounded-lg">
-                                                        <Label className="text-xs text-gray-500 uppercase tracking-wider">Waktu Pengiriman</Label>
+                                                    <div className="p-2 rounded-lg">
+                                                        <Label className="text-xs uppercase tracking-wider">Waktu Pengiriman</Label>
                                                         <div className="mt-1 flex items-center gap-2">
                                                             <CalendarClock className="h-4 w-4 text-gray-400" />
-                                                            <span className="text-sm text-gray-900">
+                                                            <span className="text-sm">
                                                                 {new Date(selectedDetail.createdAt).toLocaleDateString('id-ID', {
                                                                     weekday: 'long',
                                                                     day: 'numeric',
@@ -1029,7 +1027,7 @@ export function DataTable({
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                         {/* Kritik */}
                                         <Card className="border-l-4 border-l-red-500">
-                                            <CardHeader className="pb-3 bg-red-50">
+                                            <CardHeader className="pb-3">
                                                 <CardTitle className="text-lg flex items-center gap-2 text-red-800">
                                                     <AlertCircle className="h-5 w-5" />
                                                     Kritik & Keluhan
@@ -1039,7 +1037,7 @@ export function DataTable({
                                                 </CardDescription>
                                             </CardHeader>
                                             <CardContent className="pt-4">
-                                                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                                                <div className="border border-accent rounded-lg p-4">
                                                     <div className="prose prose-red max-w-none">
                                                         <p className="text-sm text-red-800 whitespace-pre-line leading-relaxed">
                                                             {selectedDetail.kritik || (
@@ -1055,7 +1053,7 @@ export function DataTable({
 
                                         {/* Saran */}
                                         <Card className="border-l-4 border-l-green-500">
-                                            <CardHeader className="pb-3 bg-green-50">
+                                            <CardHeader className="pb-3">
                                                 <CardTitle className="text-lg flex items-center gap-2 text-green-800">
                                                     <Lightbulb className="h-5 w-5" />
                                                     Saran & Masukan
@@ -1065,7 +1063,7 @@ export function DataTable({
                                                 </CardDescription>
                                             </CardHeader>
                                             <CardContent className="pt-4">
-                                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                                <div className="border border-accent rounded-lg p-4">
                                                     <div className="prose prose-green max-w-none">
                                                         <p className="text-sm text-green-800 whitespace-pre-line leading-relaxed">
                                                             {selectedDetail.saran || (
@@ -1082,9 +1080,9 @@ export function DataTable({
                                 </div>
                             </ScrollArea>
 
-                            <DialogFooter className="px-6 py-4 border-t bg-gray-50">
+                            <DialogFooter className="px-6 py-4 border-t">
                                 <div className="flex items-center justify-between w-full">
-                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                    <div className="flex items-center gap-2 text-sm">
                                         <CheckCircle2 className="h-4 w-4" />
                                         <span>ID: {selectedDetail.id}</span>
                                     </div>

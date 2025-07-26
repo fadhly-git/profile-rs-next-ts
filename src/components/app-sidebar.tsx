@@ -81,11 +81,11 @@ const data = {
       items: [
         {
           title: "Website Settings",
-          url: "#",
+          url: "/admin/website-settings",
         },
         {
           title: "Tentang Kami",
-          url: "#",
+          url: "/admin/tentang-kami",
         },
         {
           title: "Promosi",
@@ -96,7 +96,7 @@ const data = {
           url: "#",
         },
         {
-          title: "Limits",
+          title: "Halaman",
           url: "#",
         },
       ],
@@ -130,10 +130,10 @@ const data = {
   ],
 }
 
-type AppSidebarProps = React.ComponentProps<typeof Sidebar> & { appName?: string }
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & { appName?: string, logoUrl?: string }
 
 export function AppSidebar(props: AppSidebarProps) {
-  const { appName, ...rest } = props
+  const { appName, logoUrl, ...rest } = props
   return (
     <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
@@ -145,14 +145,26 @@ export function AppSidebar(props: AppSidebarProps) {
             <SidebarMenuButton size="lg" asChild>
               <Link href="/admin/dashboard">
                 <div className="bg-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Image
-                    src={'/logo.png'}
-                    alt="logo"
-                    width={16}
-                    height={16}
-                    style={{ width: "auto", height: "auto" }}
-                    className="w-6 h-6"
-                  />
+                  {logoUrl ? (
+                    <Image
+                      src={logoUrl}
+                      alt={`${appName} Logo`}
+                      width={24}
+                      height={24}
+                      style={{ width: "auto", height: "auto" }}
+                      loading="lazy"
+                      className="w-6 h-6"
+                    />
+                  ) : (
+                    <Image
+                      src={'/logo.png'}
+                      alt="logo"
+                      width={24}
+                      height={24}
+                      style={{ width: "auto", height: "auto" }}
+                      className="w-6 h-6"
+                    />
+                  )}
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight whitespace-normal break-words">
                   <span className="font-medium text-foreground">{appName}</span>

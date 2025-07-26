@@ -123,8 +123,10 @@ export default function UserManagementPage() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold">User Management</h1>
-                    <p className="text-muted-foreground">Manage users and their roles</p>
+                    <h1 className="text-3xl font-bold">Manajemen Pengguna</h1>
+                    <p className="text-muted-foreground">
+                        Kelola pengguna aplikasi, tambahkan, edit, hapus, atau pulihkan pengguna sesuai kebutuhan.
+                    </p>
                 </div>
             </div>
 

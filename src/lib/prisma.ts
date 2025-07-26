@@ -2,7 +2,9 @@ import { PrismaClient } from '@prisma/client'
 
 export async function getWebsiteSetting() {
     try {
-        const setting = await prisma.websiteSettings.findFirst();
+        const setting = await prisma.websiteSettings.findFirst({
+            orderBy: { updatedAt: 'desc' }
+        });
         return setting;
     } catch (error) {
         console.error("Error fetching website settings:", error);
