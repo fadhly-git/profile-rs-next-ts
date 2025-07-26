@@ -60,7 +60,7 @@ const data = {
     },
     {
       title: "Indikator Mutu",
-      url: "#",
+      url: "/admin/indikator-mutu",
       icon: ChartNoAxesCombinedIcon,
     },
     {
@@ -69,8 +69,8 @@ const data = {
       icon: SquareUser,
       items: [
         {
-          title: "User List",
-          url: "#",
+          title: "User",
+          url: "/admin/user-management",
         },
       ],
     },

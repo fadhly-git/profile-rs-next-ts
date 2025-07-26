@@ -35,18 +35,48 @@ export function NavMain({
     }[]
   }[]
 }) {
-  const path = usePathname()
+  const pathname = usePathname()
+
   const isActive = (url: string) => {
-    return path.includes(url)
+    return pathname === url || pathname.startsWith(url + '/')
   }
+
+  const isParentActive = (item: typeof items[0]) => {
+    // Check if current item URL is active
+    if (isActive(item.url)) return true
+
+    // Check if any child item is active
+    if (item.items?.some(subItem => isActive(subItem.url))) return true
+
+    return false
+  }
+
+  const hasActiveChild = (item: typeof items[0]) => {
+    return item.items?.some(subItem => isActive(subItem.url)) || false
+  }
+
+  const shouldBeOpen = (item: typeof items[0]) => {
+    // Open if parent is active OR any child is active
+    return isParentActive(item)
+  }
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Admin Panel RS</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={isActive(item.url)}>
+          <Collapsible
+            key={item.title}
+            asChild
+            defaultOpen={shouldBeOpen(item)}
+          >
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title} isActive={isActive(item.url)}>
+              <SidebarMenuButton
+                asChild
+                tooltip={item.title}
+                isActive={isParentActive(item)}
+                className={hasActiveChild(item) && !isActive(item.url) ? "bg-muted/50" : ""}
+              >
                 <Link href={item.url}>
                   <item.icon />
                   <span>
@@ -66,7 +96,10 @@ export function NavMain({
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isActive(subItem.url)}
+                          >
                             <Link href={subItem.url}>
                               <span>{subItem.title}</span>
                             </Link>
