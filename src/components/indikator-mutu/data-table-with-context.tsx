@@ -156,8 +156,8 @@ export function IndikatorMutuDataTable({ data, uniqueJuduls }: IndikatorMutuData
                                             <DataTable
                                                 columns={columns}
                                                 data={items}
-                                                searchColumn="period"
-                                                searchPlaceholder="Cari berdasarkan bulan..."
+                                                searchColumn="judul"
+                                                searchPlaceholder="Cari berdasarkan judul..."
                                             />
                                         </div>
                                     </ContextMenuTrigger>

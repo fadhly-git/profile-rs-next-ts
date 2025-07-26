@@ -13,7 +13,7 @@ import {
   Settings2,
   SquareUser,
 } from "lucide-react"
-
+import { useRBAC } from '@/hooks/use-rbac'
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -35,13 +35,11 @@ const data = {
       title: "Dashboard",
       url: "/admin/dashboard",
       icon: LayoutDashboard,
-      isActive: true,
     },
     {
       title: "Kritik & Saran",
       url: "/admin/kritik-saran",
       icon: MessageSquareWarning,
-      isActive: true,
     },
     {
       title: "Kategori",
@@ -60,7 +58,7 @@ const data = {
     },
     {
       title: "Indikator Mutu",
-      url: "#",
+      url: "/admin/indikator-mutu",
       icon: ChartNoAxesCombinedIcon,
     },
     {
@@ -69,8 +67,8 @@ const data = {
       icon: SquareUser,
       items: [
         {
-          title: "User List",
-          url: "#",
+          title: "User",
+          url: "/admin/user-management",
         },
       ],
     },
@@ -81,23 +79,23 @@ const data = {
       items: [
         {
           title: "Website Settings",
-          url: "#",
+          url: "/admin/website-settings",
         },
         {
           title: "Tentang Kami",
-          url: "#",
+          url: "/admin/about-us",
         },
         {
           title: "Promosi",
-          url: "#",
+          url: "/admin/promotions",
         },
         {
           title: "Layanan",
-          url: "#",
+          url: "/admin/menu",
         },
         {
-          title: "Limits",
-          url: "#",
+          title: "Halaman Depan",
+          url: "/admin/halaman",
         },
       ],
     },
@@ -108,15 +106,15 @@ const data = {
       items: [
         {
           title: "Data Dokter",
-          url: "#",
+          url: "/admin/dokter",
         },
         {
           title: "Jadwal Dokter",
-          url: "#",
+          url: "/admin/jadwal-dokter",
         },
         {
           title: "Kategori Spesialis",
-          url: "#",
+          url: "/admin/kategori", // Menggunakan resource kategori yang sama
         },
       ]
     },
@@ -134,6 +132,103 @@ type AppSidebarProps = React.ComponentProps<typeof Sidebar> & { appName?: string
 
 export function AppSidebar(props: AppSidebarProps) {
   const { appName, ...rest } = props
+  const { getFilteredNavigation, loading, authenticated } = useRBAC()
+
+  // Filter navigation menggunakan hook yang sudah ada
+  const filteredNavMain = React.useMemo(() => {
+    if (!authenticated || loading) return []
+    return getFilteredNavigation(data.navMain)
+  }, [getFilteredNavigation, authenticated, loading])
+
+  const filteredNavSecondary = React.useMemo(() => {
+    if (!authenticated || loading) return []
+    return getFilteredNavigation(data.navSecondary)
+  }, [getFilteredNavigation, authenticated, loading])
+
+  // Show loading state
+  if (loading) {
+    return (
+      <Sidebar
+        className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+        {...rest}
+      >
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild>
+                <Link href="/admin/dashboard">
+                  <div className="bg-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                    <Image
+                      src={'/logo.png'}
+                      alt="logo"
+                      width={16}
+                      height={16}
+                      style={{ width: "auto", height: "auto" }}
+                      className="w-6 h-6"
+                    />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight whitespace-normal break-words">
+                    <span className="font-medium text-foreground">{appName}</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <div className="p-4 text-sm text-muted-foreground">
+            Loading...
+          </div>
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser />
+        </SidebarFooter>
+      </Sidebar>
+    )
+  }
+
+  // Show login required state
+  if (!authenticated) {
+    return (
+      <Sidebar
+        className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
+        {...rest}
+      >
+        <SidebarHeader>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild>
+                <Link href="/admin/login">
+                  <div className="bg-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
+                    <Image
+                      src={'/logo.png'}
+                      alt="logo"
+                      width={16}
+                      height={16}
+                      style={{ width: "auto", height: "auto" }}
+                      className="w-6 h-6"
+                    />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight whitespace-normal break-words">
+                    <span className="font-medium text-foreground">{appName}</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarHeader>
+        <SidebarContent>
+          <div className="p-4 text-sm text-muted-foreground">
+            Please login to access admin panel
+          </div>
+        </SidebarContent>
+        <SidebarFooter>
+          <NavUser />
+        </SidebarFooter>
+      </Sidebar>
+    )
+  }
+
   return (
     <Sidebar
       className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
@@ -163,8 +258,10 @@ export function AppSidebar(props: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={filteredNavMain} />
+        {filteredNavSecondary.length > 0 && (
+          <NavSecondary items={filteredNavSecondary} className="mt-auto" />
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

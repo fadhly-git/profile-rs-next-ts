@@ -1,6 +1,6 @@
 
 import '@/app/admin/admin.css'
-import { Providers } from "@/app/providers"
+import { Providers } from "@/components/providers/session-provider"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
     SidebarInset,
@@ -13,7 +13,6 @@ import { SiteHeader } from '@/components/site-header'
 import { getWebsiteSetting } from '@/lib/prisma'
 import { WebsiteSettings } from '@/types'
 import { Metadata } from 'next'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import { MainScrollArea } from '@/components/main-scroll'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -31,8 +30,15 @@ export default async function AdminLayout({
 }) {
 
     const websiteSettings: WebsiteSettings | null = await getWebsiteSetting();
-    const session = await getServerSession(authOptions);
-    if (!session) { redirect('/admin/login') }
+    const session = await getServerSession(authOptions)
+
+    if (!session) {
+        redirect('/admin/login')
+    }
+
+    if (!['SUPER_ADMIN', 'ADMIN', 'MODERATOR'].includes(session.user.role)) {
+        redirect('/admin/login?error=AccessDenied')
+    }
     return (
         <Providers>
             <div className="[--header-height:calc(--spacing(14))] h-screen flex flex-col overflow-hidden">

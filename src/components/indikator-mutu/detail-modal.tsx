@@ -16,7 +16,6 @@ import {
     TrendingUp,
     Clock,
     Edit,
-    X,
     Award,
     BarChart3
 } from "lucide-react"
@@ -24,6 +23,7 @@ import { type IndikatorMutu } from "@/types"
 import { formatDate } from "@/lib/utils"
 import { BadgeStatus } from "@/components/ui/badge-status"
 import { MainScrollArea } from "../main-scroll"
+import React from "react"
 
 interface DetailModalProps {
     open: boolean
@@ -33,9 +33,9 @@ interface DetailModalProps {
 }
 
 const getStatusInfo = (capaian: string, target: string) => {
-    const capaianNum = parseFloat(capaian.replace(/[^\d.]/g, ''))
-    const targetNum = parseFloat(target.replace(/[^\d.]/g, ''))
-    const percentage = (capaianNum / targetNum) * 100
+    const capaianNum = parseFloat(capaian.replace(/[^\d.]/g, '')) || 0
+    const targetNum = parseFloat(target.replace(/[^\d.]/g, '')) || 0
+    const percentage = targetNum > 0 ? (capaianNum / targetNum) * 100 : (capaianNum > 0 ? 100 : 0)
 
     if (capaianNum >= targetNum) {
         return {
@@ -67,8 +67,8 @@ const ProgressBar = ({ percentage }: { percentage: number }) => {
         if (pct >= 80) return 'bg-yellow-500 dark:bg-yellow-400'
         return 'bg-red-500 dark:bg-red-400'
     }
-
-    const clampedPercentage = Math.min(Math.max(percentage, 0), 100)
+    // Progress bar bisa melebihi 100% secara visual, jadi kita clamp di 100 untuk width
+    const clampedPercentage = Math.min(percentage, 100)
 
     return (
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
@@ -113,8 +113,9 @@ export function DetailModal({ open, onOpenChange, data, onEdit }: DetailModalPro
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:!max-w-[600px] max-h-[90vh] overflow-hidden">
-                <DialogHeader className="space-y-4">
+            <DialogContent className="sm:!max-w-[600px] max-h-[90vh] flex flex-col p-0">
+
+                <DialogHeader className="p-6 pb-4 flex-shrink-0 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
                             <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
@@ -133,8 +134,10 @@ export function DetailModal({ open, onOpenChange, data, onEdit }: DetailModalPro
                         </div>
                     </div>
                 </DialogHeader>
-                <MainScrollArea>
-                    <div className="space-y-8 h-full">
+
+                {/* === LETAK PERBAIKAN UTAMA === */}
+                <div className="flex-1 min-h-0 overflow-y-auto">
+                    <div className="p-6 space-y-8">
                         {/* Judul Section */}
                         <div className="space-y-3">
                             <div className="flex items-center space-x-2">
@@ -155,7 +158,6 @@ export function DetailModal({ open, onOpenChange, data, onEdit }: DetailModalPro
                                 <div className="h-1 w-8 bg-green-600 dark:bg-green-500 rounded-full" />
                                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Kinerja</h3>
                             </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <InfoCard
                                     icon={<TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
@@ -170,14 +172,12 @@ export function DetailModal({ open, onOpenChange, data, onEdit }: DetailModalPro
                                     description="Target yang ditetapkan"
                                 />
                             </div>
-
-                            {/* Progress Visualization */}
                             <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Progress Pencapaian
                                     </span>
-                                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
                                         {statusInfo.percentage}%
                                     </span>
                                 </div>
@@ -196,12 +196,11 @@ export function DetailModal({ open, onOpenChange, data, onEdit }: DetailModalPro
                         <Separator className="dark:bg-gray-700" />
 
                         {/* Timeline Section */}
-                        <div className="space-y-4 pb-2">
+                        <div className="space-y-4">
                             <div className="flex items-center space-x-2">
                                 <div className="h-1 w-8 bg-purple-600 dark:bg-purple-500 rounded-full" />
                                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Timeline</h3>
                             </div>
-
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <InfoCard
                                     icon={<Clock className="h-5 w-5 text-green-600 dark:text-green-400" />}
@@ -217,30 +216,30 @@ export function DetailModal({ open, onOpenChange, data, onEdit }: DetailModalPro
                                 />
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex-shrink-0 p-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex justify-end space-x-3">
+                        <Button variant="outline" onClick={() => onOpenChange(false)}>
+                            Tutup
+                        </Button>
+                        {onEdit && (
                             <Button
-                                variant="outline"
-                                onClick={() => onOpenChange(false)}
-                            >
-                                Tutup
-                            </Button>
-                            {onEdit && (
-                                <Button
-                                    onClick={() => {
+                                onClick={() => {
+                                    if (data) {
                                         onEdit(data)
                                         onOpenChange(false)
-                                    }}
-                                    className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
-                                >
-                                    <Edit className="h-4 w-4 mr-2" />
-                                    Edit Data
-                                </Button>
-                            )}
-                        </div>
+                                    }
+                                }}
+                                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700"
+                            >
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Data
+                            </Button>
+                        )}
                     </div>
-                </MainScrollArea>
+                </div>
             </DialogContent>
         </Dialog>
     )

@@ -4,7 +4,6 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ScrollAreaProvider } from '@/context/scrollarea-context'
 import { Toaster } from '@/components/ui/sonner'
 
-
 const poppins = Poppins({ subsets: ['latin'], weight: ['500', '800'] })
 
 export default async function AdminLayout({

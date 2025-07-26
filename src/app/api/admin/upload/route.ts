@@ -1,4 +1,4 @@
 // TODO: 
-export default function handler() {
+export async function POST() {
     return "hai";
 }

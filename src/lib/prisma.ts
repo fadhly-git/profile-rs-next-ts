@@ -1,3 +1,5 @@
+// lib/prisma.ts
+// This file is part of Web Profil RS, a web application for managing hospital profiles.
 import { PrismaClient } from '@prisma/client'
 
 export async function getWebsiteSetting() {
