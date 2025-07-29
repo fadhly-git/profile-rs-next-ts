@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { FeatureBlock } from '@/types/feature-blocks'
 import { formatDate } from '@/lib/utils'
 import Image from 'next/image'
+import { isValidImageUrl } from '@/lib/validators'
 
 interface DetailModalProps {
     item: FeatureBlock
@@ -23,7 +24,7 @@ export function DetailModal({ item, open, onOpenChange }: DetailModalProps) {
     console.log('DetailModal item:', item)
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogContent className="!max-w-2xl max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
                         Detail Fitur Blok
@@ -90,7 +91,7 @@ export function DetailModal({ item, open, onOpenChange }: DetailModalProps) {
                                 <div className="space-y-2">
                                     <span className="text-sm text-muted-foreground">Gambar:</span>
                                     <div className="border rounded-lg p-3 bg-muted/30">
-                                        {item.image_url.startsWith('http') || item.image_url.startsWith('/') ? (
+                                        {isValidImageUrl(item.image_url) ? (
                                             <Image
                                                 src={item.image_url}
                                                 alt="Image"
@@ -99,7 +100,7 @@ export function DetailModal({ item, open, onOpenChange }: DetailModalProps) {
                                                 className="rounded object-cover"
                                             />
                                         ) : (
-                                            <div className="text-xs font-mono break-all">{item.image_url}</div>
+                                            <div className="text-xs font-mono break-all">{JSON.stringify(isValidImageUrl(item.image_url))}</div>
                                         )}
                                     </div>
                                 </div>
