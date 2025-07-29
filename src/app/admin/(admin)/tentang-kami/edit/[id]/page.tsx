@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 interface EditAboutUsPageProps {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 export default async function EditAboutUsPage({ params }: EditAboutUsPageProps) {

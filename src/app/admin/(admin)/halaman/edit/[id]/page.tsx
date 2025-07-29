@@ -4,9 +4,7 @@ import { HalamanForm } from '@/components/halaman/halaman-form'
 import { notFound } from 'next/navigation'
 
 interface EditHalamanPageProps {
-    params: {
-        id: string
-    }
+    params: Promise<{ id: string }>
 }
 
 export default async function EditHalamanPage({ params }: EditHalamanPageProps) {

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 interface EditWebsiteSettingsPageProps {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }
 
 export default async function EditWebsiteSettingsPage({ params }: EditWebsiteSettingsPageProps) {

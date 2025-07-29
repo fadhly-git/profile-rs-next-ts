@@ -1,10 +1,10 @@
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 
-// Type untuk params yang lebih spesifik
-type PageParams = {
+// Update type untuk params yang async
+type PageParams = Promise<{
     slug?: string[]
-}
+}>
 
 export async function generateStaticParams() {
     // Ambil semua path yang mungkin
@@ -23,7 +23,6 @@ export async function generateStaticParams() {
         })
     ])
 
-    // Definisi tipe yang jelas untuk params
     const params: { slug: string[] }[] = []
 
     // Generate paths untuk halaman
@@ -31,7 +30,7 @@ export async function generateStaticParams() {
         if (page.kategori) {
             params.push({ slug: [page.kategori.slug_kategori, page.slug] })
         }
-        params.push({ slug: [page.slug] }) // Fallback tanpa kategori
+        params.push({ slug: [page.slug] })
     })
 
     // Generate paths untuk berita
@@ -39,12 +38,12 @@ export async function generateStaticParams() {
         if (item.kategori) {
             params.push({ slug: [item.kategori.slug_kategori, item.slug_berita] })
         }
-        params.push({ slug: [item.slug_berita] }) // Fallback tanpa kategori
+        params.push({ slug: [item.slug_berita] })
     })
 
-    // Generate paths untuk kategori (termasuk hierarki)
+    // Generate paths untuk kategori
     categories.forEach(category => {
-        const path: string[] = [] // Definisi tipe yang jelas
+        const path: string[] = []
         if (category.parent) {
             path.push(category.parent.slug_kategori)
         }
@@ -55,8 +54,11 @@ export async function generateStaticParams() {
     return params
 }
 
+// Update function component untuk handle async params
 export default async function DynamicPage({ params }: { params: PageParams }) {
-    const path = params.slug || []
+    // Await params sebelum menggunakannya
+    const resolvedParams = await params
+    const path = resolvedParams.slug || []
     const lastSegment = path[path.length - 1]
 
     // Return 404 jika tidak ada slug
@@ -81,13 +83,11 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
     })
 
     if (category) {
-        // Render halaman kategori
         return (
             <div>
                 <h1>{category.nama_kategori}</h1>
                 {category.parent && <p>Bagian dari: {category.parent.nama_kategori}</p>}
 
-                {/* Daftar subkategori */}
                 {category.children.length > 0 && (
                     <div>
                         <h2>Subkategori</h2>
@@ -101,7 +101,6 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                     </div>
                 )}
 
-                {/* Daftar berita */}
                 {category.beritas.length > 0 && (
                     <>
                         <h2>Berita Terkait</h2>
@@ -117,7 +116,6 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                     </>
                 )}
 
-                {/* Daftar halaman */}
                 {category.Halaman.length > 0 && (
                     <>
                         <h2>Halaman Terkait</h2>
@@ -156,7 +154,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
         )
     }
 
-    // Cek apakah ini berita - PERBAIKAN UTAMA DI SINI
+    // Cek apakah ini berita
     const newsItem = await prisma.beritas.findFirst({
         where: { slug_berita: lastSegment },
         include: { kategori: true }
@@ -176,6 +174,5 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
         )
     }
 
-    // Jika tidak ditemukan
     return notFound()
 }

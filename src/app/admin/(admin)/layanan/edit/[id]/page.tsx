@@ -7,9 +7,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 interface EditFeatureBlockPageProps {
-    params: {
-        id: string
-    }
+    params: Promise<{ id: string }>
 }
 
 async function getFeatureBlock(id: number) {

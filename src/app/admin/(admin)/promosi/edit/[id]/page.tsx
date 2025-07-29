@@ -7,9 +7,7 @@ import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
 interface EditPromotionPageProps {
-    params: {
-        id: string
-    }
+    params: Promise<{ id: string }>
 }
 
 export default async function EditPromotionPage({ params }: EditPromotionPageProps) {

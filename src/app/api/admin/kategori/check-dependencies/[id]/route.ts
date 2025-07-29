@@ -6,10 +6,12 @@ import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const categoryId = BigInt(params.id)
+        const resolvedParams = await params
+        const id = resolvedParams.id
+        const categoryId = BigInt(id)
 
         // Dapatkan semua kategori yang akan terpengaruh
         const childrenIds = await getAllChildrenRecursive(prisma, categoryId)
