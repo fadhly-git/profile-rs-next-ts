@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { EnumRoleUsers } from "@prisma/client"
 import {
     Users,
     FileText,
@@ -16,7 +17,17 @@ type RecentNewsItem = {
     status_berita: "publish" | "draft"
     hits?: number | null
     user: {
+        id: bigint              // 👈 Gunakan `id` bukan `id_user`
         name: string
+        email: string
+        email_verified_at: Date | null
+        password: string
+        gambar: string | null
+        remember_token: string | null
+        role: EnumRoleUsers
+        deleted_at: Date | null
+        createdAt: Date | null
+        updatedAt: Date | null
     }
     slug_berita: string
     thumbnail?: string | null
@@ -49,7 +60,10 @@ async function getDashboardStats() {
             prisma.beritas.findMany({
                 take: 5,
                 orderBy: { tanggal_post: 'desc' },
-                include: { user: true }
+                include: {
+                    user: true,
+                    kategori: true // opsional jika Anda ingin data kategori juga
+                }
             })
         ])
 
