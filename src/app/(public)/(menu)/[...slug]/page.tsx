@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 
@@ -26,7 +27,7 @@ export async function generateStaticParams() {
     const params: { slug: string[] }[] = []
 
     // Generate paths untuk halaman
-    pages.forEach(page => {
+    pages.forEach((page: any) => {
         if (page.kategori) {
             params.push({ slug: [page.kategori.slug_kategori, page.slug] })
         }
