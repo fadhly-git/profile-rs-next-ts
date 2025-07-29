@@ -171,7 +171,7 @@ export function FeatureBlocksTable({ data }: FeatureBlocksTableProps) {
             </ContextMenuTrigger>
             <ContextMenuContent>
                 <ContextMenuItem onClick={() => {
-                    setSelectedItem(row)
+                    setSelectedItem(row.original)
                     setShowDetail(true)
                 }}>
                     <Eye className="mr-2 h-4 w-4" />
