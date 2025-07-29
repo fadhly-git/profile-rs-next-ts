@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         for (const file of files) {
             try {
                 // Validasi tipe file
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml']
                 if (!allowedTypes.includes(file.type)) {
                     errors.push(`${file.name}: Tipe file tidak didukung`)
                     continue
