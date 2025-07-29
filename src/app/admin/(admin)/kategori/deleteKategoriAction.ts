@@ -13,7 +13,6 @@ export async function deleteKategoriAction(id: string) {
             include: {
                 children: true,
                 beritas: true,
-                menu: true,
                 Halaman: true
             }
         });
