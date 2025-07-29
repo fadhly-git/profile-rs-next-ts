@@ -47,6 +47,8 @@ export function ImageSelector({
                 <MediaBrowser
                     onSelect={onChange}
                     selectedUrl={value}
+                    allowCustomCategory={true}
+
                     trigger={
                         <Button type="button" variant="outline" size="sm">
                             {value ? (

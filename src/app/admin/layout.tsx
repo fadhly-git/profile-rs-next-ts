@@ -3,6 +3,7 @@ import '@/app/admin/admin.css'
 import { ThemeProvider } from "@/components/theme-provider"
 import { ScrollAreaProvider } from '@/context/scrollarea-context'
 import { Toaster } from '@/components/ui/sonner'
+import ErrorBoundary from '@/components/molecules/error-boundary'
 
 
 const poppins = Poppins({ subsets: ['latin'], weight: ['500', '800'] })
@@ -23,7 +24,9 @@ export default async function AdminLayout({
                 >
                     <Toaster position="top-center" />
                     <ScrollAreaProvider>
-                        {children}
+                        <ErrorBoundary>
+                            {children}
+                        </ErrorBoundary>
                     </ScrollAreaProvider>
                 </ThemeProvider>
             </body>
