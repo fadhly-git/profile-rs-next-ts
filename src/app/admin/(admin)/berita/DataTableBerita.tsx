@@ -608,6 +608,7 @@ export function DataTableBerita({ data }: { data: Beritas[] }) {
                                                     src={selectedDetail.thumbnail}
                                                     alt={selectedDetail.judul_berita}
                                                     className="max-w-xs rounded-md"
+                                                    placeholder="blur"
                                                     width={200}
                                                     height={120}
                                                 />

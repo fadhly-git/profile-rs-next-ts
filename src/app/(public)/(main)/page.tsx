@@ -8,6 +8,7 @@ export default function Home() {
           className="dark:invert"
           src="/next.svg"
           alt="Next.js logo"
+          placeholder="blur"
           width={180}
           height={38}
           priority
@@ -24,6 +25,7 @@ export default function Home() {
             aria-hidden
             src="/file.svg"
             alt="File icon"
+            placeholder="blur"
             width={16}
             height={16}
           />
@@ -39,6 +41,7 @@ export default function Home() {
             aria-hidden
             src="/window.svg"
             alt="Window icon"
+            placeholder="blur"
             width={16}
             height={16}
           />
@@ -54,6 +57,7 @@ export default function Home() {
             aria-hidden
             src="/globe.svg"
             alt="Globe icon"
+            placeholder="blur"
             width={16}
             height={16}
           />

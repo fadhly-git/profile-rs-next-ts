@@ -601,11 +601,15 @@ export default function MediaLibraryPage() {
                                             src={file.url}
                                             alt={file.name}
                                             fill
+                                            placeholder='blur'
                                             className="object-cover"
                                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                             onError={(e) => {
-                                                const target = e.target as HTMLImageElement
-                                                target.src = '/placeholder-image.png'
+                                                console.error('Image load error:', {
+                                                    src: file.url,
+                                                    fileName: file.name,
+                                                    error: e
+                                                })
                                             }}
                                         />
                                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
