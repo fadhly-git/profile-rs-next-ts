@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
     function middleware(req) {
-        console.log("Middleware triggered for path:", req.nextUrl.pathname);
         const { pathname } = req.nextUrl;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const token = (req as any).nextauth?.token;
