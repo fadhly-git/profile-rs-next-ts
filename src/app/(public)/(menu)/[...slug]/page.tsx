@@ -1,34 +1,181 @@
-import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
+import { notFound } from 'next/navigation'
 
-export default async function DynamicMenuPage({
-    params
-}: {
-    params: Promise<{ slug: string[] }>
-}) {
-    // ⬇️ Await params
-    const { slug } = await params;
-    const path = `/${slug.join('/')}`;
+// Type untuk params yang lebih spesifik
+type PageParams = {
+    slug?: string[]
+}
 
-    // 1. Cek apakah path ada di menu
-    const menu = await prisma.menu.findFirst({
-        where: { route: path },
-        include: { kategori: true }
-    });
+export async function generateStaticParams() {
+    // Ambil semua path yang mungkin
+    const [pages, news, categories] = await Promise.all([
+        prisma.halaman.findMany({
+            where: { is_published: true },
+            select: { slug: true, kategori: { select: { slug_kategori: true } } }
+        }),
+        prisma.beritas.findMany({
+            where: { status_berita: 'publish' },
+            select: { slug_berita: true, kategori: { select: { slug_kategori: true } } }
+        }),
+        prisma.kategori.findMany({
+            where: { is_active: true },
+            select: { slug_kategori: true, parent: { select: { slug_kategori: true } } }
+        })
+    ])
 
-    if (!menu) return notFound();
+    // Definisi tipe yang jelas untuk params
+    const params: { slug: string[] }[] = []
 
-    // 2. Handle berdasarkan tipe menu
-    if (menu.kategori) {
-        // Ambil konten kategori terkait
-        const beritas = await prisma.beritas.findMany({
-            where: { id_kategori: menu.kategori.id_kategori }
-        });
+    // Generate paths untuk halaman
+    pages.forEach(page => {
+        if (page.kategori) {
+            params.push({ slug: [page.kategori.slug_kategori, page.slug] })
+        }
+        params.push({ slug: [page.slug] }) // Fallback tanpa kategori
+    })
 
-        // Ganti dengan komponen yang sesuai untuk kategori
-        return "halo";
+    // Generate paths untuk berita
+    news.forEach(item => {
+        if (item.kategori) {
+            params.push({ slug: [item.kategori.slug_kategori, item.slug_berita] })
+        }
+        params.push({ slug: [item.slug_berita] }) // Fallback tanpa kategori
+    })
+
+    // Generate paths untuk kategori (termasuk hierarki)
+    categories.forEach(category => {
+        const path: string[] = [] // Definisi tipe yang jelas
+        if (category.parent) {
+            path.push(category.parent.slug_kategori)
+        }
+        path.push(category.slug_kategori)
+        params.push({ slug: path })
+    })
+
+    return params
+}
+
+export default async function DynamicPage({ params }: { params: PageParams }) {
+    const path = params.slug || []
+    const lastSegment = path[path.length - 1]
+
+    // Return 404 jika tidak ada slug
+    if (!lastSegment) {
+        return notFound()
     }
 
-    // 3. Fallback untuk menu tanpa kategori
-    return "halo"; // Ganti dengan komponen yang sesuai untuk menu tanpa kategori
+    // Cek apakah ini kategori
+    const category = await prisma.kategori.findUnique({
+        where: { slug_kategori: lastSegment },
+        include: {
+            parent: true,
+            children: true,
+            beritas: {
+                where: { status_berita: 'publish' },
+                orderBy: { tanggal_post: 'desc' }
+            },
+            Halaman: {
+                where: { is_published: true }
+            }
+        }
+    })
+
+    if (category) {
+        // Render halaman kategori
+        return (
+            <div>
+                <h1>{category.nama_kategori}</h1>
+                {category.parent && <p>Bagian dari: {category.parent.nama_kategori}</p>}
+
+                {/* Daftar subkategori */}
+                {category.children.length > 0 && (
+                    <div>
+                        <h2>Subkategori</h2>
+                        <ul>
+                            {category.children.map(child => (
+                                <li key={child.id_kategori.toString()}>
+                                    <a href={`/${child.slug_kategori}`}>{child.nama_kategori}</a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+                {/* Daftar berita */}
+                {category.beritas.length > 0 && (
+                    <>
+                        <h2>Berita Terkait</h2>
+                        <ul>
+                            {category.beritas.map(berita => (
+                                <li key={berita.id_berita.toString()}>
+                                    <a href={`/${category.slug_kategori}/${berita.slug_berita}`}>
+                                        {berita.judul_berita}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </>
+                )}
+
+                {/* Daftar halaman */}
+                {category.Halaman.length > 0 && (
+                    <>
+                        <h2>Halaman Terkait</h2>
+                        <ul>
+                            {category.Halaman.map(halaman => (
+                                <li key={halaman.id_halaman.toString()}>
+                                    <a href={`/${category.slug_kategori}/${halaman.slug}`}>
+                                        {halaman.judul}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </>
+                )}
+            </div>
+        )
+    }
+
+    // Cek apakah ini halaman
+    const page = await prisma.halaman.findUnique({
+        where: { slug: lastSegment },
+        include: { kategori: true }
+    })
+
+    if (page) {
+        return (
+            <div>
+                <h1>{page.judul}</h1>
+                {page.kategori && (
+                    <p>
+                        Kategori: <a href={`/${page.kategori.slug_kategori}`}>{page.kategori.nama_kategori}</a>
+                    </p>
+                )}
+                <div dangerouslySetInnerHTML={{ __html: page.konten }} />
+            </div>
+        )
+    }
+
+    // Cek apakah ini berita - PERBAIKAN UTAMA DI SINI
+    const newsItem = await prisma.beritas.findFirst({
+        where: { slug_berita: lastSegment },
+        include: { kategori: true }
+    })
+
+    if (newsItem) {
+        return (
+            <div>
+                <h1>{newsItem.judul_berita}</h1>
+                {newsItem.kategori && (
+                    <p>
+                        Kategori: <a href={`/${newsItem.kategori.slug_kategori}`}>{newsItem.kategori.nama_kategori}</a>
+                    </p>
+                )}
+                <div dangerouslySetInnerHTML={{ __html: newsItem.isi }} />
+            </div>
+        )
+    }
+
+    // Jika tidak ditemukan
+    return notFound()
 }
