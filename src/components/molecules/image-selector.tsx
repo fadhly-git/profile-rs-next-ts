@@ -1,7 +1,6 @@
 // components/molecules/image-selector.tsx
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { ImagePreview } from '@/components/atoms/image-preview'

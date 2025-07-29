@@ -79,6 +79,7 @@ export function ImageUpload({
         } finally {
             setIsUploading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [maxSizeMB, onImageUpload]);
 
     const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {

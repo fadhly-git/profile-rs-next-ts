@@ -407,7 +407,7 @@ export function DataTableKategori({ data }: { data: Kategori[] }) {
                                                 Edit
                                             </ContextMenuItem>
                                             <ContextMenuItem
-                                                onClick={(e) => {
+                                                onClick={() => {
                                                     setSelectedKategori(row.original);
                                                     setShowDeleteDialog(true);
                                                 }}

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/prisma";
-import { Beritas, EnumStatusBerita, EnumBeritasBahasa } from "@/types";
+import { Beritas } from "@/types";
 
 // Helper function to convert bigint fields to number
 function convertBigIntFields(berita: any): Beritas {

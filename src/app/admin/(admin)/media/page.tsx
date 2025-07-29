@@ -135,6 +135,7 @@ export default function MediaLibraryPage() {
 
     useEffect(() => {
         loadFiles()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [category, search, sortBy, sortOrder])
 
     // Handle file selection

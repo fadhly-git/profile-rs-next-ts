@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         try {
             // Periksa apakah file ada
             await stat(filePath);
-        } catch (statError) {
+        } catch {
             // File tidak ditemukan
             return NextResponse.json({
                 success: true,

@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
-import { Poppins } from 'next/font/google'
 import '@/app/globals.css'
 import Header from "@/components/ui/Header";
 import Footer from "@/components/ui/Footer";
-import { Providers } from "@/app/providers";
 import { prisma } from '@/lib/prisma'
-
-const poppins = Poppins({ subsets: ['latin'], weight: ['500', '800'] })
 
 async function getWebsiteSetting() {
   try {

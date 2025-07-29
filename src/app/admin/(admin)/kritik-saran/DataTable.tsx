@@ -34,10 +34,8 @@ import {
     ChevronRight,
     ChevronsLeft,
     ChevronsRight,
-    Filter,
     RefreshCw,
     FileText,
-    Star,
     AlertCircle,
     CheckCircle2,
     ExternalLink,
@@ -64,8 +62,6 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-    DropdownMenuRadioGroup,
-    DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import {
@@ -714,7 +710,7 @@ export function DataTable({
                         <TableBody className="">
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row, index) => (
-                                    <ContextMenu key={row.id}>
+                                    <ContextMenu key={row.id + index}>
                                         <ContextMenuTrigger asChild>
                                             <TableRow
                                                 data-state={row.getIsSelected() && "selected"}

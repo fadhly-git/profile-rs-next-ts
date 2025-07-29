@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         const files: MediaFile[] = []
 
         // Fungsi rekursif untuk membaca semua file
-        const readDirectory = async (dir: string, categoryPath: string = '') => {
+        const readDirectory = async (dir: string) => {
             try {
                 const entries = await readdir(dir, { withFileTypes: true })
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
                     const relativePath = path.relative(uploadsDir, fullPath)
 
                     if (entry.isDirectory()) {
-                        await readDirectory(fullPath, entry.name)
+                        await readDirectory(fullPath)
                     } else if (entry.isFile()) {
                         const stats = await stat(fullPath)
                         const ext = path.extname(entry.name).toLowerCase()

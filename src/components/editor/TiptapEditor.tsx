@@ -306,7 +306,7 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
             const prevDoc = transaction.before
             const newDoc = transaction.doc
 
-            prevDoc.descendants((node: any, pos: number) => {
+            prevDoc.descendants((node: any) => {
                 if (node.type.name === 'image') {
                     const imageUrl = node.attrs.src
                     // Cek apakah node ini ada di dokumen baru
