@@ -239,12 +239,18 @@ export function MediaBrowser({
                             <div className="flex justify-between items-center p-4 rounded-lg">
                                 <div className="flex items-center gap-3">
                                     <div className="relative w-12 h-12">
-                                        <Image
-                                            src={selectedFile}
-                                            alt="Terpilih"
-                                            fill
-                                            className="object-cover rounded"
-                                        />
+                                        {isValidImageUrl(selectedFile) ? (
+                                            <Image
+                                                src={selectedFile}
+                                                alt="Terpilih"
+                                                fill
+                                                className="object-cover rounded"
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-center w-full h-full bg-gray-200 rounded">
+                                                <ImageIcon className="h-6 w-6 text-gray-500" />
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <p className="font-medium text-sm">Terpilih:</p>
@@ -285,7 +291,7 @@ export function MediaBrowser({
                                             Klik untuk unggah atau tarik dan jatuhkan
                                         </label>
                                         <p className="text-sm text-gray-500 mt-2">
-                                            PNG, JPG, WEBP maksimal 5MB per file
+                                            PNG, JPG, WEBP, SVG maksimal 5MB per file
                                         </p>
                                     </>
                                 )}
@@ -293,7 +299,7 @@ export function MediaBrowser({
 
                             <div className="text-sm p-3 rounded-lg">
                                 <p className="font-medium mb-1">Catatan:</p>
-                                <p>File akan diunggah ke kategori &quot;website-settings&quot;. Setelah diunggah, gambar akan otomatis terpilih.</p>
+                                <p>File akan diunggah ke kategori &quot;website-settings&quot;.</p>
                             </div>
                         </div>
                     </TabsContent>

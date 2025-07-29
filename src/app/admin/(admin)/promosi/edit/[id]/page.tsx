@@ -2,6 +2,9 @@
 import { notFound } from 'next/navigation'
 import { PromotionForm } from '@/components/promotions/promotion-form'
 import { getPromotionById } from '@/lib/actions/promotion'
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 interface EditPromotionPageProps {
     params: {
@@ -19,14 +22,14 @@ export default async function EditPromotionPage({ params }: EditPromotionPagePro
     }
 
     return (
-        <div className="space-y-6">
+        <div className="container space-y-6 w-full mx-auto">
             <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                    Edit Promosi
-                </h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                    Ubah informasi promosi yang ada. Pastikan untuk memperbarui semua detail yang diperlukan.
-                </p>
+                <Button variant="ghost" asChild className="mb-4">
+                    <Link href="/admin/promosi">
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Kembali ke Daftar Promosi
+                    </Link>
+                </Button>
             </div>
 
             <PromotionForm promotion={promotion} mode="edit" />

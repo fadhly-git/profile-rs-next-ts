@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { X, Eye, AlertCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { isValidImageUrl } from '@/lib/validators'
 
 interface ImagePreviewProps {
     src: string
@@ -58,15 +59,19 @@ export function ImagePreview({ src, alt, onRemove, className = "" }: ImagePrevie
                     </div>
                 )}
 
-                <Image
-                    src={src}
-                    alt={alt}
-                    fill
-                    className="object-cover"
-                    onError={handleImageError}
-                    onLoad={handleImageLoad}
-                    style={{ display: isLoading ? 'none' : 'block' }}
-                />
+                {isValidImageUrl(src) ? (
+                    <Image
+                        src={src}
+                        alt={alt}
+                        fill
+                        className="object-cover"
+                        onError={handleImageError}
+                        onLoad={handleImageLoad}
+                        style={{ display: isLoading ? 'none' : 'block' }}
+                    />
+                ) : (
+                    <div className="text-red-500 text-sm text-center">Invalid image URL</div>
+                )}
 
                 {/* Overlay buttons */}
                 {!isLoading && !imageError && (
@@ -89,12 +94,17 @@ export function ImagePreview({ src, alt, onRemove, className = "" }: ImagePrevie
                                     </div>
                                 </DialogTitle>
                                 <div className="relative aspect-video rounded-lg">
-                                    <Image
-                                        src={src}
-                                        alt={alt}
-                                        fill
-                                        className="object-contain rounded-lg"
-                                    />
+                                    {isValidImageUrl(src) ? (
+                                        <Image
+                                            src={src}
+                                            alt={alt}
+                                            fill
+                                            className="object-contain rounded-lg"
+                                            onError={handleImageError}
+                                        />
+                                    ) : (
+                                        <div className="text-red-500 text-sm">Invalid image URL</div>
+                                    )}
                                 </div>
                                 <DialogDescription className="mt-2 text-sm">
                                     {src}

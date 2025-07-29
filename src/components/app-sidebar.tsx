@@ -6,6 +6,7 @@ import {
   Folders,
   Hospital,
   ImageIcon,
+  Images,
   LayoutDashboard,
   MessageSquareWarning,
   NewspaperIcon,
@@ -13,7 +14,7 @@ import {
   Settings2,
   SquareUser,
 } from "lucide-react"
-
+import { dhaf } from "./atoms/d"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -123,8 +124,13 @@ const data = {
   ],
   navSecondary: [
     {
+      title: "Galeri",
+      url: "/admin/media",
+      icon: Images,
+    },
+    {
       title: "Feedback",
-      url: "#",
+      url: dhaf,
       icon: Send,
     },
   ],
