@@ -36,7 +36,7 @@ export default function LoginPage() {
                     router.push('/admin/dashboard')
                 }
             }
-        } catch (error) {
+        } catch {
             setError('Terjadi kesalahan saat login')
         } finally {
             setIsLoading(false)

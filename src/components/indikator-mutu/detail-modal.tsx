@@ -16,7 +16,6 @@ import {
     TrendingUp,
     Clock,
     Edit,
-    X,
     Award,
     BarChart3
 } from "lucide-react"

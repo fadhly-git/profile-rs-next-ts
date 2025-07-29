@@ -1,7 +1,6 @@
 // src/middleware.ts
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { authOptions } from "@/lib/authOptions";
 
 export default withAuth(
     function middleware(req) {

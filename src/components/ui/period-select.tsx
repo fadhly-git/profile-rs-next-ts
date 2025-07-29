@@ -15,7 +15,7 @@ interface PeriodSelectProps {
     placeholder?: string
 }
 
-export function PeriodSelect({ value, onChange, placeholder = "Pilih periode..." }: PeriodSelectProps) {
+export function PeriodSelect({ value, onChange }: PeriodSelectProps) {
     // Generate years (current year ± 5 years)
     const currentYear = new Date().getFullYear()
     const years = Array.from({ length: 11 }, (_, i) => currentYear - 5 + i)

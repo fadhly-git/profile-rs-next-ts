@@ -1,13 +1,11 @@
 "use client"
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RichTextEditor } from "@/components/editor/TiptapEditor";
@@ -18,12 +16,11 @@ import {
     ArrowLeft,
     Save,
     Eye,
-    Calendar,
     Tag,
-    Image,
     Globe,
     FileText,
-    Loader2
+    Loader2,
+    ImageIcon
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -35,7 +32,6 @@ interface Kategori {
 }
 
 export default function CreateBeritaPage() {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [kategoris, setKategoris] = useState<Kategori[]>([]);
     const [formData, setFormData] = useState({
@@ -57,8 +53,13 @@ export default function CreateBeritaPage() {
         const fetchKategoris = async () => {
             try {
                 const data = await getKategoriOptions();
-                setKategoris(data);
-            } catch (error) {
+                setKategoris(
+                    data.map((kategori) => ({
+                        ...kategori,
+                        id_kategori: BigInt(kategori.id_kategori),
+                    }))
+                );
+            } catch {
                 toast.error("Gagal memuat kategori");
             }
         };
@@ -209,7 +210,7 @@ export default function CreateBeritaPage() {
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
-                                        <Image className="w-5 h-5" />
+                                        <ImageIcon className="w-5 h-5" />
                                         Media
                                     </CardTitle>
                                     <CardDescription>

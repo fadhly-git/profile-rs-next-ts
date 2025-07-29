@@ -311,15 +311,11 @@ async function deactivateWithDependencies(tx: any, parentId: bigint) {
 
     // Cek dependencies untuk setiap kategori
     const dependencies: DependencyInfo[] = []
-    let totalBeritaAffected = 0
-    let totalHalamanAffected = 0
 
     for (const categoryId of allCategoryIds) {
         const deps = await checkCategoryDependencies(tx, categoryId)
         if (deps.hasData) {
             dependencies.push(deps)
-            totalBeritaAffected += deps.beritaCount
-            totalHalamanAffected += deps.halamanCount
         }
     }
 
@@ -385,42 +381,7 @@ export async function getKategoriById(id: string) {
         return null;
     }
 }
-/* 
-export async function updateKategoriAction(id: string, formData: FormData) {
-    try {
-        const nama_kategori = formData.get("nama_kategori") as string
-        const slug_kategori = formData.get("slug_kategori") as string
-        const keterangan = formData.get("keterangan") as string
-        const parent_id = parseOptionalBigInt(formData.get("parent_id"));
-        const urutan = formData.get("urutan") ? parseInt(formData.get("urutan") as string) : null
-        const gambar = formData.get("gambar") as string || null
-        const is_main_menu = formData.get("is_main_menu") === "on"
-        const is_active = formData.get("is_active") === "on"
 
-        await prisma.kategori.update({
-            where: {
-                id_kategori: BigInt(id)
-            },
-            data: {
-                nama_kategori,
-                slug_kategori,
-                keterangan,
-                parent_id,
-                urutan,
-                gambar,
-                is_main_menu,
-                is_active,
-            }
-        })
-
-        revalidatePath("/admin/kategori")
-        return { success: true }
-    } catch (error) {
-        console.error("Error updating kategori:", error)
-        throw new Error("Gagal mengupdate kategori")
-    }
-}
-*/
 export async function getKategoriListExcept(excludeId: string) {
     try {
         const kategoriList = await prisma.kategori.findMany({
@@ -459,8 +420,7 @@ export async function deleteKategoriAction(id: string) {
             include: {
                 children: true,
                 beritas: true,
-                menu: true,
-                Halaman: true
+                Halaman: true // Use the correct relation name as defined in your Prisma schema (likely 'halaman' not 'Halaman')
             }
         });
 
@@ -470,17 +430,18 @@ export async function deleteKategoriAction(id: string) {
 
         // Check for dependencies
         if (kategori.children && kategori.children.length > 0) {
-            throw new Error("Kategori memiliki sub-kategori. Hapus sub-kategori terlebih dahulu.");
-        }
+            if ((kategori as any).children && (kategori as any).children.length > 0) {
+                throw new Error("Kategori memiliki sub-kategori. Hapus sub-kategori terlebih dahulu.");
+            }
 
-        if (kategori.beritas && kategori.beritas.length > 0) {
-            throw new Error("Kategori memiliki berita terkait. Pindahkan atau hapus berita terlebih dahulu.");
-        }
+            if ((kategori as any).beritas && (kategori as any).beritas.length > 0) {
+                throw new Error("Kategori memiliki berita terkait. Pindahkan atau hapus berita terlebih dahulu.");
+            }
 
-        if (kategori.Halaman && kategori.Halaman.length > 0) {
-            throw new Error("Kategori memiliki halaman terkait. Pindahkan atau hapus halaman terlebih dahulu.");
+            if ((kategori as any).halaman && (kategori as any).halaman.length > 0) {
+                throw new Error("Kategori memiliki halaman terkait. Pindahkan atau hapus halaman terlebih dahulu.");
+            }
         }
-
         // Delete kategori
         await prisma.kategori.delete({
             where: {

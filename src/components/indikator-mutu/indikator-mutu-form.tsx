@@ -2,7 +2,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -68,7 +67,6 @@ export function IndikatorMutuForm({
     uniqueJuduls
 }: IndikatorMutuFormProps) {
     const [loading, setLoading] = useState(false)
-    const router = useRouter()
     const [openCombobox, setOpenCombobox] = useState(false)
 
     // State untuk tahun dan bulan terpisah
@@ -178,7 +176,7 @@ export function IndikatorMutuForm({
             } else {
                 toast.error(result.message)
             }
-        } catch (error) {
+        } catch {
             toast.error("Terjadi kesalahan")
         } finally {
             setLoading(false)

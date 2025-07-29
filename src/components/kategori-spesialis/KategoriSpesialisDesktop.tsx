@@ -69,7 +69,7 @@ export default function KategoriSpesialisDesktop({ data }: Props) {
         },
         {
             id: 'actions',
-            cell: ({ row }) => (
+            cell: () => (
                 <Button
                     variant="ghost"
                     className="h-8 w-8 p-0"

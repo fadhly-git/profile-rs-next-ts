@@ -128,6 +128,7 @@ export default function EditHeroSectionPage({ params }: HeroSectionFormProps) {
         }, 3000) // Auto-save after 3 seconds of inactivity
 
         return () => clearTimeout(autoSaveTimer)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [formData, hasUnsavedChanges, isLoading])
 
     // Check for unsaved changes

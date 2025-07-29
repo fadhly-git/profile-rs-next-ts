@@ -13,7 +13,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createPromotion, updatePromotion } from '@/lib/actions/promotion'
 import { toast } from 'sonner'
-import type { Promotion, PromotionFormData, PromotionSubmitData } from '@/types/promotion'
+import type { Promotion, PromotionFormData } from '@/types/promotion'
 import { isValidUrl } from '@/lib/validators'
 
 interface PromotionFormProps {
