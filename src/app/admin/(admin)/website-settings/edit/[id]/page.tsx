@@ -11,7 +11,7 @@ interface EditWebsiteSettingsPageProps {
 }
 
 export default async function EditWebsiteSettingsPage({ params }: EditWebsiteSettingsPageProps) {
-    const { id } = params;
+    const { id } = await params;
     const websiteSettings = await getWebsiteSettingsById(parseInt(id))
 
     if (!websiteSettings) {
