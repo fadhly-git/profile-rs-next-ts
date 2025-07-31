@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getKategoriOptions } from '@/app/admin/(admin)/berita/create/_data';
+import { getKategoriOptions } from '@/lib/actions/berita';
 
 export async function GET() {
     try {

@@ -1,11 +1,18 @@
 // components/ui/badge-status.tsx
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { TextTruncate } from "../atoms/text-truncate"
 
 interface BadgeStatusProps {
     status: 'success' | 'warning' | 'danger' | 'info'
     children: React.ReactNode
     className?: string
+}
+
+interface StatusBadgeProps {
+  text?: string
+  maxLength?: number
+  variant?: "default" | "secondary" | "destructive" | "outline"
 }
 
 const statusVariants = {
@@ -24,4 +31,16 @@ export function BadgeStatus({ status, children, className }: BadgeStatusProps) {
             {children}
         </Badge>
     )
+}
+
+export function StatusBadge({ text, maxLength = 15, variant = "outline" }: StatusBadgeProps) {
+  if (!text) {
+    return <span className="text-muted-foreground text-xs">-</span>
+  }
+
+  return (
+    <Badge variant={variant} className="text-xs">
+      <TextTruncate text={text} maxLength={maxLength} />
+    </Badge>
+  )
 }

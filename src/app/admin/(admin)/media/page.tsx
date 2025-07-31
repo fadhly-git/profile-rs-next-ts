@@ -601,7 +601,6 @@ export default function MediaLibraryPage() {
                                             src={file.url}
                                             alt={file.name}
                                             fill
-                                            placeholder='blur'
                                             className="object-cover"
                                             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                             onError={(e) => {
