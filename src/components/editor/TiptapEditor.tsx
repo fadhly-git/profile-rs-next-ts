@@ -11,10 +11,6 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import Underline from '@tiptap/extension-underline'
-import { Table } from '@tiptap/extension-table'
-import TableRow from '@tiptap/extension-table-row'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { createLowlight } from 'lowlight'
 import { Button } from '@/components/ui/button'
@@ -42,7 +38,6 @@ import {
     AlignRight,
     AlignJustify,
     Highlighter,
-    Table as TableIcon,
     Type,
     Upload,
     Loader2,
@@ -105,11 +100,6 @@ const CustomImage = Image.extend({
                     editor.chain().focus().deleteRange({ from: pos, to: pos + 1 }).run()
                 }
 
-                // Panggil callback untuk hapus gambar dari server
-                if (globalImageDeleteCallback) {
-                    await globalImageDeleteCallback(node.attrs.src)
-                }
-
             }
 
             // Tombol ganti
@@ -143,10 +133,6 @@ const CustomImage = Image.extend({
                             const result = await response.json()
 
                             if (result.success) {
-                                // Hapus gambar lama dari server
-                                if (globalImageDeleteCallback) {
-                                    await globalImageDeleteCallback(node.attrs.src)
-                                }
 
                                 // Update node dengan gambar baru menggunakan view.dispatch
                                 const pos = getPos()
@@ -225,15 +211,6 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
                 multicolor: true,
             }),
             Underline,
-            Table.configure({
-                resizable: true,
-                HTMLAttributes: {
-                    class: 'border-collapse border border-gray-300',
-                },
-            }),
-            TableRow,
-            TableHeader,
-            TableCell,
             CodeBlockLowlight.configure({
                 lowlight,
                 HTMLAttributes: {
@@ -252,48 +229,6 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
         },
     })
 
-    // Fungsi untuk menghapus gambar dari server
-    const deleteImageFromServer = useCallback(async (imageUrl: string) => {
-        // Cek apakah gambar sudah diproses
-        if (deletingImages.has(imageUrl)) return;
-        deletingImages.add(imageUrl);
-        try {
-            const response = await fetch('/api/admin/upload/image/berita/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: imageUrl }),
-            })
-
-            const result = await response.json()
-
-            if (result.success) {
-                console.log('Gambar berhasil dihapus dari server:', imageUrl)
-            } else {
-                console.error('Gagal menghapus gambar:', result.error)
-            }
-        } catch (error) {
-            console.error('Error deleting image:', error)
-        } finally {
-            // hapus dari set setelah selesai
-            setTimeout(() => {
-                deletingImages.delete(imageUrl)
-            }, 1000)
-        }
-    }, [])
-
-    // Setup callback untuk penghapusan gambar
-    useEffect(() => {
-        // Set global callback
-        globalImageDeleteCallback = onImageDelete || deleteImageFromServer
-
-        // Cleanup saat component unmount
-        return () => {
-            globalImageDeleteCallback = null
-            // bersihkan set
-            deletingImages.clear()
-            processedImages.clear()
-        }
-    }, [onImageDelete, deleteImageFromServer])
 
     // Listener untuk keyboard delete
     useEffect(() => {
@@ -321,7 +256,7 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
                         processedImages.add(imageUrl)
                         // delay untuk memastikan callback tidak dipanggil berulang kali
                         setTimeout(() => {
-                            const callback = globalImageDeleteCallback || deleteImageFromServer
+                            const callback = globalImageDeleteCallback
                             if (callback) callback(imageUrl);
                             // Hapus dari set setelah callback dipanggil
                             setTimeout(() => {
@@ -338,7 +273,7 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
         return () => {
             editor.off('transaction', handleTransaction)
         }
-    }, [editor, onImageDelete, deleteImageFromServer])
+    }, [editor, onImageDelete])
 
     const handleFileUpload = useCallback(async (file: File) => {
         if (!file) return
@@ -414,10 +349,6 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
             setImageUrl('')
             setIsImageOpen(false)
         }
-    }
-
-    const addTable = () => {
-        editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
     }
 
     return (
@@ -693,17 +624,6 @@ export function RichTextEditor({ content, onChange, onImageDelete }: RichTextEdi
                             </div>
                         </PopoverContent>
                     </Popover>
-
-                    {/* Table */}
-                    <Button type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={addTable}
-                    >
-                        <TableIcon className="w-4 h-4" />
-                    </Button>
-
-                    <Separator orientation="vertical" className="mx-1 h-8" />
 
                     {/* Undo/Redo */}
                     <Button

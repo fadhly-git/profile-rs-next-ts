@@ -31,7 +31,7 @@ export async function GET(
 
                 return {
                     categoryId: id.toString(),
-                    categoryName: kategori?.nama_kategori,
+                    categoryName: kategori?.nama_kategori || `Category ${id}`,
                     beritaCount,
                     halamanCount,
                     hasData: beritaCount > 0 || halamanCount > 0
@@ -41,7 +41,13 @@ export async function GET(
 
         const totalBerita = dependencies.reduce((sum, dep) => sum + dep.beritaCount, 0)
         const totalHalaman = dependencies.reduce((sum, dep) => sum + dep.halamanCount, 0)
-        const hasAnyDependencies = dependencies.some(dep => dep.hasData)
+
+        // ✅ PERBAIKAN: Ada dependencies jika:
+        // 1. Ada child categories (childrenIds.length > 0), ATAU
+        // 2. Ada berita/halaman yang menggunakan kategori ini/child categories
+        const hasChildCategories = childrenIds.length > 0
+        const hasContentDependencies = dependencies.some(dep => dep.hasData)
+        const hasAnyDependencies = hasChildCategories || hasContentDependencies
 
         return NextResponse.json({
             success: true,
@@ -49,8 +55,8 @@ export async function GET(
                 affectedCategories: allCategoryIds.length,
                 totalBerita,
                 totalHalaman,
-                hasAnyDependencies,
-                dependencies: dependencies.filter(dep => dep.hasData)
+                hasAnyDependencies, // ✅ Sekarang akan true jika ada child categories
+                dependencies: dependencies // ✅ Return semua dependencies, tidak hanya yang hasData
             }
         })
 
@@ -63,7 +69,7 @@ export async function GET(
     }
 }
 
-// Helper function (sama seperti di atas)
+// Helper function tetap sama
 async function getAllChildrenRecursive(prisma: any, parentId: bigint): Promise<bigint[]> {
     const children = await prisma.kategori.findMany({
         where: { parent_id: parentId },

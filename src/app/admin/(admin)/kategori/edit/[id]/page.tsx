@@ -1,29 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// app/admin/kategori/edit/[id]/page.tsx
 "use client"
 
-import { use } from "react"
+import { use, useState, useEffect, useTransition, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { useTransition, useRef, useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -34,34 +14,17 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog"
+import { Loader2 } from "lucide-react"
+import { CategoryFormTemplate } from "@/components/kategori/templates/category-form-template"
+import { CategoryForm } from "@/components/molecules/category-form"
+import { DependencyDialog } from "@/components/kategori/DependencyDialog"
+import { useDependencyManager } from "@/hooks/use-dependency-manager"
 import {
     getKategoriById,
     updateKategoriActionWithOptions,
     getKategoriListExcept,
     deleteKategoriAction
-} from "./editKategoriAction"
-import {
-    FolderTree,
-    Info,
-    ListOrdered,
-    Menu,
-    ToggleLeft,
-    ArrowLeft,
-    Save,
-    Loader2,
-    Trash2,
-    AlertTriangle,
-    FileText,
-    Database
-} from "lucide-react"
+} from "@/lib/actions/kategori"
 
 interface KategoriData {
     id_kategori: string
@@ -81,45 +44,55 @@ interface KategoriOption {
     parent_id: string | null
 }
 
-interface DependencyData {
-    affectedCategories: number
-    totalBerita: number
-    totalHalaman: number
-    hasAnyDependencies: boolean
-    dependencies: Array<{
-        categoryId: string
-        categoryName: string
-        beritaCount: number
-        halamanCount: number
-    }>
-}
-
 interface PageProps {
     params: Promise<{ id: string }>
 }
 
+// Transform data to match CategoryForm interface
+const transformKategoriData = (data: KategoriData): Partial<{
+    nama_kategori: string
+    slug_kategori: string
+    keterangan: string | undefined // Change to undefined
+    parent_id: string | null
+    urutan: number | null
+    is_main_menu: boolean
+    is_active: boolean
+}> => ({
+    nama_kategori: data.nama_kategori,
+    slug_kategori: data.slug_kategori,
+    keterangan: data.keterangan || undefined, // Transform null to undefined
+    parent_id: data.parent_id,
+    urutan: data.urutan,
+    is_main_menu: data.is_main_menu,
+    is_active: data.is_active
+})
+
 export default function EditKategoriPage({ params }: PageProps) {
     const router = useRouter()
-    const formRef = useRef<HTMLFormElement>(null)
     const [isPending, startTransition] = useTransition()
     const [isDeleting, setIsDeleting] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
     const [kategoriData, setKategoriData] = useState<KategoriData | null>(null)
     const [kategoriList, setKategoriList] = useState<KategoriOption[]>([])
-    const [slug, setSlug] = useState("")
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+    const [currentActiveState, setCurrentActiveState] = useState(true)
+    const [isProcessingDependency, setIsProcessingDependency] = useState(false) // ✅ Add this
 
-    // Dependency handling states
-    const [isActive, setIsActive] = useState(true)
-    const [showDependencyDialog, setShowDependencyDialog] = useState(false)
-    const [dependencies, setDependencies] = useState<DependencyData | null>(null)
-    const [handleOption, setHandleOption] = useState("deactivate")
-    const [migrateToCategory, setMigrateToCategory] = useState("")
-    const [isCheckingDependencies, setIsCheckingDependencies] = useState(false)
+    const {
+        showDependencyDialog,
+        setShowDependencyDialog,
+        dependencies,
+        handleOption,
+        setHandleOption,
+        migrateToCategory,
+        setMigrateToCategory,
+        isCheckingDependencies,
+        checkDependencies,
+        resetDependencyState
+    } = useDependencyManager()
 
     const { id } = use(params)
 
-    // Fetch kategori data dan list
     useEffect(() => {
         async function fetchData() {
             setIsLoading(true)
@@ -136,8 +109,7 @@ export default function EditKategoriPage({ params }: PageProps) {
                 }
 
                 setKategoriData(data as KategoriData)
-                setSlug(data.slug_kategori)
-                setIsActive(data.is_active)
+                setCurrentActiveState(data.is_active) // ✅ Set initial active state
                 setKategoriList(list)
             } catch {
                 toast.error("Gagal memuat data kategori")
@@ -150,64 +122,97 @@ export default function EditKategoriPage({ params }: PageProps) {
         fetchData()
     }, [id, router])
 
-    const handleNamaChange = (value: string) => {
-        const generatedSlug = value
-            .toLowerCase()
-            .replace(/[^\w\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/--+/g, '-')
-            .trim()
-        setSlug(generatedSlug)
-    }
-
-    const checkDependencies = async () => {
-        setIsCheckingDependencies(true)
-        try {
-            const response = await fetch(`/api/admin/kategori/check-dependencies/${id}`)
-            const result = await response.json()
-
-            if (result.success) {
-                setDependencies(result.data)
-                if (result.data.hasAnyDependencies) {
-                    setShowDependencyDialog(true)
-                    return true
-                }
-            }
-            return false
-        } catch (error) {
-            console.error("Error checking dependencies:", error)
-            toast.error("Gagal memeriksa dependencies")
-            return false
-        } finally {
-            setIsCheckingDependencies(false)
-        }
-    }
-
-    const handleActiveToggle = async (checked: boolean) => {
-        setIsActive(checked)
+    // ✅ PERBAIKAN UTAMA: handleActiveToggle yang benar
+    const handleActiveToggle = async (checked: boolean): Promise<boolean> => {
+        console.log("Toggle aktif:", checked) // Debug log
 
         if (!checked) {
-            // Jika ingin menonaktifkan, cek dependencies dulu
-            const hasDependencies = await checkDependencies()
-            if (!hasDependencies) {
-                // Jika tidak ada dependencies, langsung bisa dinonaktifkan
-                return
+            // Menonaktifkan - check dependencies
+            console.log("Checking dependencies...") // Debug log
+            const hasDependencies = await checkDependencies(id)
+            console.log("Has dependencies:", hasDependencies) // Debug log
+
+            if (hasDependencies) {
+                // Ada dependencies, dialog akan muncul dari useDependencyManager
+                // Jangan update state currentActiveState dulu
+                return true // Indicate ada dependencies
+            } else {
+                // Tidak ada dependencies, boleh langsung nonaktif
+                setCurrentActiveState(false)
+                return false // Indicate tidak ada dependencies
             }
+        } else {
+            // Mengaktifkan - langsung update state
+            setCurrentActiveState(true)
+            return false // Indicate tidak ada dependencies
         }
     }
 
-    const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
-        if (e) {
-            e.preventDefault()
-        }
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
 
-        const formData = new FormData(formRef.current!)
+        console.log("Submit with active state:", currentActiveState) // Debug log
 
-        // Set the active status
-        if (isActive) {
+        const formData = new FormData(e.currentTarget)
+
+        // ✅ Set active state berdasarkan currentActiveState
+        if (currentActiveState) {
             formData.set("is_active", "on")
         } else {
             formData.delete("is_active")
+        }
+
+        startTransition(async () => {
+            try {
+                const result = await updateKategoriActionWithOptions(id, formData)
+
+                if (result.success) {
+                    toast.success("Kategori berhasil diperbarui!")
+                    setTimeout(() => {
+                        router.push("/admin/kategori")
+                    }, 1500)
+                } else {
+                    toast.error("Gagal memperbarui kategori", {
+                        description: result.message
+                    })
+                }
+            } catch (error: any) {
+                toast.error("Gagal memperbarui kategori", {
+                    description: error.message || "Silakan coba lagi."
+                })
+            }
+        })
+    }
+
+    const handleDependencyCancel = () => {
+        console.log("Dependency canceled") // Debug log
+        setShowDependencyDialog(false)
+        // ✅ Reset currentActiveState ke true karena user cancel nonaktif
+        setCurrentActiveState(true)
+        resetDependencyState()
+    }
+
+    const handleDependencyConfirm = () => {
+
+        // ✅ Set ke nonaktif karena user konfirmasi
+        setCurrentActiveState(false)
+
+        // ✅ Buat FormData manual, jangan ambil dari form ref
+        const formData = new FormData()
+
+        // ✅ Set data kategori dari state yang ada
+        if (kategoriData) {
+            formData.set("nama_kategori", kategoriData.nama_kategori)
+            formData.set("slug_kategori", kategoriData.slug_kategori)
+            formData.set("keterangan", kategoriData.keterangan || "")
+            formData.set("parent_id", kategoriData.parent_id || "none")
+            formData.set("urutan", kategoriData.urutan?.toString() || "")
+
+            // Set checkboxes
+            if (kategoriData.is_main_menu) {
+                formData.set("is_main_menu", "on")
+            }
+            // ✅ Jangan set is_active karena kita ingin nonaktifkan
         }
 
         // Set dependency handling options
@@ -221,10 +226,10 @@ export default function EditKategoriPage({ params }: PageProps) {
                 const result = await updateKategoriActionWithOptions(id, formData)
 
                 if (result.success) {
-                    toast.success("Kategori berhasil diperbarui!", {
-                        description: result.message
-                    })
+                    toast.success("Kategori berhasil diperbarui dengan penanganan dependencies!")
                     setShowDependencyDialog(false)
+                    setIsProcessingDependency(false)
+                    resetDependencyState()
                     setTimeout(() => {
                         router.push("/admin/kategori")
                     }, 1500)
@@ -232,22 +237,25 @@ export default function EditKategoriPage({ params }: PageProps) {
                     toast.error("Gagal memperbarui kategori", {
                         description: result.message
                     })
+                    setCurrentActiveState(true)
+                    setIsProcessingDependency(false)
                 }
             } catch (error: any) {
+                console.error("Error updating kategori:", error)
                 toast.error("Gagal memperbarui kategori", {
-                    description: error.message || "Silakan coba lagi atau hubungi administrator."
+                    description: error.message || "Silakan coba lagi."
                 })
+                setCurrentActiveState(true)
+                setIsProcessingDependency(false)
             }
         })
     }
 
-    const handleDelete = async () => {
+    const handleDelete = useCallback(async () => {
         setIsDeleting(true)
         try {
             await deleteKategoriAction(id)
-            toast.success("Kategori berhasil dihapus", {
-                description: "Kategori telah dihapus dari sistem."
-            })
+            toast.success("Kategori berhasil dihapus")
             router.push("/admin/kategori")
         } catch (error: any) {
             toast.error("Gagal menghapus kategori", {
@@ -257,7 +265,11 @@ export default function EditKategoriPage({ params }: PageProps) {
             setIsDeleting(false)
             setShowDeleteDialog(false)
         }
-    }
+    }, [id, router])
+
+    const handleBack = useCallback(() => {
+        router.push("/admin/kategori")
+    }, [router])
 
     if (isLoading) {
         return <LoadingSkeleton />
@@ -268,439 +280,65 @@ export default function EditKategoriPage({ params }: PageProps) {
     }
 
     return (
-        <div className="container max-w-4xl py-8">
-            {/* Header */}
-            <div className="mb-8">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => router.push("/admin/kategori")}
-                    className="mb-4"
-                >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Kembali
-                </Button>
-
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-3xl font-bold">Edit Kategori</h1>
-                            <Badge variant="outline">ID: {kategoriData.id_kategori}</Badge>
-                        </div>
-                        <p className="text-muted-foreground mt-2">
-                            Perbarui informasi kategori {kategoriData.nama_kategori}
-                        </p>
-                    </div>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => setShowDeleteDialog(true)}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Hapus
-                    </Button>
-                </div>
-            </div>
-
-            <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
-                {/* Informasi Dasar */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Informasi Dasar</CardTitle>
-                        <CardDescription>
-                            Perbarui informasi dasar kategori
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="nama_kategori">
-                                    Nama Kategori <span className="text-red-500">*</span>
-                                </Label>
-                                <Input
-                                    id="nama_kategori"
-                                    name="nama_kategori"
-                                    placeholder="Contoh: Layanan Kesehatan"
-                                    defaultValue={kategoriData.nama_kategori}
-                                    required
-                                    onChange={(e) => handleNamaChange(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="slug_kategori">
-                                    Slug URL <span className="text-red-500">*</span>
-                                </Label>
-                                <Input
-                                    id="slug_kategori"
-                                    name="slug_kategori"
-                                    placeholder="layanan-kesehatan"
-                                    value={slug}
-                                    onChange={(e) => setSlug(e.target.value)}
-                                    required
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    URL: /kategori/{slug || "slug-kategori"}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="keterangan">Deskripsi</Label>
-                            <Textarea
-                                id="keterangan"
-                                name="keterangan"
-                                placeholder="Deskripsi singkat tentang kategori ini..."
-                                defaultValue={kategoriData.keterangan || ""}
-                                rows={3}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Hierarki & Pengaturan */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Hierarki & Pengaturan</CardTitle>
-                        <CardDescription>
-                            Atur posisi dan hierarki kategori
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <Label htmlFor="parent_id">
-                                    <FolderTree className="inline mr-2 h-4 w-4" />
-                                    Kategori Induk
-                                </Label>
-                                <Select
-                                    name="parent_id"
-                                    defaultValue={kategoriData.parent_id || "none"}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Pilih kategori induk (opsional)" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">Tidak ada (Kategori Utama)</SelectItem>
-                                        {kategoriList.map((kategori) => (
-                                            <SelectItem
-                                                key={kategori.id_kategori}
-                                                value={kategori.id_kategori}
-                                            >
-                                                {kategori.nama_kategori}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                <p className="text-xs text-muted-foreground">
-                                    Biarkan kosong untuk membuat kategori utama
-                                </p>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="urutan">
-                                    <ListOrdered className="inline mr-2 h-4 w-4" />
-                                    Urutan Tampil
-                                </Label>
-                                <Input
-                                    id="urutan"
-                                    name="urutan"
-                                    type="number"
-                                    placeholder="1"
-                                    defaultValue={kategoriData.urutan || ""}
-                                    min="1"
-                                />
-                                <p className="text-xs text-muted-foreground">
-                                    Urutan tampil dalam daftar kategori
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Status & Visibilitas */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Status & Visibilitas</CardTitle>
-                        <CardDescription>
-                            Kontrol visibilitas kategori di website
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-start space-x-3">
-                            <Checkbox
-                                id="is_main_menu"
-                                name="is_main_menu"
-                                defaultChecked={kategoriData.is_main_menu}
-                            />
-                            <div className="space-y-1">
-                                <Label
-                                    htmlFor="is_main_menu"
-                                    className="flex items-center cursor-pointer"
-                                >
-                                    <Menu className="mr-2 h-4 w-4" />
-                                    Tampilkan di Menu Utama
-                                </Label>
-                                <p className="text-sm text-muted-foreground">
-                                    Kategori akan muncul di navigasi utama website
-                                </p>
-                            </div>
-                        </div>
-
-                        <Separator />
-
-                        <div className="flex items-start space-x-3">
-                            <Checkbox
-                                id="is_active"
-                                checked={isActive}
-                                onCheckedChange={handleActiveToggle}
-                                disabled={isCheckingDependencies}
-                            />
-                            <div className="space-y-1">
-                                <Label
-                                    htmlFor="is_active"
-                                    className="flex items-center cursor-pointer"
-                                >
-                                    <ToggleLeft className="mr-2 h-4 w-4" />
-                                    Status Aktif
-                                    {isCheckingDependencies && (
-                                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                                    )}
-                                </Label>
-                                <p className="text-sm text-muted-foreground">
-                                    Nonaktifkan untuk menyembunyikan kategori dari publik
-                                </p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Info Alert */}
-                <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
-                        <strong>Tips:</strong> Kategori dapat memiliki sub-kategori untuk membentuk
-                        hierarki konten. Kategori yang ditandai sebagai menu utama akan muncul
-                        di navigasi website.
-                    </AlertDescription>
-                </Alert>
-
-                {/* Action Buttons */}
-                <div className="flex justify-end gap-4">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => router.push("/admin/kategori")}
-                        disabled={isPending}
-                    >
-                        Batal
-                    </Button>
-                    <Button type="submit" disabled={isPending}>
-                        {isPending ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Menyimpan...
-                            </>
-                        ) : (
-                            <>
-                                <Save className="mr-2 h-4 w-4" />
-                                Simpan Perubahan
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </form>
+        <>
+            <CategoryFormTemplate
+                title="Edit Kategori"
+                subtitle={`Perbarui informasi kategori ${kategoriData.nama_kategori}`}
+                categoryId={kategoriData.id_kategori}
+                onBack={handleBack}
+                onSubmit={handleSubmit}
+                onDelete={() => setShowDeleteDialog(true)}
+                isSubmitting={isPending}
+                submitText="Simpan Perubahan"
+                showDeleteButton={true}
+            >
+                <CategoryForm
+                    // ref={formRef}
+                    initialData={transformKategoriData(kategoriData)}
+                    kategoriesList={kategoriList}
+                    onActiveToggle={handleActiveToggle}
+                    isCheckingDependencies={isCheckingDependencies}
+                    isEditMode={true}
+                />
+            </CategoryFormTemplate>
 
             {/* Dependency Dialog */}
-            <Dialog open={showDependencyDialog} onOpenChange={setShowDependencyDialog}>
-                <DialogContent className="!max-w-2xl">
-                    <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            <AlertTriangle className="h-5 w-5 text-orange-500" />
-                            Peringatan: Kategori Memiliki Konten Terkait
-                        </DialogTitle>
-                        <DialogDescription>
-                            Menonaktifkan kategori ini akan mempengaruhi konten yang ada.
-                            Pilih tindakan yang ingin Anda lakukan.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    {dependencies && (
-                        <div className="space-y-4">
-                            {/* Dependency Statistics */}
-                            <div className="grid grid-cols-3 gap-4">
-                                <Card>
-                                    <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                            <FolderTree className="h-4 w-4 text-blue-500" />
-                                            <div>
-                                                <p className="text-sm font-medium">Kategori</p>
-                                                <p className="text-2xl font-bold">{dependencies.affectedCategories}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-green-500" />
-                                            <div>
-                                                <p className="text-sm font-medium">Berita</p>
-                                                <p className="text-2xl font-bold">{dependencies.totalBerita}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                                <Card>
-                                    <CardContent className="p-4">
-                                        <div className="flex items-center gap-2">
-                                            <Database className="h-4 w-4 text-purple-500" />
-                                            <div>
-                                                <p className="text-sm font-medium">Halaman</p>
-                                                <p className="text-2xl font-bold">{dependencies.totalHalaman}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-
-                            {/* Detailed Dependencies */}
-                            {dependencies.dependencies.length > 0 && (
-                                <div className="space-y-2">
-                                    <h4 className="font-medium">Kategori yang Terpengaruh:</h4>
-                                    <div className="max-h-32 overflow-y-auto space-y-2">
-                                        {dependencies.dependencies.map((dep) => (
-                                            <div key={dep.categoryId} className="flex items-center justify-between p-2 bg-muted rounded">
-                                                <span className="font-medium">{dep.categoryName}</span>
-                                                <div className="flex gap-2 text-sm text-muted-foreground">
-                                                    {dep.beritaCount > 0 && (
-                                                        <Badge variant="secondary">{dep.beritaCount} berita</Badge>
-                                                    )}
-                                                    {dep.halamanCount > 0 && (
-                                                        <Badge variant="secondary">{dep.halamanCount} halaman</Badge>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Action Options */}
-                            <div className="space-y-4">
-                                <h4 className="font-medium">Pilih tindakan:</h4>
-                                <RadioGroup value={handleOption} onValueChange={setHandleOption}>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="deactivate" id="deactivate" />
-                                        <Label htmlFor="deactivate" className="cursor-pointer">
-                                            <div>
-                                                <p className="font-medium">Nonaktifkan semua konten</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Kategori dan semua konten terkait akan dinonaktifkan
-                                                </p>
-                                            </div>
-                                        </Label>
-                                    </div>
-
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="migrate" id="migrate" />
-                                        <Label htmlFor="migrate" className="cursor-pointer">
-                                            <div>
-                                                <p className="font-medium">Pindahkan konten ke kategori lain</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Konten akan dipindahkan ke kategori yang Anda pilih
-                                                </p>
-                                            </div>
-                                        </Label>
-                                    </div>
-
-                                    {handleOption === "migrate" && (
-                                        <div className="ml-6 space-y-2">
-                                            <Label htmlFor="migrate_category">Kategori Tujuan:</Label>
-                                            <Select
-                                                value={migrateToCategory}
-                                                onValueChange={setMigrateToCategory}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Pilih kategori tujuan" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {kategoriList
-                                                        .filter(cat => cat.id_kategori !== kategoriData.id_kategori)
-                                                        .map((kategori) => (
-                                                            <SelectItem
-                                                                key={kategori.id_kategori}
-                                                                value={kategori.id_kategori}
-                                                            >
-                                                                {kategori.nama_kategori}
-                                                            </SelectItem>
-                                                        ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="keep" id="keep" />
-                                        <Label htmlFor="keep" className="cursor-pointer">
-                                            <div>
-                                                <p className="font-medium">Hanya nonaktifkan kategori</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    Kategori dinonaktifkan, konten tetap aktif
-                                                </p>
-                                            </div>
-                                        </Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
-                        </div>
-                    )}
-
-                    <DialogFooter>
-                        <Button
-                            variant="outline"
-                            onClick={() => {
-                                setShowDependencyDialog(false)
-                                setIsActive(true) // Reset ke aktif
-                            }}
-                        >
-                            Batal
-                        </Button>
-                        <Button
-                            onClick={() => handleSubmit()}
-                            disabled={
-                                isPending ||
-                                (handleOption === "migrate" && !migrateToCategory)
-                            }
-                        >
-                            {isPending ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Memproses...
-                                </>
-                            ) : (
-                                "Lanjutkan"
-                            )}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <DependencyDialog
+                isOpen={showDependencyDialog}
+                onClose={() => {
+                    console.log("Dialog closed via X button")
+                    setShowDependencyDialog(false)
+                    // ✅ Don't call handleDependencyCancel here to avoid loop
+                }}
+                onConfirm={handleDependencyConfirm}
+                dependencies={dependencies}
+                handleOption={handleOption}
+                onOptionChange={setHandleOption}
+                migrateToCategory={migrateToCategory}
+                onMigrateCategoryChange={setMigrateToCategory}
+                kategoriesList={kategoriList}
+                currentKategoriId={kategoriData.id_kategori}
+                isPending={isPending}
+                onCancel={handleDependencyCancel}
+            />
 
             {/* Delete Confirmation Dialog */}
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-                <AlertDialogContent>
+                <AlertDialogContent className="max-w-md sm:max-w-lg">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
-                        <AlertDialogDescription>
+                        <AlertDialogTitle className="text-lg">Apakah Anda yakin?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-sm">
                             Tindakan ini tidak dapat dibatalkan. Kategori &quot;{kategoriData.nama_kategori}&quot;
                             akan dihapus secara permanen dari sistem beserta semua data terkait.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+                    <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                        <AlertDialogCancel disabled={isDeleting} className="w-full sm:w-auto">
+                            Batal
+                        </AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
                             disabled={isDeleting}
                         >
                             {isDeleting ? (
@@ -715,57 +353,32 @@ export default function EditKategoriPage({ params }: PageProps) {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
+        </>
     )
 }
 
-// Loading Skeleton Component (tidak berubah)
 function LoadingSkeleton() {
     return (
-        <div className="container max-w-4xl py-8">
-            <Skeleton className="h-10 w-24 mb-4" />
-            <div className="mb-8">
-                <Skeleton className="h-8 w-64 mb-2" />
-                <Skeleton className="h-4 w-96" />
-            </div>
+        <div className="container max-w-4xl py-4 sm:py-8 px-4">
+            <div className="animate-pulse space-y-6">
+                <div className="h-10 w-24 bg-gray-200 rounded mb-4"></div>
+                <div className="mb-8">
+                    <div className="h-8 w-64 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 w-96 bg-gray-200 rounded"></div>
+                </div>
 
-            <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-32 mb-2" />
-                        <Skeleton className="h-4 w-48" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-24" />
-                                <Skeleton className="h-10 w-full" />
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="border rounded-lg p-6">
+                        <div className="h-6 w-32 bg-gray-200 rounded mb-4"></div>
+                        <div className="space-y-4">
+                            <div className="grid gap-4 md:grid-cols-2">
+                                <div className="h-10 w-full bg-gray-200 rounded"></div>
+                                <div className="h-10 w-full bg-gray-200 rounded"></div>
                             </div>
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-24" />
-                                <Skeleton className="h-10 w-full" />
-                            </div>
+                            <div className="h-20 w-full bg-gray-200 rounded"></div>
                         </div>
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-24" />
-                            <Skeleton className="h-20 w-full" />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-40 mb-2" />
-                        <Skeleton className="h-4 w-56" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid gap-4 md:grid-cols-2">
-                            <Skeleton className="h-24 w-full" />
-                            <Skeleton className="h-24 w-full" />
-                        </div>
-                        <Skeleton className="h-10 w-full" />
-                    </CardContent>
-                </Card>
+                    </div>
+                ))}
             </div>
         </div>
     )
