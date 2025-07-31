@@ -214,7 +214,7 @@ export default async function AdminDashboard() {
                             </div>
                         </Link>
                         <Link
-                            href="/admin/dokter/create"
+                            href="/admin/data-dokter/create"
                             className="block w-full text-left px-4 py-3 bg-green-700 hover:bg-green-500 rounded-lg transition-colors duration-200"
                         >
                             <div className="flex items-center space-x-3">
@@ -223,7 +223,7 @@ export default async function AdminDashboard() {
                             </div>
                         </Link>
                         <Link
-                            href="/admin/jadwal-dokter/create"
+                            href="/admin/jadwal-dokter"
                             className="block w-full text-left px-4 py-3 bg-purple-700 hover:bg-purple-500 rounded-lg transition-colors duration-200"
                         >
                             <div className="flex items-center space-x-3">
@@ -232,7 +232,7 @@ export default async function AdminDashboard() {
                             </div>
                         </Link>
                         <Link
-                            href="/admin/settings"
+                            href="/admin/website-settings"
                             className="block w-full text-left px-4 py-3 bg-orange-700 hover:bg-orange-500 rounded-lg transition-colors duration-200"
                         >
                             <div className="flex items-center space-x-3">
@@ -243,13 +243,6 @@ export default async function AdminDashboard() {
                     </div>
                 </div>
             </div>
-            <p>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae est alias quas modi, eius, incidunt aliquid obcaecati, nesciunt cumque aperiam fuga eveniet eligendi? Libero placeat expedita repudiandae dolorem porro reprehenderit?
-                Animi quibusdam reprehenderit adipisci, dolorem corporis dolor beatae nam! Voluptas eaque dolorem harum vero voluptatem explicabo suscipit delectus deserunt ipsa perferendis pariatur quidem eveniet odit, culpa, accusantium earum itaque. Aperiam?
-                Sed repellendus facilis illo fugiat asperiores vitae omnis similique, dolorem et? Mollitia quos nihil dolore dicta culpa dolorem unde dolor eum magnam? Incidunt corporis, ipsum distinctio recusandae animi libero laboriosam.
-                Tempora quas dicta aut rerum totam error ullam hic iure sequi ducimus modi ut inventore ratione labore, tempore recusandae nulla nobis incidunt. Magni ullam voluptate, distinctio non eveniet rerum laudantium!
-                Quia voluptatem, exercitationem nihil enim assumenda perspiciatis? Officiis voluptatum blanditiis minus modi voluptates repudiandae exercitationem mollitia tempora. Deleniti unde optio amet modi officiis, cumque, adipisci illum sapiente fuga corrupti aliquam!
-            </p>
         </div>
     )
 }

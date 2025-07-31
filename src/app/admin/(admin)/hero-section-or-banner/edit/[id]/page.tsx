@@ -614,7 +614,7 @@ export default function EditHeroSectionPage({ params }: HeroSectionFormProps) {
                                                 <Image
                                                     src={imagePreview}
                                                     alt="Preview"
-                                                    placeholder="blur"
+
                                                     width={800}
                                                     height={300}
                                                     className="w-full h-48 object-cover"
@@ -828,7 +828,7 @@ export default function EditHeroSectionPage({ params }: HeroSectionFormProps) {
                                             <Image
                                                 src={imagePreview}
                                                 alt="Background"
-                                                placeholder="blur"
+
                                                 fill
                                                 className="object-cover opacity-60"
                                                 sizes="(max-width: 768px) 100vw, 300px"

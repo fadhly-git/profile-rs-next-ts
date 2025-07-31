@@ -168,7 +168,7 @@ export function DataTableHero({ data }: { data: HeroSection[] }) {
                             <Image
                                 src={row.original.background_image}
                                 alt="Background"
-                                placeholder="blur"
+
                                 width={48}
                                 height={32}
                                 className="h-8 w-12 object-cover rounded border"
@@ -586,7 +586,7 @@ export function DataTableHero({ data }: { data: HeroSection[] }) {
                                                             alt="Background"
                                                             width={320}
                                                             height={180}
-                                                            placeholder="blur"
+
                                                             fill
                                                             className="object-cover rounded"
                                                         />
