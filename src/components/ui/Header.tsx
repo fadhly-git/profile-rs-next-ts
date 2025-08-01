@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import {
   Phone,
   Mail,
@@ -32,6 +34,60 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
   const [scrolled, setScrolled] = useState(false);
   const isMobile = useIsMobile();
   const dropdownTimeoutRef = useRef<NodeJS.Timeout>(null);
+  const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Handle client-side hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Function to check if a path is active - only after mounting
+  const isPathActive = (path: string) => {
+    if (!isMounted) return false;
+    if (path === '/' && pathname === '/') return true;
+    if (path !== '/' && pathname.startsWith(path)) return true;
+    return false;
+  };
+
+  // Function to check if a category is active (including its children)
+  const isCategoryActive = (category: MenuCategory) => {
+    if (!isMounted) return false;
+
+    // Check if current path matches category
+    if (isPathActive(`/${category.slug_kategori}`)) return true;
+
+    // Check if any direct page in category is active
+    const hasActivePage = category.Halaman.some(halaman =>
+      isPathActive(`/${category.slug_kategori}/${halaman.slug}`)
+    );
+    if (hasActivePage) return true;
+
+    // Check if any child category or its pages are active
+    const hasActiveChild = category.children.some(child => {
+      if (isPathActive(`/${child.slug_kategori}`)) return true;
+      return child.Halaman.some(halaman =>
+        isPathActive(`/${child.slug_kategori}/${halaman.slug}`)
+      );
+    });
+
+    return hasActiveChild;
+  };
+
+  // Function to check if a specific page is active
+  const isPageActive = (categorySlug: string, pageSlug: string) => {
+    if (!isMounted) return false;
+    return isPathActive(`/${categorySlug}/${pageSlug}`);
+  };
+
+  // Function to check if a child category has active pages
+  const isChildCategoryActive = (child: any) => {
+    if (!isMounted) return false;
+    if (isPathActive(`/${child.slug_kategori}`)) return true;
+    return child.Halaman.some((halaman: any) =>
+      isPathActive(`/${child.slug_kategori}/${halaman.slug}`)
+    );
+  };
 
   // Handle scroll effect
   useEffect(() => {
@@ -70,6 +126,17 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
       setIsMobileMenuOpen(false);
     }
   }, [isMobile, isMobileMenuOpen]);
+
+  // Auto-expand active mobile submenu
+  useEffect(() => {
+    if (isMobile && isMounted) {
+      const activeCategory = menuCategories.find(category => isCategoryActive(category));
+      if (activeCategory && (activeCategory.children.length > 0 || activeCategory.Halaman.length > 0)) {
+        setActiveMobileSubmenu(activeCategory.id_kategori);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile, pathname, menuCategories, isMounted]);
 
   const handleMouseEnter = (categoryId: number) => {
     if (isMobile) return;
@@ -238,17 +305,26 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
             {!isMobile && (
               <nav className="flex items-center space-x-1">
                 {/* Home Link */}
-                <Link
-                  href="/"
-                  className="flex items-center px-4 py-2 text-gray-700 hover:text-[#07b8b2] hover:bg-teal-50 rounded-lg transition-all duration-200 font-medium"
-                >
-                  <Home className="w-4 h-4 mr-2" />
-                  Beranda
-                </Link>
+                <div className="relative">
+                  <Link
+                    href="/"
+                    className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 font-medium ${isMounted && pathname === '/'
+                      ? 'text-[#07b8b2] bg-teal-50'
+                      : 'text-gray-700 hover:text-[#07b8b2] hover:bg-teal-50'
+                      }`}
+                  >
+                    <Home className="w-4 h-4 mr-2" />
+                    Beranda
+                  </Link>
+                  {isMounted && pathname === '/' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2] rounded-full"></div>
+                  )}
+                </div>
 
                 {/* Dynamic Categories */}
                 {menuCategories?.map((category) => {
                   const hasSubmenu = category.children.length > 0 || category.Halaman.length > 0;
+                  const isActive = isCategoryActive(category);
 
                   return (
                     <div
@@ -257,38 +333,63 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                       onMouseEnter={() => handleMouseEnter(category.id_kategori)}
                       onMouseLeave={handleMouseLeave}
                     >
-                      <Link
-                        href={`/${category.slug_kategori}`}
-                        className="flex items-center px-4 py-2 text-gray-700 hover:text-[#07b8b2] hover:bg-teal-50 rounded-lg transition-all duration-200 font-medium"
-                      >
-                        {category.nama_kategori}
-                        {hasSubmenu && (
+                      {hasSubmenu ? (
+                        <div
+                          className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 font-medium cursor-pointer ${isActive
+                            ? 'text-[#07b8b2] bg-teal-50'
+                            : 'text-gray-700 hover:text-[#07b8b2] hover:bg-teal-50'
+                            }`}
+                        >
+                          {category.nama_kategori}
                           <ChevronDown className="w-4 h-4 ml-1 transition-transform duration-200" />
-                        )}
-                      </Link>
+                        </div>
+                      ) : (
+                        <Link
+                          href={`/${category.slug_kategori}`}
+                          className={`flex items-center px-4 py-2 rounded-lg transition-all duration-200 font-medium ${isActive
+                            ? 'text-[#07b8b2] bg-teal-50'
+                            : 'text-gray-700 hover:text-[#07b8b2] hover:bg-teal-50'
+                            }`}
+                        >
+                          {category.nama_kategori}
+                        </Link>
+                      )}
+
+                      {/* Active indicator */}
+                      {isActive && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2] rounded-full"></div>
+                      )}
 
                       {/* Desktop Dropdown */}
                       {hasSubmenu && (
                         <div
                           className={`absolute top-full left-0 mt-1 w-72 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 ${activeDropdown === category.id_kategori
-                              ? 'opacity-100 visible transform translate-y-0'
-                              : 'opacity-0 invisible transform -translate-y-2 pointer-events-none'
+                            ? 'opacity-100 visible transform translate-y-0'
+                            : 'opacity-0 invisible transform -translate-y-2 pointer-events-none'
                             }`}
                           onMouseEnter={() => handleMouseEnter(category.id_kategori)}
                           onMouseLeave={handleMouseLeave}
                         >
                           <div className="py-2 max-h-80 overflow-y-auto custom-scrollbar">
                             {/* Direct Pages */}
-                            {category.Halaman.map((halaman) => (
-                              <Link
-                                key={halaman.id_halaman}
-                                href={`/${category.slug_kategori}/${halaman.slug}`}
-                                className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-teal-50 hover:text-[#07b8b2] transition-colors group"
-                              >
-                                <div className="w-2 h-2 bg-teal-200 rounded-full mr-3 group-hover:bg-[#07b8b2] transition-colors" />
-                                {halaman.judul}
-                              </Link>
-                            ))}
+                            {category.Halaman.map((halaman) => {
+                              const pageActive = isPageActive(category.slug_kategori, halaman.slug);
+                              return (
+                                <div key={halaman.id_halaman} className="relative">
+                                  <Link
+                                    href={`/${category.slug_kategori}/${halaman.slug}`}
+                                    className={`flex items-center px-4 py-3 text-sm transition-colors group ${pageActive
+                                      ? 'bg-teal-50 text-[#07b8b2] border-r-2 border-[#07b8b2]'
+                                      : 'text-gray-700 hover:bg-teal-50 hover:text-[#07b8b2]'
+                                      }`}
+                                  >
+                                    <div className={`w-2 h-2 rounded-full mr-3 transition-colors ${pageActive ? 'bg-[#07b8b2]' : 'bg-teal-200 group-hover:bg-[#07b8b2]'
+                                      }`} />
+                                    {halaman.judul}
+                                  </Link>
+                                </div>
+                              );
+                            })}
 
                             {/* Sub Categories */}
                             {category.children.map((child, index) => (
@@ -296,21 +397,32 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                                 {(category.Halaman.length > 0 || index > 0) && (
                                   <div className="border-t border-gray-100 my-1" />
                                 )}
-                                <div className="flex items-center px-6 py-2.5 text-sm text-gray-600 hover:bg-teal-50 hover:text-[#07b8b2] transition-colors group">
-                                  <div className="w-1.5 h-1.5 bg-gray-300 rounded-full mr-3 group-hover:bg-[#07b8b2] transition-colors" />
+                                <div className={`flex items-center px-6 py-2.5 text-sm transition-colors group ${isChildCategoryActive(child)
+                                  ? 'bg-teal-50 text-[#07b8b2] border-r-2 border-[#07b8b2]'
+                                  : 'text-gray-600 hover:bg-teal-50 hover:text-[#07b8b2]'
+                                  }`}>
+                                  <div className={`w-1.5 h-1.5 rounded-full mr-3 transition-colors ${isChildCategoryActive(child) ? 'bg-[#07b8b2]' : 'bg-gray-300 group-hover:bg-[#07b8b2]'
+                                    }`} />
                                   {child.nama_kategori}
                                 </div>
 
-                                {child.Halaman.map((halaman) => (
-                                  <Link
-                                    key={halaman.id_halaman}
-                                    href={`/${child.slug_kategori}/${halaman.slug}`}
-                                    className="flex items-center px-6 py-2.5 text-sm text-gray-600 hover:bg-teal-50 hover:text-[#07b8b2] transition-colors group"
-                                  >
-                                    <div className="w-1.5 h-1.5 bg-gray-300 rounded-full mr-3 group-hover:bg-[#07b8b2] transition-colors" />
-                                    {halaman.judul}
-                                  </Link>
-                                ))}
+                                {child.Halaman.map((halaman) => {
+                                  const pageActive = isPageActive(child.slug_kategori, halaman.slug);
+                                  return (
+                                    <Link
+                                      key={halaman.id_halaman}
+                                      href={`/${child.slug_kategori}/${halaman.slug}`}
+                                      className={`flex items-center px-6 py-2.5 text-sm transition-colors group ${pageActive
+                                        ? 'bg-teal-50 text-[#07b8b2] border-r-2 border-[#07b8b2]'
+                                        : 'text-gray-600 hover:bg-teal-50 hover:text-[#07b8b2]'
+                                        }`}
+                                    >
+                                      <div className={`w-1.5 h-1.5 rounded-full mr-3 transition-colors ${pageActive ? 'bg-[#07b8b2]' : 'bg-gray-300 group-hover:bg-[#07b8b2]'
+                                        }`} />
+                                      {halaman.judul}
+                                    </Link>
+                                  );
+                                })}
                               </div>
                             ))}
                           </div>
@@ -381,51 +493,76 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                 onClick={closeMobileMenu}
                 className="p-2 rounded-lg bg-white bg-opacity-20 hover:bg-opacity-30 transition-colors"
               >
-                <X className="w-5 h-5 text-white" />
+                <X className="w-5 h-5 text-black" />
               </button>
             </div>
 
             {/* Menu Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {/* Home Link */}
-              <Link
-                href="/"
-                onClick={closeMobileMenu}
-                className="flex items-center px-6 py-4 text-gray-700 hover:bg-teal-50 hover:text-[#07b8b2] transition-colors border-b border-gray-50"
-              >
-                <Home className="w-5 h-5 mr-3 text-[#07b8b2]" />
-                <span className="font-medium">Beranda</span>
-              </Link>
-
+              <div className="relative">
+                <Link
+                  href="/"
+                  onClick={closeMobileMenu}
+                  className={`flex items-center px-6 py-4 transition-colors border-b border-gray-50 ${isMounted && pathname === '/'
+                      ? 'bg-teal-50 text-[#07b8b2] border-r-4 border-r-[#07b8b2]'
+                      : 'text-gray-700 hover:bg-teal-50 hover:text-[#07b8b2]'
+                    }`}
+                >
+                  <Home className="w-5 h-5 mr-3 text-[#07b8b2]" />
+                  <span className="font-medium">Beranda</span>
+                </Link>
+                {isMounted && pathname === '/' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2]"></div>
+                )}
+              </div>
               {/* Category Links */}
               {menuCategories.map((category) => {
                 const hasSubmenu = category.children.length > 0 || category.Halaman.length > 0;
                 const isOpen = activeMobileSubmenu === category.id_kategori;
+                const isActive = isCategoryActive(category);
 
                 return (
-                  <div key={category.id_kategori} className="border-b border-gray-50">
+                  <div key={category.id_kategori} className="border-b border-gray-50 relative">
                     <div className="flex items-center">
-                      <Link
-                        href={`/${category.slug_kategori}`}
-                        onClick={closeMobileMenu}
-                        className="flex-1 flex items-center text-sm px-6 py-4 text-gray-700 hover:text-[#07b8b2] transition-colors"
-                      >
-                        <span className="font-medium">{category.nama_kategori}</span>
-                      </Link>
-
-                      {hasSubmenu && (
-                        <button
-                          onClick={() => toggleMobileSubmenu(category.id_kategori)}
-                          className="p-4 text-gray-400 hover:text-[#07b8b2] transition-colors"
-                          aria-expanded={isOpen}
-                        >
-                          <ChevronRight
-                            className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''
+                      {hasSubmenu ? (
+                        <>
+                          <div
+                            className={`flex-1 flex items-center text-sm px-6 py-4 transition-colors ${isActive
+                              ? 'text-[#07b8b2] bg-teal-50 border-r-4 border-r-[#07b8b2]'
+                              : 'text-gray-700 hover:text-[#07b8b2]'
                               }`}
-                          />
-                        </button>
+                          >
+                            <span className="font-medium">{category.nama_kategori}</span>
+                          </div>
+                          <button
+                            onClick={() => toggleMobileSubmenu(category.id_kategori)}
+                            className="p-4 text-gray-400 hover:text-[#07b8b2] transition-colors"
+                            aria-expanded={isOpen}
+                          >
+                            <ChevronRight
+                              className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''
+                                }`}
+                            />
+                          </button>
+                        </>
+                      ) : (
+                        <Link
+                          href={`/${category.slug_kategori}`}
+                          onClick={closeMobileMenu}
+                          className={`flex-1 flex items-center text-sm px-6 py-4 transition-colors ${isActive
+                            ? 'text-[#07b8b2] bg-teal-50 border-r-4 border-r-[#07b8b2]'
+                            : 'text-gray-700 hover:text-[#07b8b2]'
+                            }`}
+                        >
+                          <span className="font-medium">{category.nama_kategori}</span>
+                        </Link>
                       )}
                     </div>
+                    {/* Active indicator for parent category */}
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2]"></div>
+                    )}
 
                     {/* Submenu */}
                     {hasSubmenu && (
@@ -435,36 +572,61 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                       >
                         <div className="py-2">
                           {/* Direct Pages */}
-                          {category.Halaman.map((halaman) => (
-                            <Link
-                              key={halaman.id_halaman}
-                              href={`/${category.slug_kategori}/${halaman.slug}`}
-                              onClick={closeMobileMenu}
-                              className="flex items-center px-8 py-3 text-sm text-gray-600 hover:text-[#07b8b2] hover:bg-white transition-colors"
-                            >
-                              <div className="w-2 h-2 bg-teal-300 rounded-full mr-3" />
-                              {halaman.judul}
-                            </Link>
-                          ))}
+                          {category.Halaman.map((halaman) => {
+                            const pageActive = isPageActive(category.slug_kategori, halaman.slug);
+                            return (
+                              <div key={halaman.id_halaman} className="relative">
+                                <Link
+                                  href={`/${category.slug_kategori}/${halaman.slug}`}
+                                  onClick={closeMobileMenu}
+                                  className={`flex items-center px-8 py-3 text-sm transition-colors ${pageActive
+                                    ? 'text-[#07b8b2] bg-white border-r-4 border-r-[#07b8b2]'
+                                    : 'text-gray-600 hover:text-[#07b8b2] hover:bg-white'
+                                    }`}
+                                >
+                                  <div className={`w-2 h-2 rounded-full mr-3 ${pageActive ? 'bg-[#07b8b2]' : 'bg-teal-300'
+                                    }`} />
+                                  {halaman.judul}
+                                </Link>
+                                {pageActive && (
+                                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2]"></div>
+                                )}
+                              </div>
+                            );
+                          })}
 
                           {/* Sub Categories */}
                           {category.children.map((child) => (
                             <div key={child.id_kategori}>
-                              <div className="px-8 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                              <div className={`px-8 py-2 text-xs font-semibold uppercase tracking-wider ${isChildCategoryActive(child)
+                                ? 'text-[#07b8b2] bg-white border-r-4 border-r-[#07b8b2]'
+                                : 'text-gray-500'
+                                }`}>
                                 {child.nama_kategori}
                               </div>
 
-                              {child.Halaman.map((halaman) => (
-                                <Link
-                                  key={halaman.id_halaman}
-                                  href={`/${child.slug_kategori}/${halaman.slug}`}
-                                  onClick={closeMobileMenu}
-                                  className="flex items-center px-10 py-2.5 text-sm text-gray-600 hover:text-[#07b8b2] hover:bg-white transition-colors"
-                                >
-                                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full mr-3" />
-                                  {halaman.judul}
-                                </Link>
-                              ))}
+                              {child.Halaman.map((halaman) => {
+                                const pageActive = isPageActive(child.slug_kategori, halaman.slug);
+                                return (
+                                  <div key={halaman.id_halaman} className="relative">
+                                    <Link
+                                      href={`/${child.slug_kategori}/${halaman.slug}`}
+                                      onClick={closeMobileMenu}
+                                      className={`flex items-center px-10 py-2.5 text-sm transition-colors ${pageActive
+                                        ? 'text-[#07b8b2] bg-white border-r-4 border-r-[#07b8b2]'
+                                        : 'text-gray-600 hover:text-[#07b8b2] hover:bg-white'
+                                        }`}
+                                    >
+                                      <div className={`w-1.5 h-1.5 rounded-full mr-3 ${pageActive ? 'bg-[#07b8b2]' : 'bg-gray-400'
+                                        }`} />
+                                      {halaman.judul}
+                                    </Link>
+                                    {pageActive && (
+                                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2]"></div>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           ))}
                         </div>

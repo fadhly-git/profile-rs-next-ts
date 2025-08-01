@@ -433,23 +433,7 @@ export default function Footer({ settings, menuCategories = [] }: FooterProps) {
 
                             <div className="flex flex-wrap items-center justify-center gap-4">
                                 <Link
-                                    href="/kebijakan-privasi"
-                                    className="text-sm text-gray-400 hover:text-[#07b8b2] transition-colors duration-200 flex items-center space-x-1 group"
-                                >
-                                    <span>Kebijakan Privasi</span>
-                                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                                </Link>
-                                <span className="text-gray-600">•</span>
-                                <Link
-                                    href="/syarat-layanan"
-                                    className="text-sm text-gray-400 hover:text-[#07b8b2] transition-colors duration-200 flex items-center space-x-1 group"
-                                >
-                                    <span>Syarat & Ketentuan</span>
-                                    <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                                </Link>
-                                <span className="text-gray-600">•</span>
-                                <Link
-                                    href="/hubungi-kami/kontak-kami"
+                                    href="/hubungi-kami"
                                     className="text-sm text-gray-400 hover:text-[#07b8b2] transition-colors duration-200 flex items-center space-x-1 group"
                                 >
                                     <span>Kritik & Saran</span>
