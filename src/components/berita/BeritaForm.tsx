@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { ImageUpload } from '@/components/ui/image-upload'
+import { ImageUploadSection } from '@/components//molecules/image-upload-section'
 import { RichTextEditor } from '@/components/editor/TiptapEditor'
 import { toast } from 'sonner'
 import {
@@ -89,6 +90,16 @@ export function BeritaForm({
         ...initialData
     })
 
+    // Tambahkan state untuk preview
+    const [thumbnailPreview, setThumbnailPreview] = useState('')
+    const [gambarPreview, setGambarPreview] = useState('')
+
+    // Inisialisasi preview saat component mount atau data berubah
+    useEffect(() => {
+        setThumbnailPreview(formData.thumbnail)
+        setGambarPreview(formData.gambar)
+    }, [formData.thumbnail, formData.gambar])
+
     // Load kategoris
     useEffect(() => {
         const fetchKategoris = async () => {
@@ -149,31 +160,6 @@ export function BeritaForm({
         }
         if (onSaveDraft) {
             await onSaveDraft({ ...formData, status_berita: "draft" })
-        }
-    }
-
-    const handleDeleteImage = async (type: 'gambar' | 'thumbnail') => {
-        const imageUrl = formData[type]
-        if (!imageUrl) return
-
-        try {
-            const response = await fetch('/api/admin/upload/image/berita/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: imageUrl }),
-            })
-
-            const result = await response.json()
-
-            if (result.success) {
-                setFormData(prev => ({ ...prev, [type]: '' }))
-                toast.success('Gambar berhasil dihapus')
-            } else {
-                toast.error(result.error || 'Gagal menghapus gambar')
-            }
-        } catch (error) {
-            console.error('Error deleting image:', error)
-            toast.error('Terjadi kesalahan saat menghapus gambar')
         }
     }
 
@@ -249,9 +235,9 @@ export function BeritaForm({
                                         <Input
                                             id="slug_berita"
                                             value={formData.slug_berita}
-                                            onChange={(e) => setFormData(prev => ({ 
-                                                ...prev, 
-                                                slug_berita: e.target.value 
+                                            onChange={(e) => setFormData(prev => ({
+                                                ...prev,
+                                                slug_berita: e.target.value
                                             }))}
                                             placeholder="url-berita"
                                             className="flex-1"
@@ -275,9 +261,9 @@ export function BeritaForm({
                             <CardContent>
                                 <RichTextEditor
                                     content={formData.isi}
-                                    onChange={(content) => setFormData(prev => ({ 
-                                        ...prev, 
-                                        isi: content 
+                                    onChange={(content) => setFormData(prev => ({
+                                        ...prev,
+                                        isi: content
                                     }))}
                                     placeholder="Mulai tulis berita Anda di sini..."
                                 />
@@ -301,25 +287,25 @@ export function BeritaForm({
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <ImageUpload
+                                    <ImageUploadSection
                                         label="Thumbnail"
-                                        currentImage={formData.thumbnail}
-                                        onImageUpload={(url) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            thumbnail: url 
+                                        value={formData.thumbnail}
+                                        onChange={(url) => setFormData(prev => ({
+                                            ...prev,
+                                            thumbnail: url
                                         }))}
-                                        onImageRemove={() => handleDeleteImage('thumbnail')}
-                                        url='/api/admin/upload/image/berita-thumb'
+                                        onPreviewChange={setThumbnailPreview}
+                                        disabled={isLoading}
                                     />
-                                    <ImageUpload
+                                    <ImageUploadSection
                                         label="Gambar Utama"
-                                        currentImage={formData.gambar}
-                                        onImageUpload={(url) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            gambar: url 
+                                        value={formData.gambar}
+                                        onChange={(url) => setFormData(prev => ({
+                                            ...prev,
+                                            gambar: url
                                         }))}
-                                        onImageRemove={() => handleDeleteImage('gambar')}
-                                        url='/api/admin/upload/image/berita-thumb'
+                                        onPreviewChange={setGambarPreview}
+                                        disabled={isLoading}
                                     />
                                 </div>
                             </CardContent>
@@ -341,9 +327,9 @@ export function BeritaForm({
                                     <Label>Status</Label>
                                     <Select
                                         value={formData.status_berita}
-                                        onValueChange={(value) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            status_berita: value 
+                                        onValueChange={(value) => setFormData(prev => ({
+                                            ...prev,
+                                            status_berita: value
                                         }))}
                                     >
                                         <SelectTrigger>
@@ -375,9 +361,9 @@ export function BeritaForm({
                                         id="tanggal_post"
                                         type="datetime-local"
                                         value={formData.tanggal_post}
-                                        onChange={(e) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            tanggal_post: e.target.value 
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            tanggal_post: e.target.value
                                         }))}
                                     />
                                 </div>
@@ -389,8 +375,8 @@ export function BeritaForm({
                                     className="w-full"
                                     disabled={isLoading || !formData.judul_berita || !formData.isi}
                                 >
-                                    {isLoading 
-                                        ? (mode === 'create' ? "Menyimpan..." : "Memperbarui...") 
+                                    {isLoading
+                                        ? (mode === 'create' ? "Menyimpan..." : "Memperbarui...")
                                         : (mode === 'create' ? "Publikasikan" : "Perbarui Berita")
                                     }
                                 </Button>
@@ -410,9 +396,9 @@ export function BeritaForm({
                                     <Label>Kategori <span className="text-destructive">*</span></Label>
                                     <Select
                                         value={formData.id_kategori}
-                                        onValueChange={(value) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            id_kategori: value 
+                                        onValueChange={(value) => setFormData(prev => ({
+                                            ...prev,
+                                            id_kategori: value
                                         }))}
                                         required
                                         disabled={isLoadingKategoris}
@@ -420,14 +406,14 @@ export function BeritaForm({
                                         <SelectTrigger>
                                             <SelectValue placeholder={
                                                 isLoadingKategoris ? "Memuat kategori..." :
-                                                kategoris.length === 0 ? "Tidak ada kategori tersedia" :
-                                                "Pilih kategori"
+                                                    kategoris.length === 0 ? "Tidak ada kategori tersedia" :
+                                                        "Pilih kategori"
                                             } />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {kategoris.map((kategori) => (
-                                                <SelectItem 
-                                                    key={kategori.id_kategori} 
+                                                <SelectItem
+                                                    key={kategori.id_kategori}
                                                     value={kategori.id_kategori}
                                                 >
                                                     {kategori.nama_kategori}
@@ -446,9 +432,9 @@ export function BeritaForm({
                                     <Label>Jenis Berita</Label>
                                     <Select
                                         value={formData.jenis_berita}
-                                        onValueChange={(value) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            jenis_berita: value 
+                                        onValueChange={(value) => setFormData(prev => ({
+                                            ...prev,
+                                            jenis_berita: value
                                         }))}
                                     >
                                         <SelectTrigger>
@@ -470,9 +456,9 @@ export function BeritaForm({
                                     </Label>
                                     <Select
                                         value={formData.bahasa}
-                                        onValueChange={(value) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            bahasa: value 
+                                        onValueChange={(value) => setFormData(prev => ({
+                                            ...prev,
+                                            bahasa: value
                                         }))}
                                     >
                                         <SelectTrigger>
@@ -498,9 +484,9 @@ export function BeritaForm({
                                     <Textarea
                                         placeholder="kata kunci, seo, berita, rumah sakit"
                                         value={formData.keywords}
-                                        onChange={(e) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            keywords: e.target.value 
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            keywords: e.target.value
                                         }))}
                                         className="min-h-[80px]"
                                     />

@@ -225,6 +225,7 @@ export interface WebsiteSettings {
     email?: string | null;
     phone?: string | null;
     address?: string | null;
+    url_maps?: string | null;
     facebook_url?: string | null;
     twitter_url?: string | null;
     instagram_url?: string | null;
@@ -249,6 +250,27 @@ export interface KritikSaran {
     saran: string;
     createdAt: Date;
     updatedAt: Date;
+}
+
+export interface MenuCategory {
+  id_kategori: number;
+  nama_kategori: string;
+  slug_kategori: string;
+  gambar: string | null;
+  keterangan: string | null;
+  parent_id: number | null;
+  is_main_menu: boolean;
+  urutan: number | null;
+  is_active: boolean;
+  children: MenuCategory[];
+  Halaman: {
+    id_halaman: number;
+    judul: string;
+    slug: string;
+    konten: string;
+    gambar: string | null;
+    is_published: boolean;
+  }[];
 }
 
 export type EnumPerawatanTerkait = 'Poliklinik' | 'RawatInap';

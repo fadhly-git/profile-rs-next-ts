@@ -54,9 +54,10 @@ export function FormFields({ values, errors, onChange, kategoriOptions }: FormFi
                 value={values.judul}
                 onChange={(e) => handleJudulChange(e.target.value)}
                 error={errors.judul}
-                helperText="Judul akan otomatis menghasilkan slug"
+                helperText="Judul akan otomatis menghasilkan slug. Tidak boleh sama dengan kategori induk."
                 required
             />
+
 
             <Input
                 label="Slug"

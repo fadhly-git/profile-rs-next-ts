@@ -40,7 +40,7 @@ export default async function AdminLayout({
                 <SidebarProvider className="flex flex-col flex-1">
                     <SiteHeader />
                     <div className="flex flex-1">
-                        <AppSidebar appName={websiteSettings?.website_name ?? "Admin"} logoUrl={websiteSettings?.logo_url ?? undefined} />
+                        <AppSidebar appName={websiteSettings?.website_name ?? "Admin"} />
                         <SidebarInset className="flex flex-1 overflow-hidden">
                             <div className="h-full">
                                 <MainScrollArea>
