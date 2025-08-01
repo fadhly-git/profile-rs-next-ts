@@ -13,20 +13,21 @@ export default async function WebsiteSettingsPage() {
 
     return (
         <div className="container mx-auto py-6">
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        <Settings className="h-8 w-8" />
+                    <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
+                        <Settings className="h-6 w-6 sm:h-8 sm:w-8" />
                         Website Settings
                     </h1>
-                    <p className="mt-2">
-                        Mananjemen konfigurasi website Anda di sini. Anda dapat membuat, mengedit, dan menghapus konfigurasi yang ada.
+                    <p className="text-gray-600 mt-2 text-sm sm:text-base">
+                        Manage your website configuration and branding settings
                     </p>
                 </div>
-                <Button asChild>
+
+                <Button asChild className="w-full sm:w-auto">
                     <Link href="/admin/website-settings/create">
                         <Plus className="h-4 w-4 mr-2" />
-                        Tambah Konfigurasi
+                        Add New Setting
                     </Link>
                 </Button>
             </div>

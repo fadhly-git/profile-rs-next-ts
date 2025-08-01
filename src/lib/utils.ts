@@ -64,6 +64,10 @@ export function truncateText(text: string, length: number): string {
   return text.slice(0, length) + "...";
 }
 
+export function bigIntToString(value: bigint): string {
+  return value.toString();
+}
+
 export function parseOptionalBigInt(value: FormDataEntryValue | null): bigint | null {
   if (!value || typeof value !== "string" || value === "" || value === "null") {
     return null;

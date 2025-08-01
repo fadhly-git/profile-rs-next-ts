@@ -1,5 +1,6 @@
 // lib/authOptions.ts
 import type { AuthOptions } from "next-auth";
+import { User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { prisma } from "./prisma";
@@ -12,7 +13,8 @@ export const authOptions: AuthOptions = {
             name: "credentials",
             credentials: {
                 email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" }
+                password: { label: "Password", type: "password" },
+                rememberMe: { label: "Remember Me", type: "text" }
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) return null;
@@ -24,7 +26,7 @@ export const authOptions: AuthOptions = {
                         email: true,
                         name: true,
                         password: true,
-                        gambar: true // Pastikan ini di-select
+                        gambar: true
                     }
                 });
 
@@ -35,33 +37,54 @@ export const authOptions: AuthOptions = {
                     user.password
                 );
 
-                return isValid ? {
+                if (!isValid) return null;
+
+                // Return user dengan explicit type assertion
+                return {
                     id: user.id.toString(),
                     email: user.email,
                     name: user.name,
-                    image: user.gambar, // Kirim gambar sebagai image
-                } : null;
+                    image: user.gambar || undefined,
+                    rememberMe: credentials.rememberMe === "true"
+                } as User & { rememberMe: boolean };
             }
         })
     ],
-    session: { strategy: "jwt" },
+    session: { 
+        strategy: "jwt",
+        maxAge: 2 * 60 * 60,
+    },
     pages: { signIn: "/admin/login" },
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) {
+        async jwt({ token, user, account }) {
+            if (user && account) {
+                const userWithRemember = user as User & { rememberMe?: boolean };
+                
                 token.id = user.id;
-                token.email = user.email ?? "";
-                token.name = user.name ?? "";
-                token.gambar = user.image ?? undefined; // Sertakan gambar di token
+                token.email = user.email || "";
+                token.name = user.name || "";
+                token.gambar = user.image;
+                token.rememberMe = userWithRemember.rememberMe || false;
+                
+                const now = Math.floor(Date.now() / 1000);
+                if (userWithRemember.rememberMe) {
+                    token.exp = now + (7 * 24 * 60 * 60);
+                } else {
+                    token.exp = now + (2 * 60 * 60);
+                }
             }
             return token;
         },
         async session({ session, token }) {
-            if (session.user) {
+            if (session.user && token) {
                 session.user.id = token.id as string;
                 session.user.email = token.email as string;
                 session.user.name = token.name as string;
-                session.user.image = token.gambar as string; // Sertakan gambar di session
+                session.user.image = token.gambar as string;
+                
+                if (token.exp && typeof token.exp === 'number') {
+                    session.expires = new Date(token.exp * 1000).toISOString();
+                }
             }
             return session;
         }

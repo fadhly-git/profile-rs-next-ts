@@ -205,7 +205,7 @@ export function JadwalDokterPage({ initialData, dokters }: JadwalDokterPageProps
                     columns={columns}
                     data={initialData}
                     searchPlaceholder="Cari dokter..."
-                    searchColumn="dokter"
+                    searchColumn="nama_dokter"
                     rowWrapper={rowWrapper}
                 />
             )}
