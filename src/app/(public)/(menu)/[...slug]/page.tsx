@@ -357,7 +357,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
         
         // Cek halaman statis berdasarkan path lengkap
         
-        if (fullPath === 'hubungi-kami/kontak-kami') {
+        if (fullPath === 'hubungi-kami') {
             return <KontakKami />
         }
         
