@@ -51,6 +51,7 @@ export const CategoryForm = forwardRef<HTMLDivElement, CategoryFormProps>(({
         is_active: initialData?.is_active ?? true,
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [isActive, setIsActive] = useState(initialData?.is_active ?? true)
     // Update ketika initialData berubah
     useEffect(() => {

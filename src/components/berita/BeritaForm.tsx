@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import { ImageUpload } from '@/components/ui/image-upload'
 import { ImageUploadSection } from '@/components//molecules/image-upload-section'
 import { RichTextEditor } from '@/components/editor/TiptapEditor'
 import { toast } from 'sonner'
@@ -91,7 +90,9 @@ export function BeritaForm({
     })
 
     // Tambahkan state untuk preview
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [thumbnailPreview, setThumbnailPreview] = useState('')
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [gambarPreview, setGambarPreview] = useState('')
 
     // Inisialisasi preview saat component mount atau data berubah

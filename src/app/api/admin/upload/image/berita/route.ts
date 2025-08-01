@@ -4,7 +4,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
-import { existsSync } from 'fs';
 
 export async function POST(request: NextRequest) {
     try {
