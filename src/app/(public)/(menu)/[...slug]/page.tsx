@@ -19,6 +19,8 @@ import {
 } from 'lucide-react'
 import { Suspense } from 'react'
 import { ShareButton } from '@/components/landing/shared-button'
+import KontakKami from '@/app/(public)/(menu)/hubungi-kami/kontak-kami/page'
+import JadwalDokter from '@/app/(public)/(menu)/layanan/jadwal-dokter/page'
 
 // Update type untuk params yang async
 type PageParams = Promise<{
@@ -348,6 +350,19 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
 
         if (!lastSegment) {
             return notFound()
+        }
+
+        // ========== PENGECEKAN HALAMAN STATIS TERLEBIH DAHULU ==========
+        const fullPath = path.join('/')
+        
+        // Cek halaman statis berdasarkan path lengkap
+        
+        if (fullPath === 'hubungi-kami/kontak-kami') {
+            return <KontakKami />
+        }
+        
+        if (fullPath === 'layanan/jadwal-dokter') {
+            return <JadwalDokter />
         }
 
         // Cek apakah ini kategori
