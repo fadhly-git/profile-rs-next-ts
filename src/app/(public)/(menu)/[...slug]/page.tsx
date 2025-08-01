@@ -21,7 +21,7 @@ import { Suspense } from 'react'
 import { ShareButton } from '@/components/landing/shared-button'
 import KontakKami from '@/app/(public)/(menu)/hubungi-kami/kontak-kami/page'
 import JadwalDokter from '@/app/(public)/(menu)/layanan/jadwal-dokter/page'
-import IndikatorMutuPage from '@/app/admin/(admin)/indikator-mutu/page'
+import IndikatorMutuPage from '@/app/(public)/(menu)/indikator-mutu/page'
 // Update type untuk params yang async
 type PageParams = Promise<{
     slug?: string[]
