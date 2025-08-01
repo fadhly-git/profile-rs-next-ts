@@ -469,7 +469,6 @@ export function MediaBrowser({
                                             alt="Pratinjau URL"
                                             fill
                                             className="object-cover rounded"
-                                            onError={() => console.log('URL gambar tidak valid')}
                                         />
                                     </div>
                                 </div>

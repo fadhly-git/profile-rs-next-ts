@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
     try {
-        console.log('Testing kategori fetch...');
 
         // Test simple query
         const count = await prisma.kategori.count({
@@ -23,8 +22,6 @@ export async function GET() {
                 nama_kategori: 'asc'
             }
         });
-
-        console.log('Categories fetched:', kategoris.length);
 
         // Convert BigInt to string for JSON serialization
         const serializedKategoris = kategoris.map(kategori => ({

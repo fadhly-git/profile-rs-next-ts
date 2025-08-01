@@ -147,8 +147,6 @@ export async function updateKategoriActionWithOptions(id: string, formData: Form
         const is_main_menu = formData.get("is_main_menu") === "on"
         const is_active = formData.get("is_active") === "on"
 
-        console.log("Updating kategori with ID:", id + " and handleDependencies:", formData)
-
         let result: UpdateResult
 
         if (!handleDependencies) {

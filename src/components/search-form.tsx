@@ -6,10 +6,6 @@ import { SidebarInput } from "@/components/ui/sidebar"
 export function SearchForm({ ...props }: React.ComponentProps<"form">) {
   async function handleSearch(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const query = formData.get("search") as string
-    // Handle the search logic here, e.g., redirect to a search results page
-    console.log("Search query:", query)
   }
   return (
     <form {...props} onSubmit={handleSearch} >

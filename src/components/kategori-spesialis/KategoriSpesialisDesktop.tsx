@@ -28,7 +28,6 @@ export default function KategoriSpesialisDesktop({ data }: Props) {
     }
 
     const handleEdit = (item: any) => {
-        console.log('Editing item:', item.original)
         setEditingItem(item.original)
         setIsFormOpen(true)
     }

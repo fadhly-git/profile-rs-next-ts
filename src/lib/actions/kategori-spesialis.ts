@@ -24,7 +24,6 @@ export async function getAllSpesialis() {
 }
 
 export async function createSpesialis(data: { nama_spesialis: string; deskripsi?: string }) {
-    console.log("Creating spesialis with data:", data)
 
     if (!data.nama_spesialis?.trim()) {
         throw new Error("Nama spesialis tidak boleh kosong")
