@@ -1,20 +1,11 @@
 // pages/indikator-mutu.tsx atau app/indikator-mutu/page.tsx
-'use client'
+
 import { IndikatorMutuPage } from '@/components/indikator-mutu-page'
-import { IndikatorMutu } from '@/types'
+import { getIndikatorMutu } from '@/lib/actions/indikator-mutu'
 
-// Data contoh sesuai dengan yang Anda berikan
 
-import { useEffect, useState } from 'react'
-
-export default function IndikatorMutuPageWrapper() {
-  const [data, setData] = useState<IndikatorMutu[]>([])
-
-  useEffect(() => {
-    fetch('/api/test-db')
-      .then(response => response.json())
-      .then((data: IndikatorMutu[]) => setData(data))
-  }, [])
+export default async function IndikatorMutuPageWrapper() {
+  const data = await getIndikatorMutu();
 
   return (
     <div className="container mx-auto p-6">

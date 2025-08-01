@@ -21,13 +21,11 @@ import { Suspense } from 'react'
 import { ShareButton } from '@/components/landing/shared-button'
 import KontakKami from '@/app/(public)/(menu)/hubungi-kami/kontak-kami/page'
 import JadwalDokter from '@/app/(public)/(menu)/layanan/jadwal-dokter/page'
-
+import IndikatorMutuPage from '@/app/admin/(admin)/indikator-mutu/page'
 // Update type untuk params yang async
 type PageParams = Promise<{
     slug?: string[]
 }>
-
-
 
 // Loading Components
 function PageSkeleton() {
@@ -95,33 +93,32 @@ function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
     )
 }
 
-// Category Card Component
+// Modified Category Card Component
 function CategoryCard({
     title,
     description,
     href,
     icon: Icon,
-    count
+    count,
+    isClickable = true
 }: {
     title: string
     description?: string
     href: string
     icon: React.ElementType
     count?: number
+    isClickable?: boolean
 }) {
-    return (
-        <Link
-            href={href}
-            className="group block p-6 bg-white rounded-xl border border-gray-200 hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300"
-        >
+    const cardContent = (
+        <div className={`p-6 bg-white rounded-xl border border-gray-200 ${isClickable ? 'hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300 cursor-pointer' : ''}`}>
             <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center group-hover:bg-[#07b8b2] transition-colors">
-                        <Icon className="w-6 h-6 text-[#07b8b2] group-hover:text-white transition-colors" />
+                    <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
+                        <Icon className="w-6 h-6 text-[#07b8b2]" />
                     </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 group-hover:text-[#07b8b2] transition-colors">
+                    <h3 className="font-semibold text-gray-900 line-clamp-1">
                         {title}
                     </h3>
                     {description && (
@@ -134,11 +131,25 @@ function CategoryCard({
                             {count} item{count !== 1 ? 's' : ''}
                         </p>
                     )}
+                    {isClickable && (
+                        <div className="mt-2">
+                            <ChevronRight className="w-5 h-5 text-gray-400" />
+                        </div>
+                    )}
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#07b8b2] transition-colors" />
             </div>
-        </Link>
+        </div>
     )
+
+    if (isClickable) {
+        return (
+            <Link href={href} className="block">
+                {cardContent}
+            </Link>
+        )
+    }
+
+    return <div>{cardContent}</div>
 }
 
 // News/Article Card Component
@@ -354,9 +365,11 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
 
         // ========== PENGECEKAN HALAMAN STATIS TERLEBIH DAHULU ==========
         const fullPath = path.join('/')
-        
-        // Cek halaman statis berdasarkan path lengkap
-        
+
+        if (fullPath === 'indikator-mutu') {
+            return <IndikatorMutuPage />
+        }
+
         if (fullPath === 'hubungi-kami') {
             return <KontakKami />
         }
@@ -440,10 +453,10 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                 )}
                             </div>
 
-                            {/* Content Grid */}
-                            <div className="grid gap-8 lg:grid-cols-3">
+                            {/* Content Grid - Modified to 2 columns */}
+                            <div className="grid gap-8 lg:grid-cols-2">
                                 {/* Main Content */}
-                                <div className="lg:col-span-2 space-y-8">
+                                <div className="space-y-8">
                                     {/* Subkategori */}
                                     {category.children.length > 0 && (
                                         <section>
@@ -497,29 +510,81 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                             </div>
                                         </section>
                                     )}
-                                </div>
 
-                                {/* Sidebar */}
-                                <div className="space-y-6">
-                                    {/* Halaman Terkait */}
-                                    {category.Halaman.length > 0 && (
-                                        <div className="bg-white rounded-xl border border-gray-200 p-6">
-                                            <div className="flex items-center space-x-2 mb-4">
-                                                <FileText className="w-5 h-5 text-[#07b8b2]" />
-                                                <h3 className="font-semibold text-gray-900">Halaman Terkait</h3>
+                                    {/* Halaman di kategori (jika tidak ada subkategori) */}
+                                    {category.children.length === 0 && category.Halaman.length > 0 && (
+                                        <section>
+                                            <div className="flex items-center justify-between mb-6">
+                                                <div className="flex items-center space-x-2">
+                                                    <FileText className="w-5 h-5 text-[#07b8b2]" />
+                                                    <h2 className="text-xl font-semibold text-gray-900">Halaman</h2>
+                                                </div>
                                             </div>
-                                            <div className="space-y-3">
+                                            <div className="grid gap-4">
                                                 {category.Halaman.map(halaman => (
                                                     <Link
                                                         key={halaman.id_halaman.toString()}
                                                         href={`/${category.slug_kategori}/${halaman.slug}`}
+                                                        className="block p-6 bg-white rounded-xl border border-gray-200 hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300"
+                                                    >
+                                                        <div className="flex items-start space-x-4">
+                                                            <div className="flex-shrink-0">
+                                                                <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
+                                                                    <FileText className="w-6 h-6 text-[#07b8b2]" />
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h3 className="font-semibold text-gray-900 hover:text-[#07b8b2] transition-colors line-clamp-1">
+                                                                    {halaman.judul}
+                                                                </h3>
+                                                                {halaman.konten && (
+                                                                    <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                                                                        {halaman.konten.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                                                                    </p>
+                                                                )}
+                                                                <div className="mt-3 flex items-center justify-between">
+                                                                    <span className="text-xs text-gray-500">
+                                                                        {new Date(halaman.createdAt).toLocaleDateString('id-ID')}
+                                                                    </span>
+                                                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </section>
+                                    )}
+                                </div>
+
+                                {/* Sidebar - hanya berita terkait yang tersisa */}
+                                <div className="space-y-6">
+                                    {/* Berita Terpopuler */}
+                                    {category.beritas.length > 3 && (
+                                        <div className="bg-white rounded-xl border border-gray-200 p-6">
+                                            <div className="flex items-center space-x-2 mb-4">
+                                                <Newspaper className="w-5 h-5 text-[#07b8b2]" />
+                                                <h3 className="font-semibold text-gray-900">Berita Terpopuler</h3>
+                                            </div>
+                                            <div className="space-y-3">
+                                                {category.beritas.slice(0, 3).map(berita => (
+                                                    <Link
+                                                        key={berita.id_berita.toString()}
+                                                        href={`/${category.slug_kategori}/${berita.slug_berita}`}
                                                         className="block p-3 rounded-lg hover:bg-gray-50 transition-colors group"
                                                     >
-                                                        <div className="flex items-center justify-between">
-                                                            <span className="text-sm font-medium text-gray-900 group-hover:text-[#07b8b2] transition-colors">
-                                                                {halaman.judul}
-                                                            </span>
-                                                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#07b8b2] transition-colors" />
+                                                        <h4 className="text-sm font-medium text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-2">
+                                                            {berita.judul_berita}
+                                                        </h4>
+                                                        <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
+                                                            <div className="flex items-center space-x-1">
+                                                                <Calendar className="w-3 h-3" />
+                                                                <span>{berita.tanggal_post ? new Date(berita.tanggal_post).toLocaleDateString('id-ID') : '-'}</span>
+                                                            </div>
+                                                            <div className="flex items-center space-x-1">
+                                                                <Eye className="w-3 h-3" />
+                                                                <span>{berita.hits || 0} views</span>
+                                                            </div>
                                                         </div>
                                                     </Link>
                                                 ))}
@@ -643,154 +708,155 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
         })
 
         if (newsItem) {
-    // Update hits
-    await prisma.beritas.update({
-        where: { id_berita: newsItem.id_berita },
-        data: { hits: { increment: 1 } }
-    })
+            // Update hits
+            await prisma.beritas.update({
+                where: { id_berita: newsItem.id_berita },
+                data: { hits: { increment: 1 } }
+            })
 
-    const breadcrumbItems = []
+            const breadcrumbItems = []
 
-    if (newsItem.kategori) {
-        breadcrumbItems.push({
-            label: newsItem.kategori.nama_kategori,
-            href: `/${newsItem.kategori.slug_kategori}`
-        })
-    }
+            if (newsItem.kategori) {
+                breadcrumbItems.push({
+                    label: newsItem.kategori.nama_kategori,
+                    href: `/${newsItem.kategori.slug_kategori}`
+                })
+            }
 
-    breadcrumbItems.push({
-        label: newsItem.judul_berita
-    })
+            breadcrumbItems.push({
+                label: newsItem.judul_berita
+            })
 
-    return (
-        <ErrorBoundary>
-            <div className="min-h-screen bg-gray-50">
-                <div className="container mx-auto px-4 py-8 max-w-4xl">
-                    <Breadcrumb items={breadcrumbItems} />
+            return (
+                <ErrorBoundary>
+                    <div className="min-h-screen bg-gray-50">
+                        <div className="container mx-auto px-4 py-8 max-w-4xl">
+                            <Breadcrumb items={breadcrumbItems} />
 
-                    <article className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        {/* Header */}
-                        <div className="p-4 sm:p-8 border-b border-gray-100">
-                            <div className="flex items-center space-x-2 mb-4">
-                                {newsItem.kategori && (
-                                    <>
-                                        <Tag className="w-4 h-4 text-[#07b8b2]" />
-                                        <Link
-                                            href={`/${newsItem.kategori.slug_kategori}`}
-                                            className="text-sm text-[#07b8b2] hover:text-teal-700 font-medium transition-colors"
-                                        >
-                                            {newsItem.kategori.nama_kategori}
-                                        </Link>
-                                    </>
+                            <article className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                {/* Header */}
+                                <div className="p-4 sm:p-8 border-b border-gray-100">
+                                    <div className="flex items-center space-x-2 mb-4">
+                                        {newsItem.kategori && (
+                                            <>
+                                                <Tag className="w-4 h-4 text-[#07b8b2]" />
+                                                <Link
+                                                    href={`/${newsItem.kategori.slug_kategori}`}
+                                                    className="text-sm text-[#07b8b2] hover:text-teal-700 font-medium transition-colors"
+                                                >
+                                                    {newsItem.kategori.nama_kategori}
+                                                </Link>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">
+                                        {newsItem.judul_berita}
+                                    </h1>
+
+                                    {/* Mobile Layout - Stack vertically */}
+                                    <div className="flex flex-col space-y-4 sm:hidden">
+                                        {/* Info items - 2 columns on mobile */}
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {newsItem.tanggal_post && (
+                                                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                                    <Calendar className="w-4 h-4 flex-shrink-0" />
+                                                    <span>{new Date(newsItem.tanggal_post).toLocaleDateString('id-ID')}</span>
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                                <Eye className="w-4 h-4 flex-shrink-0" />
+                                                <span>{(newsItem.hits || 0) + 1} views</span>
+                                            </div>
+
+                                            {newsItem.user && (
+                                                <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                                    <Users className="w-4 h-4 flex-shrink-0" />
+                                                    <span>{newsItem.user.name}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Share button - full width on mobile */}
+                                        <div className="pt-2 border-t border-gray-100">
+                                            <ShareButton
+                                                url={`/${newsItem.kategori?.slug_kategori || ''}/${newsItem.slug_berita}`}
+                                                title={newsItem.judul_berita}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Desktop Layout - Horizontal */}
+                                    <div className="hidden sm:flex items-center justify-between">
+                                        <div className="flex items-center flex-wrap gap-4 text-sm text-gray-600">
+                                            {newsItem.tanggal_post && (
+                                                <div className="flex items-center space-x-1">
+                                                    <Calendar className="w-4 h-4" />
+                                                    <span>{new Date(newsItem.tanggal_post).toLocaleDateString('id-ID')}</span>
+                                                </div>
+                                            )}
+
+                                            <div className="flex items-center space-x-1">
+                                                <Eye className="w-4 h-4" />
+                                                <span>{(newsItem.hits || 0) + 1} views</span>
+                                            </div>
+
+                                            {newsItem.user && (
+                                                <div className="flex items-center space-x-1">
+                                                    <Users className="w-4 h-4" />
+                                                    <span>{newsItem.user.name}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <ShareButton
+                                            url={`/${newsItem.kategori?.slug_kategori || ''}/${newsItem.slug_berita}`}
+                                            title={newsItem.judul_berita}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Featured Image */}
+                                {newsItem.gambar && (
+                                    <div className="px-4 pt-4 sm:px-8 sm:pt-8">
+                                        <div className="rounded-xl overflow-hidden">
+                                            <Image
+                                                src={newsItem.gambar}
+                                                alt={newsItem.judul_berita}
+                                                width={800}
+                                                height={450}
+                                                className="w-full h-auto"
+                                            />
+                                        </div>
+                                    </div>
                                 )}
-                            </div>
 
-                            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight mb-4 sm:mb-6">
-                                {newsItem.judul_berita}
-                            </h1>
-
-                            {/* Mobile Layout - Stack vertically */}
-                            <div className="flex flex-col space-y-4 sm:hidden">
-                                {/* Info items - 2 columns on mobile */}
-                                <div className="grid grid-cols-1 gap-3">
-                                    {newsItem.tanggal_post && (
-                                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                            <Calendar className="w-4 h-4 flex-shrink-0" />
-                                            <span>{new Date(newsItem.tanggal_post).toLocaleDateString('id-ID')}</span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                        <Eye className="w-4 h-4 flex-shrink-0" />
-                                        <span>{(newsItem.hits || 0) + 1} views</span>
-                                    </div>
-
-                                    {newsItem.user && (
-                                        <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                            <Users className="w-4 h-4 flex-shrink-0" />
-                                            <span>{newsItem.user.name}</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Share button - full width on mobile */}
-                                <div className="pt-2 border-t border-gray-100">
-                                    <ShareButton
-                                        url={`/${newsItem.kategori?.slug_kategori || ''}/${newsItem.slug_berita}`}
-                                        title={newsItem.judul_berita}
+                                {/* Content */}
+                                <div className="p-4 sm:p-8">
+                                    <div
+                                        className="prose prose-gray max-w-none prose-headings:text-gray-900 prose-a:text-[#07b8b2] prose-a:no-underline hover:prose-a:text-teal-700 prose-sm sm:prose-base"
+                                        dangerouslySetInnerHTML={{ __html: newsItem.isi }}
                                     />
                                 </div>
-                            </div>
+                            </article>
 
-                            {/* Desktop Layout - Horizontal */}
-                            <div className="hidden sm:flex items-center justify-between">
-                                <div className="flex items-center flex-wrap gap-4 text-sm text-gray-600">
-                                    {newsItem.tanggal_post && (
-                                        <div className="flex items-center space-x-1">
-                                            <Calendar className="w-4 h-4" />
-                                            <span>{new Date(newsItem.tanggal_post).toLocaleDateString('id-ID')}</span>
-                                        </div>
-                                    )}
-
-                                    <div className="flex items-center space-x-1">
-                                        <Eye className="w-4 h-4" />
-                                        <span>{(newsItem.hits || 0) + 1} views</span>
-                                    </div>
-
-                                    {newsItem.user && (
-                                        <div className="flex items-center space-x-1">
-                                            <Users className="w-4 h-4" />
-                                            <span>{newsItem.user.name}</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <ShareButton
-                                    url={`/${newsItem.kategori?.slug_kategori || ''}/${newsItem.slug_berita}`}
-                                    title={newsItem.judul_berita}
-                                />
+                            {/* Back Button */}
+                            <div className="mt-8">
+                                <Link
+                                    href={newsItem.kategori ? `/${newsItem.kategori.slug_kategori}` : '/'}
+                                    className="inline-flex items-center space-x-2 text-[#07b8b2] hover:text-teal-700 transition-colors text-sm sm:text-base"
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    <span>Kembali{newsItem.kategori ? ` ke ${newsItem.kategori.nama_kategori}` : ' ke Beranda'}</span>
+                                </Link>
                             </div>
                         </div>
-
-                        {/* Featured Image */}
-                        {newsItem.gambar && (
-                            <div className="px-4 pt-4 sm:px-8 sm:pt-8">
-                                <div className="rounded-xl overflow-hidden">
-                                    <Image
-                                        src={newsItem.gambar}
-                                        alt={newsItem.judul_berita}
-                                        width={800}
-                                        height={450}
-                                        className="w-full h-auto"
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Content */}
-                        <div className="p-4 sm:p-8">
-                            <div
-                                className="prose prose-gray max-w-none prose-headings:text-gray-900 prose-a:text-[#07b8b2] prose-a:no-underline hover:prose-a:text-teal-700 prose-sm sm:prose-base"
-                                dangerouslySetInnerHTML={{ __html: newsItem.isi }}
-                            />
-                        </div>
-                    </article>
-
-                    {/* Back Button */}
-                    <div className="mt-8">
-                        <Link
-                            href={newsItem.kategori ? `/${newsItem.kategori.slug_kategori}` : '/'}
-                            className="inline-flex items-center space-x-2 text-[#07b8b2] hover:text-teal-700 transition-colors text-sm sm:text-base"
-                        >
-                            <ArrowLeft className="w-4 h-4" />
-                            <span>Kembali{newsItem.kategori ? ` ke ${newsItem.kategori.nama_kategori}` : ' ke Beranda'}</span>
-                        </Link>
                     </div>
-                </div>
-            </div>
-        </ErrorBoundary>
-    )
-}
+                </ErrorBoundary>
+            )
+        }
+
         return notFound()
 
     } catch (error) {
