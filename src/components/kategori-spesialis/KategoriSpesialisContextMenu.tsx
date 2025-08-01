@@ -25,7 +25,6 @@ export default function KategoriSpesialisContextMenu({
     children,
 }: Props) {
     const handleDelete = async () => {
-        console.log('Deleting item:', item)
         if (confirm(`Apakah Anda yakin ingin menghapus "${item.original.nama_spesialis}"?`)) {
             try {
                 await deleteSpesialis(item.original.id_spesialis)

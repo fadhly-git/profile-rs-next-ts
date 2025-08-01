@@ -19,8 +19,6 @@ export default function CreateKategoriPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    console.log("Kategories List:", kategoriesList)
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         const formData = new FormData(e.currentTarget)

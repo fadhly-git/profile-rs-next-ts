@@ -46,25 +46,15 @@ export async function POST(request: NextRequest) {
             await mkdir(uploadDir, { recursive: true });
         } catch (error) {
             // Directory might already exist
-            console.log('Upload directory creation:', error);
+            console.error('Upload directory creation:', error);
         }
 
         // Save file
         // Save file
         const filePath = path.join(uploadDir, filename);
-        console.log('Attempting to save file to:', filePath);
 
         try {
             await writeFile(filePath, buffer);
-            console.log('✅ File saved successfully:', filePath);
-
-            // Verify file exists
-            if (existsSync(filePath)) {
-                console.log('✅ File verified exists');
-            } else {
-                console.log('❌ File verification failed');
-                throw new Error('File was not saved properly');
-            }
 
         } catch (error) {
             console.error('❌ File write error:', error);

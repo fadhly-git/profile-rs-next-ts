@@ -125,7 +125,6 @@ export async function createBeritaAction(formData: FormData) {
 
 export async function getKategoriOptions() {
     try {
-        console.log('Fetching categories from database...');
 
         const kategoris = await prisma.kategori.findMany({
             where: {
@@ -140,8 +139,6 @@ export async function getKategoriOptions() {
                 nama_kategori: 'asc'
             }
         });
-
-        console.log('Categories fetched:', kategoris.length);
 
         // Convert BigInt to string for client-side compatibility
         const serializedKategoris = kategoris.map(kategori => ({
@@ -310,8 +307,6 @@ export async function updateBeritaAction(id: string, formData: FormData) {
         revalidatePath('/admin/berita');
         revalidatePath(`/admin/berita/${id}`);
         revalidatePath(`/berita/${data.slug_berita}`);
-
-        // console.log('Berita updated successfully:', updatedBerita.id_berita.toString());
 
     } catch (error) {
         console.error('Error updating berita:', error);

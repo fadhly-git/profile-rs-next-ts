@@ -76,7 +76,7 @@ export default function EditKategoriPage({ params }: PageProps) {
     const [kategoriList, setKategoriList] = useState<KategoriOption[]>([])
     const [showDeleteDialog, setShowDeleteDialog] = useState(false)
     const [currentActiveState, setCurrentActiveState] = useState(true)
-    const [isProcessingDependency, setIsProcessingDependency] = useState(false) // ✅ Add this
+    // Removed unused isProcessingDependency state
 
     const {
         showDependencyDialog,
@@ -124,13 +124,10 @@ export default function EditKategoriPage({ params }: PageProps) {
 
     // ✅ PERBAIKAN UTAMA: handleActiveToggle yang benar
     const handleActiveToggle = async (checked: boolean): Promise<boolean> => {
-        console.log("Toggle aktif:", checked) // Debug log
 
         if (!checked) {
             // Menonaktifkan - check dependencies
-            console.log("Checking dependencies...") // Debug log
             const hasDependencies = await checkDependencies(id)
-            console.log("Has dependencies:", hasDependencies) // Debug log
 
             if (hasDependencies) {
                 // Ada dependencies, dialog akan muncul dari useDependencyManager
@@ -150,8 +147,6 @@ export default function EditKategoriPage({ params }: PageProps) {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-
-        console.log("Submit with active state:", currentActiveState) // Debug log
 
         const formData = new FormData(e.currentTarget)
 
@@ -185,7 +180,6 @@ export default function EditKategoriPage({ params }: PageProps) {
     }
 
     const handleDependencyCancel = () => {
-        console.log("Dependency canceled") // Debug log
         setShowDependencyDialog(false)
         // ✅ Reset currentActiveState ke true karena user cancel nonaktif
         setCurrentActiveState(true)
@@ -228,7 +222,6 @@ export default function EditKategoriPage({ params }: PageProps) {
                 if (result.success) {
                     toast.success("Kategori berhasil diperbarui dengan penanganan dependencies!")
                     setShowDependencyDialog(false)
-                    setIsProcessingDependency(false)
                     resetDependencyState()
                     setTimeout(() => {
                         router.push("/admin/kategori")
@@ -238,7 +231,6 @@ export default function EditKategoriPage({ params }: PageProps) {
                         description: result.message
                     })
                     setCurrentActiveState(true)
-                    setIsProcessingDependency(false)
                 }
             } catch (error: any) {
                 console.error("Error updating kategori:", error)
@@ -246,7 +238,6 @@ export default function EditKategoriPage({ params }: PageProps) {
                     description: error.message || "Silakan coba lagi."
                 })
                 setCurrentActiveState(true)
-                setIsProcessingDependency(false)
             }
         })
     }
@@ -306,7 +297,6 @@ export default function EditKategoriPage({ params }: PageProps) {
             <DependencyDialog
                 isOpen={showDependencyDialog}
                 onClose={() => {
-                    console.log("Dialog closed via X button")
                     setShowDependencyDialog(false)
                     // ✅ Don't call handleDependencyCancel here to avoid loop
                 }}

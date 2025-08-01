@@ -20,7 +20,6 @@ export function ShareButton({ url, title }: { url: string; title: string }) {
       setIsSharing(true)
       try {
         await navigator.share(shareData)
-        console.log('Share successful')
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         // Hanya log error jika bukan user cancel
