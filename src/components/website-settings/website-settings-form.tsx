@@ -1,7 +1,7 @@
 // components/organisms/website-settings-form.tsx
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { WebsiteSettings } from '@prisma/client'
 import { Button } from '@/components/ui/button'
@@ -13,9 +13,7 @@ import { ImageSelector } from '@/components/molecules/image-selector'
 import { LoadingSpinner } from '@/components/atoms/loading-spinner'
 import { createWebsiteSettings, updateWebsiteSettings, WebsiteSettingsInput } from '@/lib/actions/website-settings'
 import { toast } from 'sonner'
-import { Trash2, MapPin, Globe, Users, Share2, FileText } from 'lucide-react'
-import { isValidUrl } from '@/lib/validators'
-import NextImage from 'next/image'
+import { MapPin, Globe, Users, Share2, FileText } from 'lucide-react'
 
 interface WebsiteSettingsFormProps {
   websiteSettings?: WebsiteSettings
@@ -25,7 +23,7 @@ interface WebsiteSettingsFormProps {
 export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFormProps) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
-  
+
   const [formData, setFormData] = useState<WebsiteSettingsInput>({
     website_name: websiteSettings?.website_name || 'Nama Rumah Sakit Anda',
     logo_url: websiteSettings?.logo_url || '',
@@ -46,7 +44,7 @@ export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     startTransition(async () => {
       try {
         if (mode === 'edit' && websiteSettings) {
@@ -56,7 +54,7 @@ export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFo
           await createWebsiteSettings(formData)
           toast.success('Website settings created successfully!')
         }
-        
+
         router.push('/admin/website-settings')
         router.refresh()
       } catch (error) {
@@ -70,62 +68,6 @@ export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFo
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const ImagePreview = ({ url, alt, onRemove }: { url: string, alt: string, onRemove: () => void }) => {
-    const [isImageError, setIsImageError] = useState(false)
-    const [isUrlInvalid, setIsUrlInvalid] = useState(false)
-
-    useEffect(() => {
-      if (!url) return
-      
-      if (!isValidUrl(url)) {
-        setIsUrlInvalid(true)
-        setIsImageError(true)
-      } else {
-        setIsUrlInvalid(false)
-        setIsImageError(false)
-      }
-    }, [url])
-
-    const handleImageError = () => {
-      setIsImageError(true)
-    }
-
-    if (!url) return null
-
-    return (
-      <div className="relative group">
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 border rounded-lg overflow-hidden">
-          {isUrlInvalid || isImageError ? (
-            <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 p-2 text-center">
-              {isUrlInvalid ? 'Invalid URL' : 'Failed to load'}
-            </div>
-          ) : (
-            <NextImage
-              src={url}
-              alt={alt}
-              fill
-              className="object-cover"
-              onError={handleImageError}
-              loading="lazy"
-            />
-          )}
-        </div>
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={onRemove}
-        >
-          <Trash2 className="h-3 w-3" />
-        </Button>
-        <p className="text-xs text-gray-500 mt-1 truncate max-w-24" title={url}>
-          {url}
-        </p>
-      </div>
-    )
-  }
-
   return (
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
       <div className="mb-4 sm:mb-6">
@@ -133,8 +75,8 @@ export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFo
           {mode === 'edit' ? 'Edit Website Settings' : 'Create Website Settings'}
         </h1>
         <p className="text-gray-600 mt-2 text-sm sm:text-base">
-          {mode === 'edit' 
-            ? 'Update your website configuration and branding settings.' 
+          {mode === 'edit'
+            ? 'Update your website configuration and branding settings.'
             : 'Configure your website information and branding settings.'
           }
         </p>
@@ -205,8 +147,8 @@ export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFo
                 <div className="mt-2 p-3 bg-gray-50 rounded-lg">
                   <p className="text-xs text-gray-600 mb-2">Preview:</p>
                   <div className="text-xs font-mono bg-white p-2 rounded border max-h-20 overflow-y-auto">
-                    {formData.url_maps.length > 100 
-                      ? `${formData.url_maps.substring(0, 100)}...` 
+                    {formData.url_maps.length > 100
+                      ? `${formData.url_maps.substring(0, 100)}...`
                       : formData.url_maps
                     }
                   </div>
@@ -261,13 +203,6 @@ export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFo
               <div className="space-y-3">
                 <label className="block text-sm font-medium">Logo Akreditasi</label>
                 <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                  {formData.logo_akreditasi_url && (
-                    <ImagePreview
-                      url={formData.logo_akreditasi_url}
-                      alt="Logo Akreditasi"
-                      onRemove={() => handleInputChange('logo_akreditasi_url', '')}
-                    />
-                  )}
                   <ImageSelector
                     label=""
                     value={formData.logo_akreditasi_url || ''}
@@ -378,8 +313,8 @@ export function WebsiteSettingsForm({ websiteSettings, mode }: WebsiteSettingsFo
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 disabled={isPending}
                 className="w-full sm:w-auto"
               >

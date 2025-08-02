@@ -95,3 +95,17 @@ export async function getLatestNews(): Promise<Berita[]> {
 
   return berita;
 }
+
+export async function getPromotions() {
+    try {
+        const promotions = await prisma.promotions.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            }
+        })
+        return promotions
+    } catch (error) {
+        console.error('Error fetching promotions:', error)
+        return []
+    }
+}

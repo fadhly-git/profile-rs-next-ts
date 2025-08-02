@@ -21,6 +21,7 @@ const CreateBeritaSchema = z.object({
     gambar: z.string().optional(),
     icon: z.string().optional(),
     tanggal_post: z.date().optional(),
+    user_id: z.string().min(1, "User ID wajib ada"), // Tambahkan ini
 });
 
 export async function createBeritaAction(formData: FormData) {
@@ -38,6 +39,7 @@ export async function createBeritaAction(formData: FormData) {
             gambar: formData.get('gambar'),
             icon: formData.get('icon'),
             tanggal_post: formData.get('tanggal_post') ? new Date(formData.get('tanggal_post') as string) : undefined,
+            user_id: formData.get('user_id'), // Tambahkan ini
         });
 
         if (!validatedFields.success) {
@@ -56,10 +58,11 @@ export async function createBeritaAction(formData: FormData) {
             thumbnail,
             gambar,
             icon,
-            tanggal_post
+            tanggal_post,
+            user_id // Destructure user_id
         } = validatedFields.data;
 
-        // Check if slug already exists - optimized with select
+        // Check if slug already exists
         const existingBerita = await prisma.beritas.findFirst({
             where: { slug_berita },
             select: { id_berita: true }
@@ -69,6 +72,10 @@ export async function createBeritaAction(formData: FormData) {
             throw new Error("Slug berita sudah digunakan");
         }
 
+        // Get session untuk mendapatkan nama user sebagai updater
+        const session = await getServerSession(authOptions);
+        const updaterName = session?.user?.name || session?.user?.email || "system";
+
         // Get next urutan value efficiently
         const lastBerita = await prisma.beritas.findFirst({
             select: { urutan: true },
@@ -77,14 +84,14 @@ export async function createBeritaAction(formData: FormData) {
 
         const nextUrutan = (lastBerita?.urutan || 0) + 1;
 
-        // Create with minimal fields and proper defaults
+        // Create dengan user_id yang dikirim dari frontend
         await prisma.beritas.create({
             data: {
                 judul_berita,
                 slug_berita,
                 isi,
                 id_kategori: BigInt(id_kategori),
-                id_user: BigInt(1), // TODO: Get from session when auth is implemented
+                id_user: BigInt(user_id), // Gunakan user_id dari formData
                 status_berita,
                 jenis_berita: jenis_berita || "artikel",
                 bahasa,
@@ -93,13 +100,13 @@ export async function createBeritaAction(formData: FormData) {
                 gambar: gambar || null,
                 icon: icon || null,
                 tanggal_post: tanggal_post || new Date(),
-                updater: "system", // TODO: Get from session when auth is implemented
+                updater: updaterName, // Gunakan nama dari session
                 hits: 0,
                 urutan: nextUrutan,
             },
         });
 
-        // Revalidate only necessary paths
+        // Revalidate paths
         revalidatePath("/admin/berita");
         if (status_berita === "publish") {
             revalidatePath("/berita");
@@ -107,10 +114,9 @@ export async function createBeritaAction(formData: FormData) {
         }
 
     } catch (error) {
-        // More specific error handling - Don't catch redirect errors
         if (error && typeof error === 'object' && 'digest' in error &&
             typeof error.digest === 'string' && error.digest.includes('NEXT_REDIRECT')) {
-            throw error; // Re-throw redirect errors
+            throw error;
         }
 
         if (error instanceof Error) {
@@ -119,7 +125,6 @@ export async function createBeritaAction(formData: FormData) {
         throw new Error("Terjadi kesalahan saat menyimpan berita");
     }
 
-    // Redirect outside try-catch to avoid catching redirect errors
     return { success: true, message: "Berita berhasil dibuat" };
 }
 
@@ -255,6 +260,23 @@ export async function getBeritaByIdAction(id: string) {
     }
 }
 
+// Update schema untuk include user_id
+const UpdateBeritaSchema = z.object({
+    judul_berita: z.string().min(1, "Judul berita wajib diisi").max(255, "Judul terlalu panjang"),
+    slug_berita: z.string().min(1, "Slug berita wajib diisi").max(255, "Slug terlalu panjang"),
+    isi: z.string().min(10, "Isi berita minimal 10 karakter"),
+    id_kategori: z.string().min(1, "Kategori wajib dipilih"),
+    status_berita: z.enum(["draft", "publish"]),
+    jenis_berita: z.string().optional(),
+    bahasa: z.enum(["ID", "EN"]),
+    keywords: z.string().optional(),
+    thumbnail: z.string().optional(),
+    gambar: z.string().optional(),
+    icon: z.string().optional(),
+    tanggal_post: z.date().optional(),
+    user_id: z.string().optional(), // Untuk update, user_id bisa optional karena diambil dari session
+});
+
 export async function updateBeritaAction(id: string, formData: FormData) {
     try {
         // Validasi session
@@ -263,26 +285,42 @@ export async function updateBeritaAction(id: string, formData: FormData) {
             throw new Error('Unauthorized');
         }
 
-        // Extract data dari FormData
-        const data = {
-            judul_berita: formData.get('judul_berita') as string,
-            slug_berita: formData.get('slug_berita') as string,
-            isi: formData.get('isi') as string,
-            id_kategori: BigInt(formData.get('id_kategori') as string),
-            status_berita: formData.get('status_berita') as EnumStatusBerita,
-            jenis_berita: formData.get('jenis_berita') as string,
-            bahasa: formData.get('bahasa') as EnumBeritasBahasa,
-            keywords: formData.get('keywords') as string || null,
-            thumbnail: formData.get('thumbnail') as string || null,
-            gambar: formData.get('gambar') as string || null,
-            icon: formData.get('icon') as string || null,
-            tanggal_post: new Date(formData.get('tanggal_post') as string),
-        };
+        // Validasi data dengan schema
+        const validatedFields = UpdateBeritaSchema.safeParse({
+            judul_berita: formData.get('judul_berita'),
+            slug_berita: formData.get('slug_berita'),
+            isi: formData.get('isi'),
+            id_kategori: formData.get('id_kategori'),
+            status_berita: formData.get('status_berita'),
+            jenis_berita: formData.get('jenis_berita'),
+            bahasa: formData.get('bahasa'),
+            keywords: formData.get('keywords'),
+            thumbnail: formData.get('thumbnail'),
+            gambar: formData.get('gambar'),
+            icon: formData.get('icon'),
+            tanggal_post: formData.get('tanggal_post') ? new Date(formData.get('tanggal_post') as string) : undefined,
+            user_id: formData.get('user_id'), // Ambil user_id dari form
+        });
 
-        // Validasi required fields
-        if (!data.judul_berita || !data.isi || !data.id_kategori) {
-            throw new Error('Judul, konten, dan kategori wajib diisi');
+        if (!validatedFields.success) {
+            throw new Error(validatedFields.error.issues[0].message);
         }
+
+        const {
+            judul_berita,
+            slug_berita,
+            isi,
+            id_kategori,
+            status_berita,
+            jenis_berita,
+            bahasa,
+            keywords,
+            thumbnail,
+            gambar,
+            icon,
+            tanggal_post,
+            user_id
+        } = validatedFields.data;
 
         // Cek apakah berita exists
         const existingBerita = await prisma.beritas.findUnique({
@@ -293,27 +331,62 @@ export async function updateBeritaAction(id: string, formData: FormData) {
             throw new Error('Berita tidak ditemukan');
         }
 
+        // Check if slug already exists untuk berita lain (exclude current berita)
+        const existingSlug = await prisma.beritas.findFirst({
+            where: { 
+                slug_berita,
+                NOT: {
+                    id_berita: BigInt(id)
+                }
+            },
+            select: { id_berita: true }
+        });
+
+        if (existingSlug) {
+            throw new Error("Slug berita sudah digunakan");
+        }
+
+        // Tentukan siapa yang melakukan update
+        const updaterName = session.user.name || session.user.email || 'Unknown';
+        
+        // Untuk update, gunakan user_id dari session sebagai updater
+        // dan user_id dari form sebagai penulis (jika ada)
+        const updateData = {
+            judul_berita,
+            slug_berita,
+            isi,
+            id_kategori: BigInt(id_kategori),
+            status_berita,
+            jenis_berita: jenis_berita || "artikel",
+            bahasa,
+            keywords: keywords || null,
+            thumbnail: thumbnail || null,
+            gambar: gambar || null,
+            icon: icon || null,
+            tanggal_post: tanggal_post || existingBerita.tanggal_post,
+            updater: updaterName,
+            updatedAt: new Date(),
+            // Jika user_id dikirim dari form, update id_user
+            // Jika tidak, tetap gunakan id_user yang ada
+            ...(user_id && { id_user: BigInt(user_id) })
+        };
+
         // Update berita
         await prisma.beritas.update({
             where: { id_berita: BigInt(id) },
-            data: {
-                ...data,
-                updater: session.user.name || session.user.email || 'Unknown',
-                updatedAt: new Date(),
-            }
+            data: updateData
         });
 
         // Revalidate cache
         revalidatePath('/admin/berita');
         revalidatePath(`/admin/berita/${id}`);
-        revalidatePath(`/berita/${data.slug_berita}`);
+        revalidatePath(`/berita/${slug_berita}`);
 
     } catch (error) {
         console.error('Error updating berita:', error);
         throw new Error(error instanceof Error ? error.message : 'Gagal mengupdate berita');
     }
 
-    // Redirect ke halaman list berita
     return { success: true, message: 'Berita berhasil diperbarui' };
 }
 

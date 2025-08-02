@@ -24,6 +24,7 @@ import {
   ChartLegendContent,
 } from "@/components/ui/chart"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts'
+import { Breadcrumb } from '@/app/(public)/(menu)/hubungi-kami/page'
 
 // Interface sesuai yang Anda berikan
 export interface IndikatorMutu {
@@ -67,15 +68,15 @@ export function IndikatorMutuPage({ data }: IndikatorMutuPageProps) {
       .map(item => item.period!.split('-')[0])
       .filter((year, index, self) => self.indexOf(year) === index)
       .sort((a, b) => parseInt(b) - parseInt(a))
-    
+
     return years
   }
 
   // Fungsi untuk memfilter data berdasarkan tahun
   const filterDataByYear = (data: IndikatorMutu[], year: string) => {
     if (year === "all") return data
-    
-    return data.filter(item => 
+
+    return data.filter(item =>
       item.period && item.period.startsWith(year)
     )
   }
@@ -84,7 +85,7 @@ export function IndikatorMutuPage({ data }: IndikatorMutuPageProps) {
   const groupDataByIndicator = (filteredData: IndikatorMutu[]) => {
     const grouped = filteredData.reduce((acc, item) => {
       if (!item.judul) return acc
-      
+
       if (!acc[item.judul]) {
         acc[item.judul] = []
       }
@@ -122,6 +123,9 @@ export function IndikatorMutuPage({ data }: IndikatorMutuPageProps) {
     ]
     return `${monthNames[parseInt(month) - 1]} ${year}`
   }
+  const breadcrumbItems = [
+    { label: 'Indikator Mutu', href: '/indikator-mutu' },
+  ]
 
   const availableYears = getAvailableYears()
   const filteredData = filterDataByYear(normalizedData, selectedYear)
@@ -134,7 +138,7 @@ export function IndikatorMutuPage({ data }: IndikatorMutuPageProps) {
       color: "#07b8b2",
     },
     target: {
-      label: "Target", 
+      label: "Target",
       color: "#e11d48",
     },
   }
@@ -152,12 +156,14 @@ export function IndikatorMutuPage({ data }: IndikatorMutuPageProps) {
 
   return (
     <div className="space-y-6">
+      <Breadcrumb items={breadcrumbItems} />
       {/* Header dengan filter tahun */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+
         <div>
           <h1 className="text-2xl font-bold">Indikator Mutu</h1>
         </div>
-        
+
         <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Pilih Tahun" />
@@ -178,23 +184,23 @@ export function IndikatorMutuPage({ data }: IndikatorMutuPageProps) {
         {Object.entries(groupedData).map(([indicatorName, indicatorData]) => {
           const chartData = formatChartData(indicatorData)
           const latestData = indicatorData[indicatorData.length - 1]
-          
+
           return (
             <Card key={indicatorName} className="w-full">
               <CardHeader>
                 <CardTitle className="text-lg">{indicatorName}</CardTitle>
                 <CardDescription>
-                  Target: {latestData?.target}% | 
+                  Target: {latestData?.target}% |
                   Periode terpilih: {selectedYear === "all" ? "Semua tahun" : `Tahun ${selectedYear}`}
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
                 <ChartContainer
                   config={chartConfig}
                   className="aspect-auto h-[350px] w-full"
                 >
-                  <LineChart 
+                  <LineChart
                     data={chartData}
                     margin={{
                       top: 20,

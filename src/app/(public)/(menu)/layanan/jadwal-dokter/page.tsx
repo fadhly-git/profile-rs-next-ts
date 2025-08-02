@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma'
+import { getWebsiteSetting, prisma } from '@/lib/prisma'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { 
@@ -68,6 +68,7 @@ async function getJadwalDokter() {
 
 export default async function JadwalDokterPage() {
   const jadwalDokter = await getJadwalDokter()
+  const websiteSettings = await getWebsiteSetting();
 
   if (!jadwalDokter) {
     return notFound()
@@ -82,10 +83,10 @@ export default async function JadwalDokterPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-[#07b8b2]" />
+              <Calendar className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Jadwal Praktek Dokter Spesialis</h1>
+              <h1 className="text-xl font-bold text-gray-900">Jadwal Praktek Dokter Spesialis</h1>
               <p className="text-gray-600 mt-1">
                 Informasi lengkap jadwal praktek dokter spesialis
               </p>
@@ -117,17 +118,15 @@ export default async function JadwalDokterPage() {
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Pendaftaran:</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Pendaftaran dibuka pukul 07:00</li>
-                <li>• Bawa kartu identitas dan kartu BPJS (jika ada)</li>
-                <li>• Pasien rujukan wajib membawa surat rujukan</li>
+                <li>• Pendaftaran rawat jalan</li>
+                <li>• Bawa kartu identitas dan kartu BPJS (jika ada) atau KTP</li>
               </ul>
             </div>
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Kontak Informasi:</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Telepon: (0271) 123-4567</li>
-                <li>• WhatsApp: 0812-3456-7890</li>
-                <li>• Email: info@rumahsakit.com</li>
+                <li>• Telepon: {websiteSettings?.phone}</li>
+                <li>• Email: {websiteSettings?.email}</li>
               </ul>
             </div>
           </div>

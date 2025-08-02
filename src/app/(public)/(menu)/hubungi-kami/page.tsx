@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma'
-import { Metadata } from 'next'
 import Link from 'next/link'
 import { 
   MapPin, 
@@ -19,13 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
-export const metadata: Metadata = {
-  title: 'Kontak Kami - Hubungi Rumah Sakit',
-  description: 'Hubungi kami untuk informasi lebih lanjut, kritik, dan saran. Tersedia berbagai cara untuk menghubungi rumah sakit.'
-}
-
 // Breadcrumb Component
-function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
+export function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
   return (
     <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6" aria-label="Breadcrumb">
       <Link 
@@ -239,7 +233,6 @@ export default async function KontakKamiPage() {
 
     const breadcrumbItems = [
       { label: 'Hubungi Kami', href: '/hubungi-kami' },
-      { label: 'Kontak Kami' }
     ]
 
     return (
