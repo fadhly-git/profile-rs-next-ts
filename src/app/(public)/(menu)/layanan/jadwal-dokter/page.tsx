@@ -118,8 +118,9 @@ export default async function JadwalDokterPage() {
             <div>
               <h4 className="font-medium text-gray-900 mb-2">Pendaftaran:</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Pendaftaran rawat jalan</li>
-                <li>• Bawa kartu identitas dan kartu BPJS (jika ada) atau KTP</li>
+                <li>• Pendaftaran dibuka pukul 07:00</li>
+                <li>• Bawa kartu identitas (KTP) atau kartu BPJS, dan persiapkan aplikasi mobile JKN</li>
+                <li>• Pasien rujukan wajib membawa surat rujukan</li>
               </ul>
             </div>
             <div>
