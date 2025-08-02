@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import { Suspense } from 'react'
 import { ShareButton } from '@/components/landing/shared-button'
-import KontakKami from '@/app/(public)/(menu)/hubungi-kami/kontak-kami/page'
+import KontakKami from '@/app/(public)/(menu)/hubungi-kami/page'
 import JadwalDokter from '@/app/(public)/(menu)/layanan/jadwal-dokter/page'
 import IndikatorMutuPage from '@/app/(public)/(menu)/indikator-mutu/page'
 // Update type untuk params yang async
@@ -114,7 +114,7 @@ function CategoryCard({
             <div className="flex items-start space-x-4">
                 <div className="flex-shrink-0">
                     <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
-                        <Icon className="w-6 h-6 text-[#07b8b2]" />
+                        <Icon className="w-6 h-6 text-white" />
                     </div>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -184,7 +184,7 @@ function NewsCard({
                 </div>
             )}
 
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
                 {category && (
                     <div className="flex items-center space-x-2 mb-3">
                         <Tag className="w-4 h-4 text-[#07b8b2]" />
@@ -192,39 +192,53 @@ function NewsCard({
                     </div>
                 )}
 
-                <h3 className="font-semibold text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-2 mb-2">
-                    <Link href={href}>{title}</Link>
+                <h3 className="font-semibold text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-2 mb-3 text-lg leading-snug">
+                    <Link href={href} className="hover:underline">{title}</Link>
                 </h3>
 
                 {excerpt && (
-                    <p className="text-sm text-gray-600 line-clamp-3 mb-4">
+                    <p className="text-sm text-gray-600 line-clamp-3 mb-4 leading-relaxed">
                         {excerpt.replace(/<[^>]*>/g, '').substring(0, 150)}...
                     </p>
                 )}
 
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center space-x-4">
-                        {date && (
-                            <div className="flex items-center space-x-1">
-                                <Calendar className="w-4 h-4" />
-                                <span>{new Date(date).toLocaleDateString('id-ID')}</span>
-                            </div>
-                        )}
+                {/* Meta Information */}
+                <div className="flex flex-col space-y-3">
+                    {/* Date and Views Row */}
+                    <div className="flex items-center justify-between text-sm text-gray-500">
+                        <div className="flex items-center space-x-4">
+                            {date && (
+                                <div className="flex items-center space-x-2">
+                                    <Calendar className="w-4 h-4 text-[#07b8b2]" />
+                                    <span className="font-medium">
+                                        {new Date(date).toLocaleDateString('id-ID', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric'
+                                        })}
+                                    </span>
+                                </div>
+                            )}
 
-                        {views !== null && views !== undefined && (
-                            <div className="flex items-center space-x-1">
-                                <Eye className="w-4 h-4" />
-                                <span>{views} views</span>
-                            </div>
-                        )}
+                            {views !== null && views !== undefined && (
+                                <div className="flex items-center space-x-2">
+                                    <Eye className="w-4 h-4 text-[#07b8b2]" />
+                                    <span className="font-medium">{views.toLocaleString()} views</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    <Link
-                        href={href}
-                        className="text-[#07b8b2] hover:text-teal-700 font-medium transition-colors"
-                    >
-                        Baca selengkapnya
-                    </Link>
+                    {/* Action Button */}
+                    <div className="pt-2">
+                        <Link
+                            href={href}
+                            className="inline-flex items-center justify-center w-full sm:w-auto px-4 py-2.5 text-sm font-semibold text-white bg-[#07b8b2] hover:bg-teal-700 rounded-lg transition-all duration-200 group/btn shadow-sm hover:shadow-md"
+                        >
+                            Baca Selengkapnya
+                            <ChevronRight className="ml-2 w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                        </Link>
+                    </div>
                 </div>
             </div>
         </article>
@@ -428,7 +442,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                             <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8">
                                 <div className="flex items-center space-x-3 mb-4">
                                     <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
-                                        <FileText className="w-6 h-6 text-[#07b8b2]" />
+                                        <FileText className="w-6 h-6 text-white" />
                                     </div>
                                     <div>
                                         <h1 className="text-3xl font-bold text-gray-900">{category.nama_kategori}</h1>
@@ -461,7 +475,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                     {category.children.length > 0 && (
                                         <section>
                                             <div className="flex items-center space-x-2 mb-6">
-                                                <Users className="w-5 h-5 text-[#07b8b2]" />
+                                                <Users className="w-5 h-5 text-white" />
                                                 <h2 className="text-xl font-semibold text-gray-900">Subkategori</h2>
                                             </div>
                                             <div className="grid gap-4 sm:grid-cols-2">
@@ -484,7 +498,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                         <section>
                                             <div className="flex items-center justify-between mb-6">
                                                 <div className="flex items-center space-x-2">
-                                                    <Newspaper className="w-5 h-5 text-[#07b8b2]" />
+                                                    <Newspaper className="w-5 h-5 text-white" />
                                                     <h2 className="text-xl font-semibold text-gray-900">Berita Terkait</h2>
                                                 </div>
                                                 <Link
@@ -516,7 +530,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                         <section>
                                             <div className="flex items-center justify-between mb-6">
                                                 <div className="flex items-center space-x-2">
-                                                    <FileText className="w-5 h-5 text-[#07b8b2]" />
+                                                    <FileText className="w-5 h-5 text-white" />
                                                     <h2 className="text-xl font-semibold text-gray-900">Halaman</h2>
                                                 </div>
                                             </div>
@@ -530,7 +544,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                                         <div className="flex items-start space-x-4">
                                                             <div className="flex-shrink-0">
                                                                 <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
-                                                                    <FileText className="w-6 h-6 text-[#07b8b2]" />
+                                                                    <FileText className="w-6 h-6 text-white" />
                                                                 </div>
                                                             </div>
                                                             <div className="flex-1 min-w-0">
@@ -563,7 +577,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                     {category.beritas.length > 3 && (
                                         <div className="bg-white rounded-xl border border-gray-200 p-6">
                                             <div className="flex items-center space-x-2 mb-4">
-                                                <Newspaper className="w-5 h-5 text-[#07b8b2]" />
+                                                <Newspaper className="w-5 h-5 text-white" />
                                                 <h3 className="font-semibold text-gray-900">Berita Terpopuler</h3>
                                             </div>
                                             <div className="space-y-3">
@@ -631,7 +645,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                     <div className="flex items-center space-x-2 mb-4">
                                         {page.kategori && (
                                             <>
-                                                <Tag className="w-4 h-4 text-[#07b8b2]" />
+                                                <Tag className="w-4 h-4 text-white" />
                                                 <Link
                                                     href={`/${page.kategori.slug_kategori}`}
                                                     className="text-sm text-[#07b8b2] hover:text-teal-700 font-medium transition-colors"
@@ -739,7 +753,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                     <div className="flex items-center space-x-2 mb-4">
                                         {newsItem.kategori && (
                                             <>
-                                                <Tag className="w-4 h-4 text-[#07b8b2]" />
+                                                <Tag className="w-4 h-4 text-white" />
                                                 <Link
                                                     href={`/${newsItem.kategori.slug_kategori}`}
                                                     className="text-sm text-[#07b8b2] hover:text-teal-700 font-medium transition-colors"

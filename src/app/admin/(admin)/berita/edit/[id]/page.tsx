@@ -7,8 +7,9 @@ import { BeritaFormTemplate } from '@/components/berita/templates/BeritaFormTemp
 import { BeritaForm } from '@/components/berita/BeritaForm'
 import { getBeritaByIdAction, updateBeritaAction } from '@/lib/actions/berita'
 import { useEffect, useState } from 'react'
-import { Beritas } from '@/types'
+import { Beritas, User } from '@/types'
 import { LoadingSpinner } from '@/components/atoms/loading-spinner'
+import { useSession } from 'next-auth/react'
 
 export default function EditBeritaPage() {
     const router = useRouter()
@@ -18,6 +19,13 @@ export default function EditBeritaPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [isLoadingData, setIsLoadingData] = useState(true)
     const [beritaData, setBeritaData] = useState<Beritas | null>(null)
+
+    const { data: session } = useSession();
+    const user: User | undefined = session?.user
+        ? {
+            id: Number(session.user.id),
+        }
+        : undefined;
 
     // Load berita data
     useEffect(() => {
@@ -53,6 +61,9 @@ export default function EditBeritaPage() {
             Object.entries(formData).forEach(([key, value]) => {
                 form.append(key, value as string)
             })
+            if (user) {
+                form.append('user_id', String(user.id))
+            }
 
             await updateBeritaAction(beritaId, form)
             toast.success("Berita berhasil diperbarui")

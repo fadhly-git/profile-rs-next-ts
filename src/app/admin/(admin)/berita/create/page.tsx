@@ -7,10 +7,18 @@ import { BeritaFormTemplate } from '@/components/berita/templates/BeritaFormTemp
 import { BeritaForm } from '@/components/berita/BeritaForm'
 import { createBeritaAction } from '@/lib/actions/berita'
 import { useState } from 'react'
+import { User } from '@/types'
+import { useSession } from 'next-auth/react'
 
 export default function CreateBeritaPage() {
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
+    const { data: session } = useSession();
+    const user: User | undefined = session?.user
+    ? {
+      id: Number(session.user.id),
+    }
+    : undefined;
 
     const handleSubmit = async (formData: any) => {
         setIsLoading(true)
@@ -19,6 +27,11 @@ export default function CreateBeritaPage() {
             Object.entries(formData).forEach(([key, value]) => {
                 form.append(key, value as string)
             })
+
+            // Tambahkan data user ke FormData jika user tersedia
+            if (user) {
+                form.append('user_id', String(user.id))
+            }
 
             await createBeritaAction(form)
             toast.success("Berita berhasil dibuat")

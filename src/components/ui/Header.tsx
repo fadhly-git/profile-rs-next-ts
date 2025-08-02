@@ -42,6 +42,44 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
     setIsMounted(true);
   }, []);
 
+  // Function to get ordered menu categories
+  const getOrderedMenuCategories = () => {
+    const desiredOrder = [
+      'tentang-kami',
+      'layanan',
+      'berita',
+      'indikator-mutu',
+      'hubungi-kami'
+    ];
+
+    // Create a map for quick lookup
+    const categoryMap = new Map();
+    menuCategories.forEach(category => {
+      categoryMap.set(category.slug_kategori, category);
+    });
+
+    // Build ordered array
+    const orderedCategories: MenuCategory[] = [];
+
+    // Add categories in desired order
+    desiredOrder.forEach(slug => {
+      const category = categoryMap.get(slug);
+      if (category) {
+        orderedCategories.push(category);
+        categoryMap.delete(slug); // Remove from map
+      }
+    });
+
+    // Add any remaining categories that weren't in the desired order
+    categoryMap.forEach(category => {
+      orderedCategories.push(category);
+    });
+
+    return orderedCategories;
+  };
+
+  const orderedMenuCategories = getOrderedMenuCategories();
+
   // Function to check if a path is active - only after mounting
   const isPathActive = (path: string) => {
     if (!isMounted) return false;
@@ -130,13 +168,13 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
   // Auto-expand active mobile submenu
   useEffect(() => {
     if (isMobile && isMounted) {
-      const activeCategory = menuCategories.find(category => isCategoryActive(category));
+      const activeCategory = orderedMenuCategories.find(category => isCategoryActive(category));
       if (activeCategory && (activeCategory.children.length > 0 || activeCategory.Halaman.length > 0)) {
         setActiveMobileSubmenu(activeCategory.id_kategori);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile, pathname, menuCategories, isMounted]);
+  }, [isMobile, pathname, orderedMenuCategories, isMounted]);
 
   const handleMouseEnter = (categoryId: number) => {
     if (isMobile) return;
@@ -321,8 +359,8 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                   )}
                 </div>
 
-                {/* Dynamic Categories */}
-                {menuCategories?.map((category) => {
+                {/* Dynamic Categories - Now using ordered categories */}
+                {orderedMenuCategories?.map((category) => {
                   const hasSubmenu = category.children.length > 0 || category.Halaman.length > 0;
                   const isActive = isCategoryActive(category);
 
@@ -484,7 +522,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                     className="w-8 h-8 object-contain"
                   />
                 )}
-                <span className="text-white font-semibold text-base">
+                <span className="text-white font-semibold text-xs">
                   {websiteSettings.website_name}
                 </span>
               </div>
@@ -505,8 +543,8 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                   href="/"
                   onClick={closeMobileMenu}
                   className={`flex items-center px-6 py-4 transition-colors border-b border-gray-50 ${isMounted && pathname === '/'
-                      ? 'bg-teal-50 text-[#07b8b2] border-r-4 border-r-[#07b8b2]'
-                      : 'text-gray-700 hover:bg-teal-50 hover:text-[#07b8b2]'
+                    ? 'bg-teal-50 text-[#07b8b2] border-r-4 border-r-[#07b8b2]'
+                    : 'text-gray-700 hover:bg-teal-50 hover:text-[#07b8b2]'
                     }`}
                 >
                   <Home className="w-5 h-5 mr-3 text-[#07b8b2]" />
@@ -516,8 +554,9 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                   <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2]"></div>
                 )}
               </div>
-              {/* Category Links */}
-              {menuCategories.map((category) => {
+
+              {/* Category Links - Now using ordered categories */}
+              {orderedMenuCategories.map((category) => {
                 const hasSubmenu = category.children.length > 0 || category.Halaman.length > 0;
                 const isOpen = activeMobileSubmenu === category.id_kategori;
                 const isActive = isCategoryActive(category);
@@ -643,7 +682,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                 {websiteSettings.phone && (
                   <div className="flex items-center space-x-3 text-sm text-gray-600">
                     <div className="w-8 h-8 bg-[#07b8b2] bg-opacity-10 rounded-full flex items-center justify-center">
-                      <Phone className="w-4 h-4 text-[#07b8b2]" />
+                      <Phone className="w-4 h-4 text-white" />
                     </div>
                     <span>{websiteSettings.phone}</span>
                   </div>
@@ -655,7 +694,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                     className="flex items-center space-x-3 text-sm text-gray-600 hover:text-[#07b8b2] transition-colors"
                   >
                     <div className="w-8 h-8 bg-[#07b8b2] bg-opacity-10 rounded-full flex items-center justify-center">
-                      <Mail className="w-4 h-4 text-[#07b8b2]" />
+                      <Mail className="w-4 h-4 text-white" />
                     </div>
                     <span>{websiteSettings.email}</span>
                   </Link>

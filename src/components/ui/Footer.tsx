@@ -69,7 +69,7 @@ export default function Footer({ settings, menuCategories = [] }: FooterProps) {
             bgColor: 'bg-blue-500'
         },
         {
-            name: 'Twitter',
+            name: 'TikTok',
             url: settings?.twitter_url,
             icon: Twitter,
             color: 'hover:bg-sky-600',
@@ -160,8 +160,8 @@ export default function Footer({ settings, menuCategories = [] }: FooterProps) {
                                             <Image
                                                 src={settings.logo_url}
                                                 alt="Hospital Logo"
-                                                width={48}
-                                                height={48}
+                                                width={130}
+                                                height={130}
                                                 style={{ width: "auto", height: "auto" }}
                                                 className="h-12 w-auto"
                                             />
@@ -180,8 +180,8 @@ export default function Footer({ settings, menuCategories = [] }: FooterProps) {
                                             <Image
                                                 src={settings.logo_akreditasi_url}
                                                 alt="Accreditation"
-                                                width={48}
-                                                height={48}
+                                                width={120}
+                                                height={120}
                                                 style={{ width: "auto", height: "auto" }}
                                                 className="h-12 w-auto"
                                             />
