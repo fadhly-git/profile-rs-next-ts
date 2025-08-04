@@ -155,7 +155,7 @@ export function IndikatorMutuPage({ data }: IndikatorMutuPageProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       <Breadcrumb items={breadcrumbItems} />
       {/* Header dengan filter tahun */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

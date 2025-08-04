@@ -8,7 +8,6 @@ export default async function IndikatorMutuPageWrapper() {
   
   return (
     <div className="container mx-auto p-6">
-      
       <IndikatorMutuPage data={data} />
     </div>
   )
