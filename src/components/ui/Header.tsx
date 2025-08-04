@@ -12,7 +12,6 @@ import {
   ChevronDown,
   ChevronRight,
   Facebook,
-  Twitter,
   Instagram,
   Youtube,
   Clock,
@@ -21,6 +20,7 @@ import {
 } from 'lucide-react';
 import { WebsiteSettings, MenuCategory } from '@/types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { TiktokIcon } from './Footer';
 
 interface HeaderProps {
   websiteSettings: WebsiteSettings;
@@ -165,16 +165,16 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
     }
   }, [isMobile, isMobileMenuOpen]);
 
-  // Auto-expand active mobile submenu
-  useEffect(() => {
-    if (isMobile && isMounted) {
-      const activeCategory = orderedMenuCategories.find(category => isCategoryActive(category));
-      if (activeCategory && (activeCategory.children.length > 0 || activeCategory.Halaman.length > 0)) {
-        setActiveMobileSubmenu(activeCategory.id_kategori);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile, pathname, orderedMenuCategories, isMounted]);
+  // // Auto-expand active mobile submenu
+  // useEffect(() => {
+  //   if (isMobile && isMounted) {
+  //     const activeCategory = orderedMenuCategories.find(category => isCategoryActive(category));
+  //     if (activeCategory && (activeCategory.children.length > 0 || activeCategory.Halaman.length > 0)) {
+  //       setActiveMobileSubmenu(activeCategory.id_kategori);
+  //     }
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [isMobile, pathname, orderedMenuCategories, isMounted]);
 
   const handleMouseEnter = (categoryId: number) => {
     if (isMobile) return;
@@ -192,7 +192,14 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
   };
 
   const toggleMobileSubmenu = (categoryId: number) => {
-    setActiveMobileSubmenu(activeMobileSubmenu === categoryId ? null : categoryId);
+    setActiveMobileSubmenu(prev => {
+      // Jika menu yang diklik sudah terbuka, tutup
+      if (prev === categoryId) {
+        return null;
+      }
+      // Jika menu yang diklik berbeda atau tidak ada yang terbuka, buka menu baru
+      return categoryId;
+    });
   };
 
   const closeMobileMenu = () => {
@@ -206,7 +213,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
       case 'facebook':
         return <Facebook className={iconClass} />;
       case 'twitter':
-        return <Twitter className={iconClass} />;
+        return <TiktokIcon className={iconClass} />;
       case 'instagram':
         return <Instagram className={iconClass} />;
       case 'youtube':
@@ -562,45 +569,34 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                 const isActive = isCategoryActive(category);
 
                 return (
-                  <div key={category.id_kategori} className="border-b border-gray-50 relative">
-                    <div className="flex items-center">
-                      {hasSubmenu ? (
-                        <>
-                          <div
-                            className={`flex-1 flex items-center text-sm px-6 py-4 transition-colors ${isActive
-                              ? 'text-[#07b8b2] bg-teal-50 border-r-4 border-r-[#07b8b2]'
-                              : 'text-gray-700 hover:text-[#07b8b2]'
-                              }`}
-                          >
-                            <span className="font-medium">{category.nama_kategori}</span>
-                          </div>
-                          <button
-                            onClick={() => toggleMobileSubmenu(category.id_kategori)}
-                            className="p-4 text-gray-400 hover:text-[#07b8b2] transition-colors"
-                            aria-expanded={isOpen}
-                          >
-                            <ChevronRight
-                              className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''
-                                }`}
-                            />
-                          </button>
-                        </>
-                      ) : (
-                        <Link
-                          href={`/${category.slug_kategori}`}
-                          onClick={closeMobileMenu}
-                          className={`flex-1 flex items-center text-sm px-6 py-4 transition-colors ${isActive
-                            ? 'text-[#07b8b2] bg-teal-50 border-r-4 border-r-[#07b8b2]'
-                            : 'text-gray-700 hover:text-[#07b8b2]'
+                  <div key={category.id_kategori} className="border-b border-gray-50">
+                    {hasSubmenu ? (
+                      // Menu dengan submenu - gunakan button
+                      <button
+                        onClick={() => toggleMobileSubmenu(category.id_kategori)}
+                        className={`w-full flex items-center justify-between text-sm px-6 py-4 transition-colors text-left ${isActive
+                            ? 'text-[#07b8b2] bg-teal-50'
+                            : 'text-gray-700 hover:text-[#07b8b2] hover:bg-gray-50'
+                          }`}
+                      >
+                        <span className="font-medium">{category.nama_kategori}</span>
+                        <ChevronRight
+                          className={`w-5 h-5 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''
                             }`}
-                        >
-                          <span className="font-medium">{category.nama_kategori}</span>
-                        </Link>
-                      )}
-                    </div>
-                    {/* Active indicator for parent category */}
-                    {isActive && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2]"></div>
+                        />
+                      </button>
+                    ) : (
+                      // Menu tanpa submenu - gunakan Link
+                      <Link
+                        href={`/${category.slug_kategori}`}
+                        onClick={closeMobileMenu}
+                        className={`flex items-center text-sm px-6 py-4 transition-colors ${isActive
+                            ? 'text-[#07b8b2] bg-teal-50'
+                            : 'text-gray-700 hover:text-[#07b8b2] hover:bg-gray-50'
+                          }`}
+                      >
+                        <span className="font-medium">{category.nama_kategori}</span>
+                      </Link>
                     )}
 
                     {/* Submenu */}
@@ -614,23 +610,19 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                           {category.Halaman.map((halaman) => {
                             const pageActive = isPageActive(category.slug_kategori, halaman.slug);
                             return (
-                              <div key={halaman.id_halaman} className="relative">
-                                <Link
-                                  href={`/${category.slug_kategori}/${halaman.slug}`}
-                                  onClick={closeMobileMenu}
-                                  className={`flex items-center px-8 py-3 text-sm transition-colors ${pageActive
-                                    ? 'text-[#07b8b2] bg-white border-r-4 border-r-[#07b8b2]'
+                              <Link
+                                key={halaman.id_halaman}
+                                href={`/${category.slug_kategori}/${halaman.slug}`}
+                                onClick={closeMobileMenu}
+                                className={`flex items-center px-8 py-3 text-sm transition-colors ${pageActive
+                                    ? 'text-[#07b8b2] bg-white'
                                     : 'text-gray-600 hover:text-[#07b8b2] hover:bg-white'
-                                    }`}
-                                >
-                                  <div className={`w-2 h-2 rounded-full mr-3 ${pageActive ? 'bg-[#07b8b2]' : 'bg-teal-300'
-                                    }`} />
-                                  {halaman.judul}
-                                </Link>
-                                {pageActive && (
-                                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2]"></div>
-                                )}
-                              </div>
+                                  }`}
+                              >
+                                <div className={`w-2 h-2 rounded-full mr-3 ${pageActive ? 'bg-[#07b8b2]' : 'bg-gray-300'
+                                  }`} />
+                                {halaman.judul}
+                              </Link>
                             );
                           })}
 
@@ -638,8 +630,8 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                           {category.children.map((child) => (
                             <div key={child.id_kategori}>
                               <div className={`px-8 py-2 text-xs font-semibold uppercase tracking-wider ${isChildCategoryActive(child)
-                                ? 'text-[#07b8b2] bg-white border-r-4 border-r-[#07b8b2]'
-                                : 'text-gray-500'
+                                  ? 'text-[#07b8b2]'
+                                  : 'text-gray-500'
                                 }`}>
                                 {child.nama_kategori}
                               </div>
@@ -647,23 +639,19 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                               {child.Halaman.map((halaman) => {
                                 const pageActive = isPageActive(child.slug_kategori, halaman.slug);
                                 return (
-                                  <div key={halaman.id_halaman} className="relative">
-                                    <Link
-                                      href={`/${child.slug_kategori}/${halaman.slug}`}
-                                      onClick={closeMobileMenu}
-                                      className={`flex items-center px-10 py-2.5 text-sm transition-colors ${pageActive
-                                        ? 'text-[#07b8b2] bg-white border-r-4 border-r-[#07b8b2]'
+                                  <Link
+                                    key={halaman.id_halaman}
+                                    href={`/${child.slug_kategori}/${halaman.slug}`}
+                                    onClick={closeMobileMenu}
+                                    className={`flex items-center px-10 py-2.5 text-sm transition-colors ${pageActive
+                                        ? 'text-[#07b8b2] bg-white'
                                         : 'text-gray-600 hover:text-[#07b8b2] hover:bg-white'
-                                        }`}
-                                    >
-                                      <div className={`w-1.5 h-1.5 rounded-full mr-3 ${pageActive ? 'bg-[#07b8b2]' : 'bg-gray-400'
-                                        }`} />
-                                      {halaman.judul}
-                                    </Link>
-                                    {pageActive && (
-                                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#07b8b2]"></div>
-                                    )}
-                                  </div>
+                                      }`}
+                                  >
+                                    <div className={`w-1.5 h-1.5 rounded-full mr-3 ${pageActive ? 'bg-[#07b8b2]' : 'bg-gray-400'
+                                      }`} />
+                                    {halaman.judul}
+                                  </Link>
                                 );
                               })}
                             </div>
@@ -709,7 +697,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                         href={social.url!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 bg-[#07b8b2] bg-opacity-10 rounded-full flex items-center justify-center text-[#07b8b2] hover:bg-opacity-20 transition-colors"
+                        className="w-8 h-8 bg-[#07b8b2] bg-opacity-10 rounded-full flex items-center justify-center text-[#fff] hover:bg-opacity-20 transition-colors"
                       >
                         {getSocialIcon(social.platform)}
                       </Link>
