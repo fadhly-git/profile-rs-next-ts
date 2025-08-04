@@ -41,9 +41,8 @@ export default function HeroSectionComponent({ heroData }: HeroSectionProps) {
       {heroData.map((hero, index) => (
         <div
           key={hero.id}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === currentSlide ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
         >
           {hero.background_image && (
             <Image
@@ -55,7 +54,7 @@ export default function HeroSectionComponent({ heroData }: HeroSectionProps) {
             />
           )}
           <div className="absolute inset-0 bg-black/40" />
-          
+
           <div className="relative container mx-auto px-4 h-full flex items-center">
             <div className="text-white max-w-2xl">
               <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight">
@@ -66,26 +65,26 @@ export default function HeroSectionComponent({ heroData }: HeroSectionProps) {
                   {hero.subheading}
                 </p>
               )}
-              
+
               <div className="flex flex-col sm:flex-row gap-4">
                 {hero.cta_button_text_1 && hero.cta_button_link_1 && (
                   <Button
                     asChild
                     size="lg"
-                    className="bg-[#07b8b2] hover:bg-[#069691] text-white px-8"
+                    className="bg-[#07b8b2] hover:bg-[#069691] text-white px-8 z-50"
                   >
                     <Link href={hero.cta_button_link_1}>
                       {hero.cta_button_text_1}
                     </Link>
                   </Button>
                 )}
-                
+
                 {hero.cta_button_text_2 && hero.cta_button_link_2 && (
                   <Button
                     asChild
                     variant="outline"
                     size="lg"
-                    className="bg-[#07b8b2] hover:bg-[#069691] text-white px-8"
+                    className="bg-[#07b8b2] hover:bg-[#069691] text-white px-8 z-50"
                   >
                     <Link href={hero.cta_button_link_2}>
                       {hero.cta_button_text_2}
@@ -103,18 +102,20 @@ export default function HeroSectionComponent({ heroData }: HeroSectionProps) {
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-all duration-200"
+            className="fixed left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200 z-[9999] backdrop-blur-sm"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
+            style={{ position: 'absolute' }}
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
-          
+
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-all duration-200"
+            className="fixed right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200 z-[9999] backdrop-blur-sm"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
+            style={{ position: 'absolute' }}
           >
             <ChevronRight className="w-6 h-6" />
           </button>
@@ -128,9 +129,8 @@ export default function HeroSectionComponent({ heroData }: HeroSectionProps) {
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                index === currentSlide ? 'bg-white' : 'bg-white/50'
-              }`}
+              className={`w-3 h-3 rounded-full transition-all duration-200 relative z-50 ${index === currentSlide ? 'bg-white' : 'bg-white/50'
+                }`}
               onMouseEnter={() => setIsAutoPlaying(false)}
               onMouseLeave={() => setIsAutoPlaying(true)}
             />

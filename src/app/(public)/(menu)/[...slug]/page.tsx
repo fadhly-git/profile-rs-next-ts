@@ -31,7 +31,7 @@ type PageParams = Promise<{
 function PageSkeleton() {
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="container mx-auto px-4 py-8 max-w-6xl">
+            <div className="container mx-auto px-4 py-8 max-w-7xl">
                 <div className="animate-pulse">
                     {/* Breadcrumb skeleton */}
                     <div className="flex items-center space-x-2 mb-6">
@@ -435,7 +435,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
             return (
                 <ErrorBoundary>
                     <div className="min-h-screen bg-gray-50">
-                        <div className="container mx-auto px-4 py-8 max-w-6xl">
+                        <div className="container mx-auto px-4 py-8 max-w-7xl">
                             <Breadcrumb items={breadcrumbItems} />
 
                             {/* Header Section */}
@@ -636,7 +636,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
             return (
                 <ErrorBoundary>
                     <div className="min-h-screen bg-gray-50">
-                        <div className="container mx-auto px-4 py-8 max-w-4xl">
+                        <div className="container mx-auto px-4 py-8 max-w-7xl">
                             <Breadcrumb items={breadcrumbItems} />
 
                             <article className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -744,7 +744,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
             return (
                 <ErrorBoundary>
                     <div className="min-h-screen bg-gray-50">
-                        <div className="container mx-auto px-4 py-8 max-w-4xl">
+                        <div className="container mx-auto px-4 py-8 max-w-7xl">
                             <Breadcrumb items={breadcrumbItems} />
 
                             <article className="bg-white rounded-xl border border-gray-200 overflow-hidden">
