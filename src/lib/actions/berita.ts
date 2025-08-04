@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { Beritas } from "@/types";
-import { EnumStatusBerita, EnumBeritasBahasa } from '@/types';
 import { getServerSession } from 'next-auth';
 import { authOptions } from "../authOptions";
 import { z } from "zod";
