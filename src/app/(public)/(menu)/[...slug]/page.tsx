@@ -308,10 +308,33 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
         const path = resolvedParams.slug || []
         const lastSegment = path[path.length - 1]
 
+        // Default metadata
+        const defaultMetadata = {
+            title: 'RS PKU Muhammadiyah Boja',
+            description: 'Menyehatkan Umat, Mencerdaskan Semesta.',
+            siteName: 'RS PKU Muhammadiyah Boja',
+            baseUrl: 'https://rspkuboja.com',
+            defaultImage: 'https://rspkuboja.com/logo.png'
+        }
+
         if (!lastSegment) {
             return {
-                title: 'Halaman Tidak Ditemukan',
-                description: 'Halaman yang Anda cari tidak ditemukan.'
+                title: 'Halaman Tidak Ditemukan - RS PKU Muhammadiyah Boja',
+                description: 'Halaman yang Anda cari tidak ditemukan.',
+                openGraph: {
+                    title: 'Halaman Tidak Ditemukan',
+                    description: 'Halaman yang Anda cari tidak ditemukan.',
+                    url: `${defaultMetadata.baseUrl}/${path.join('/')}`,
+                    type: 'website',
+                    siteName: defaultMetadata.siteName,
+                    images: [defaultMetadata.defaultImage]
+                },
+                twitter: {
+                    card: 'summary_large_image',
+                    title: 'Halaman Tidak Ditemukan',
+                    description: 'Halaman yang Anda cari tidak ditemukan.',
+                    images: [defaultMetadata.defaultImage]
+                }
             }
         }
 
@@ -319,50 +342,263 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
         const [category, page, newsItem] = await Promise.all([
             prisma.kategori.findUnique({
                 where: { slug_kategori: lastSegment },
-                select: { nama_kategori: true, keterangan: true }
+                select: { nama_kategori: true, keterangan: true, gambar: true }
             }),
             prisma.halaman.findUnique({
                 where: { slug: lastSegment },
-                select: { judul: true, konten: true }
+                select: { 
+                    judul: true, 
+                    konten: true, 
+                    gambar: true, 
+                    createdAt: true, 
+                    updatedAt: true,
+                    kategori: {
+                        select: { nama_kategori: true, slug_kategori: true }
+                    }
+                }
             }),
             prisma.beritas.findFirst({
                 where: { slug_berita: lastSegment },
-                select: { judul_berita: true, isi: true }
+                select: { 
+                    judul_berita: true, 
+                    isi: true, 
+                    gambar: true, 
+                    thumbnail: true,
+                    keywords: true, // 👈 Tambahkan keywords
+                    tanggal_post: true,
+                    updatedAt: true,
+                    hits: true,
+                    kategori: {
+                        select: { nama_kategori: true, slug_kategori: true }
+                    },
+                    user: {
+                        select: { name: true }
+                    }
+                }
             })
         ])
 
+        const currentUrl = `${defaultMetadata.baseUrl}/${path.join('/')}`
+
+        // Category metadata
         if (category) {
+            const categoryTitle = `${category.nama_kategori} - ${defaultMetadata.siteName}`
+            const categoryDescription = category.keterangan?.replace(/<[^>]*>/g, '').substring(0, 160) || `Informasi lengkap tentang ${category.nama_kategori} di RS PKU Muhammadiyah Boja`
+            const categoryImage = category.gambar || defaultMetadata.defaultImage
+
             return {
-                title: category.nama_kategori,
-                description: category.keterangan || `Informasi tentang ${category.nama_kategori}`
+                title: categoryTitle,
+                description: categoryDescription,
+                keywords: `${category.nama_kategori}, RS PKU Muhammadiyah Boja, rumah sakit, kesehatan`,
+                authors: [{ name: defaultMetadata.siteName }],
+                creator: defaultMetadata.siteName,
+                publisher: defaultMetadata.siteName,
+                robots: 'index, follow',
+                openGraph: {
+                    title: category.nama_kategori,
+                    description: categoryDescription,
+                    url: currentUrl,
+                    type: 'website',
+                    siteName: defaultMetadata.siteName,
+                    images: [{
+                        url: categoryImage,
+                        width: 1200,
+                        height: 630,
+                        alt: category.nama_kategori
+                    }],
+                    locale: 'id_ID'
+                },
+                twitter: {
+                    card: 'summary_large_image',
+                    site: '@rspkuboja',
+                    creator: '@rspkuboja',
+                    title: category.nama_kategori,
+                    description: categoryDescription,
+                    images: [{
+                        url: categoryImage,
+                        alt: category.nama_kategori
+                    }]
+                },
+                alternates: {
+                    canonical: currentUrl
+                }
             }
         }
 
+        // Page metadata
         if (page) {
-            const description = page.konten?.replace(/<[^>]*>/g, '').substring(0, 160) || ''
+            const pageTitle = `${page.judul} - ${defaultMetadata.siteName}`
+            const pageDescription = page.konten?.replace(/<[^>]*>/g, '').substring(0, 160) || `${page.judul} - Informasi dari RS PKU Muhammadiyah Boja`
+            const pageImage = page.gambar || defaultMetadata.defaultImage
+            const categoryName = page.kategori?.nama_kategori
+
             return {
-                title: page.judul,
-                description
+                title: pageTitle,
+                description: pageDescription,
+                keywords: `${page.judul}, ${categoryName || ''}, RS PKU Muhammadiyah Boja, rumah sakit, kesehatan`,
+                authors: [{ name: defaultMetadata.siteName }],
+                creator: defaultMetadata.siteName,
+                publisher: defaultMetadata.siteName,
+                robots: 'index, follow',
+                openGraph: {
+                    title: page.judul,
+                    description: pageDescription,
+                    url: currentUrl,
+                    type: 'article',
+                    siteName: defaultMetadata.siteName,
+                    images: [{
+                        url: pageImage,
+                        width: 1200,
+                        height: 630,
+                        alt: page.judul
+                    }],
+                    locale: 'id_ID',
+                    publishedTime: page.createdAt.toISOString(),
+                    modifiedTime: page.updatedAt.toISOString(),
+                    section: categoryName || 'Informasi',
+                    authors: [defaultMetadata.siteName]
+                },
+                twitter: {
+                    card: 'summary_large_image',
+                    site: '@rspkuboja',
+                    creator: '@rspkuboja',
+                    title: page.judul,
+                    description: pageDescription,
+                    images: [{
+                        url: pageImage,
+                        alt: page.judul
+                    }]
+                },
+                alternates: {
+                    canonical: currentUrl
+                },
+                other: {
+                    'article:published_time': page.createdAt.toISOString(),
+                    'article:modified_time': page.updatedAt.toISOString(),
+                    'article:section': categoryName || 'Informasi',
+                    'article:author': defaultMetadata.siteName
+                }
             }
         }
 
+        // News metadata - DIPERBAIKI DENGAN KEYWORDS
         if (newsItem) {
-            const description = newsItem.isi?.replace(/<[^>]*>/g, '').substring(0, 160) || ''
+            const newsTitle = `${newsItem.judul_berita} - ${defaultMetadata.siteName}`
+            const newsDescription = newsItem.isi?.replace(/<[^>]*>/g, '').substring(0, 160) || `${newsItem.judul_berita} - Berita terbaru dari RS PKU Muhammadiyah Boja`
+            const newsImage = newsItem.gambar || newsItem.thumbnail || defaultMetadata.defaultImage
+            const categoryName = newsItem.kategori?.nama_kategori
+            const authorName = newsItem.user?.name || defaultMetadata.siteName
+            
+            // 👈 Gunakan keywords dari database + tambahan keywords default
+            const keywordsArray = []
+            if (newsItem.keywords) {
+                keywordsArray.push(newsItem.keywords)
+            }
+            keywordsArray.push(newsItem.judul_berita)
+            keywordsArray.push(categoryName || 'berita')
+            keywordsArray.push('RS PKU Muhammadiyah Boja')
+            keywordsArray.push('rumah sakit')
+            keywordsArray.push('kesehatan')
+            
+            const finalKeywords = keywordsArray.filter(Boolean).join(', ')
+
             return {
-                title: newsItem.judul_berita,
-                description
+                title: newsTitle,
+                description: newsDescription,
+                keywords: finalKeywords, // 👈 Gunakan keywords yang sudah digabung
+                authors: [{ name: authorName }],
+                creator: authorName,
+                publisher: defaultMetadata.siteName,
+                robots: 'index, follow',
+                openGraph: {
+                    title: newsItem.judul_berita,
+                    description: newsDescription,
+                    url: currentUrl,
+                    type: 'article',
+                    siteName: defaultMetadata.siteName,
+                    images: [{
+                        url: newsImage,
+                        width: 1200,
+                        height: 630,
+                        alt: newsItem.judul_berita
+                    }],
+                    locale: 'id_ID',
+                    publishedTime: newsItem.tanggal_post?.toISOString(),
+                    modifiedTime: (newsItem.updatedAt ? newsItem.updatedAt.toISOString() : new Date().toISOString()),
+                    section: categoryName || 'Berita',
+                    authors: [authorName]
+                },
+                twitter: {
+                    card: 'summary_large_image',
+                    site: '@rspkuboja',
+                    creator: '@rspkuboja',
+                    title: newsItem.judul_berita,
+                    description: newsDescription,
+                    images: [{
+                        url: newsImage,
+                        alt: newsItem.judul_berita
+                    }]
+                },
+                alternates: {
+                    canonical: currentUrl
+                },
+                other: {
+                    'article:published_time': newsItem.tanggal_post?.toISOString() || new Date().toISOString(),
+                    'article:modified_time': (newsItem.updatedAt ? newsItem.updatedAt.toISOString() : new Date().toISOString()),
+                    'article:section': categoryName || 'Berita',
+                    'article:author': authorName,
+                    'article:tag': categoryName || 'berita',
+                    // 👈 Gunakan keywords dari database untuk news_keywords
+                    'news_keywords': newsItem.keywords || `${newsItem.judul_berita}, ${categoryName || 'berita'}, RS PKU Muhammadiyah Boja`,
+                    // 👈 Tambahkan meta keywords khusus untuk berita
+                    'keywords': finalKeywords
+                }
             }
         }
 
+        // 404 fallback
         return {
-            title: 'Halaman Tidak Ditemukan',
-            description: 'Halaman yang Anda cari tidak ditemukan.'
+            title: 'Halaman Tidak Ditemukan - RS PKU Muhammadiyah Boja',
+            description: 'Halaman yang Anda cari tidak ditemukan di website RS PKU Muhammadiyah Boja.',
+            robots: 'noindex, nofollow',
+            openGraph: {
+                title: 'Halaman Tidak Ditemukan',
+                description: 'Halaman yang Anda cari tidak ditemukan.',
+                url: currentUrl,
+                type: 'website',
+                siteName: defaultMetadata.siteName,
+                images: [defaultMetadata.defaultImage]
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: 'Halaman Tidak Ditemukan',
+                description: 'Halaman yang Anda cari tidak ditemukan.',
+                images: [defaultMetadata.defaultImage]
+            }
         }
+
     } catch (error) {
         console.error('Error generating metadata:', error)
+        
+        // Error fallback metadata
         return {
-            title: 'Error',
-            description: 'Terjadi kesalahan pada sistem.'
+            title: 'Error - RS PKU Muhammadiyah Boja',
+            description: 'Terjadi kesalahan pada sistem. Silakan coba lagi nanti.',
+            robots: 'noindex, nofollow',
+            openGraph: {
+                title: 'Error - RS PKU Muhammadiyah Boja',
+                description: 'Terjadi kesalahan pada sistem.',
+                url: 'https://rspkuboja.com',
+                type: 'website',
+                siteName: 'RS PKU Muhammadiyah Boja',
+                images: ['https://rspkuboja.com/storage/rspku.jpeg']
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title: 'Error - RS PKU Muhammadiyah Boja',
+                description: 'Terjadi kesalahan pada sistem.',
+                images: ['https://rspkuboja.com/storage/rspku.jpeg']
+            }
         }
     }
 }
