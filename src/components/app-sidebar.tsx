@@ -3,6 +3,7 @@
 import * as React from "react"
 import {
   ChartNoAxesCombinedIcon,
+  DatabaseBackup,
   Folders,
   Hospital,
   ImageIcon,
@@ -123,6 +124,11 @@ const data = {
     },
   ],
   navSecondary: [
+    {
+      title: "cache",
+      url: "/admin/cache",
+      icon: DatabaseBackup,
+    },
     {
       title: "Galeri",
       url: "/admin/media",
