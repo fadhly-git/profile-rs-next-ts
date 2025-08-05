@@ -11,6 +11,8 @@
 !.yarn/versions
 /prisma/seed.ts
 /prisma/migrations
+*.zip
+node_modules_part_*
 
 # testing
 /coverage
