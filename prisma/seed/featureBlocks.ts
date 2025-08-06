@@ -13,8 +13,8 @@ export const seedFeatureBlocks = async () => {
       image_url: null,
       display_order: 1,
       is_active: true,
-      created_at: new Date('2025-07-28T21:18:47'),
-      updated_at: new Date('2025-08-02T06:10:49'),
+      createdAt: new Date('2025-07-28T21:18:47'),
+      updatedAt: new Date('2025-08-02T06:10:49'),
     },
     {
       id: 2,
@@ -24,8 +24,8 @@ export const seedFeatureBlocks = async () => {
       image_url: null,
       display_order: 2,
       is_active: true,
-      created_at: new Date('2025-07-28T21:18:47'),
-      updated_at: new Date('2025-08-02T06:11:02'),
+      createdAt: new Date('2025-07-28T21:18:47'),
+      updatedAt: new Date('2025-08-02T06:11:02'),
     },
     {
       id: 3,
@@ -36,8 +36,8 @@ export const seedFeatureBlocks = async () => {
       image_url: '/uploads/images/other/printer-1497542-1754112655442.png',
       display_order: 3,
       is_active: true,
-      created_at: new Date('2025-07-28T21:18:47'),
-      updated_at: new Date('2025-08-02T06:11:28'),
+      createdAt: new Date('2025-07-28T21:18:47'),
+      updatedAt: new Date('2025-08-02T06:11:28'),
     },
     {
       id: 4,
@@ -47,8 +47,8 @@ export const seedFeatureBlocks = async () => {
       image_url: '/uploads/images/other/printer-1497542-1754112655442.png',
       display_order: 0,
       is_active: true,
-      created_at: new Date('2025-08-01T02:33:50'),
-      updated_at: new Date('2025-08-02T06:10:34'),
+      createdAt: new Date('2025-08-01T02:33:50'),
+      updatedAt: new Date('2025-08-02T06:10:34'),
     },
     {
       id: 5,
@@ -58,8 +58,8 @@ export const seedFeatureBlocks = async () => {
       image_url: null,
       display_order: 0,
       is_active: true,
-      created_at: new Date('2025-08-01T02:39:51'),
-      updated_at: new Date('2025-08-02T06:10:16'),
+      createdAt: new Date('2025-08-01T02:39:51'),
+      updatedAt: new Date('2025-08-02T06:10:16'),
     },
   ];
 
@@ -73,8 +73,8 @@ export const seedFeatureBlocks = async () => {
         image_url: feature.image_url,
         display_order: feature.display_order,
         is_active: feature.is_active,
-        createdAt: feature.created_at,
-        updatedAt: feature.updated_at,
+        createdAt: feature.createdAt,
+        updatedAt: feature.updatedAt,
       },
       create: { ...feature },
     });

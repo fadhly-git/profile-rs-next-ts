@@ -12,8 +12,8 @@ export async function seedUsers() {
       email: 'admin@hospital.com',
       password: await hash(password, 10),
       role: 'ADMIN' as const,
-      created_at: new Date('2025-07-28T21:18:46.000Z'),
-      updated_at: new Date('2025-07-28T21:18:46.000Z')
+      createdAt: new Date('2025-07-28T21:18:46.000Z'),
+      updatedAt: new Date('2025-07-28T21:18:46.000Z')
     },
     {
       id: 2,
@@ -21,8 +21,8 @@ export async function seedUsers() {
       email: 'admin.rs@hospital.com',
       password: await hash(password, 10),
       role: 'ADMIN' as const,
-      created_at: new Date('2025-07-28T21:18:47.000Z'),
-      updated_at: new Date('2025-07-28T21:18:47.000Z')
+      createdAt: new Date('2025-07-28T21:18:47.000Z'),
+      updatedAt: new Date('2025-07-28T21:18:47.000Z')
     }
   ];
 

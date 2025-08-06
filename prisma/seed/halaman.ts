@@ -14,8 +14,8 @@ export const seedHalaman = async () => {
       menuId: BigInt(1),
       kategoriId: BigInt(4),
       is_published: true,
-      created_at: new Date('2025-07-28T21:18:47'),
-      updated_at: new Date('2025-08-01T22:34:10'),
+      createdAt: new Date('2025-07-28T21:18:47'),
+      updatedAt: new Date('2025-08-01T22:34:10'),
     },
     {
       id_halaman: BigInt(2),
@@ -26,8 +26,8 @@ export const seedHalaman = async () => {
       menuId: null,
       kategoriId: BigInt(1),
       is_published: true,
-      created_at: new Date('2025-07-31T19:41:40'),
-      updated_at: new Date('2025-08-01T22:34:29'),
+      createdAt: new Date('2025-07-31T19:41:40'),
+      updatedAt: new Date('2025-08-01T22:34:29'),
     },
     {
       id_halaman: BigInt(3),
@@ -38,8 +38,8 @@ export const seedHalaman = async () => {
       menuId: null,
       kategoriId: null,
       is_published: true,
-      created_at: new Date('2025-07-31T20:40:19'),
-      updated_at: new Date('2025-07-31T20:40:19'),
+      createdAt: new Date('2025-07-31T20:40:19'),
+      updatedAt: new Date('2025-07-31T20:40:19'),
     },
     {
       id_halaman: BigInt(4),
@@ -50,8 +50,8 @@ export const seedHalaman = async () => {
       menuId: null,
       kategoriId: BigInt(1),
       is_published: true,
-      created_at: new Date('2025-07-31T21:27:59'),
-      updated_at: new Date('2025-07-31T21:27:59'),
+      createdAt: new Date('2025-07-31T21:27:59'),
+      updatedAt: new Date('2025-07-31T21:27:59'),
     },
     {
       id_halaman: BigInt(6),
@@ -62,8 +62,8 @@ export const seedHalaman = async () => {
       menuId: null,
       kategoriId: null,
       is_published: true,
-      created_at: new Date('2025-08-01T02:50:39'),
-      updated_at: new Date('2025-08-01T02:50:39'),
+      createdAt: new Date('2025-08-01T02:50:39'),
+      updatedAt: new Date('2025-08-01T02:50:39'),
     },
   ];
 
@@ -77,8 +77,8 @@ export const seedHalaman = async () => {
         menuId: halaman.menuId,
         kategoriId: halaman.kategoriId,
         is_published: halaman.is_published,
-        createdAt: halaman.created_at,
-        updatedAt: halaman.updated_at,
+        createdAt: halaman.createdAt,
+        updatedAt: halaman.updatedAt,
       },
       create: { ...halaman },
     });
