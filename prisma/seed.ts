@@ -14,10 +14,8 @@ import { seedBeritas } from './seed/beritas.js';
 import { seedHalaman } from './seed/halaman.js';
 import { seedIndikatorMutu } from './seed/indikatorMutu.js';
 import { prisma } from '../src/lib/prisma.js';
-// ...import lainnya...
-// Import seed files lainnya sesuai kebutuhan
 
-const runSeeds = async () => {
+async function main() {
   try {
     await seedUsers();
     await seedKategori();
@@ -33,14 +31,16 @@ const runSeeds = async () => {
     await seedBeritas();
     await seedHalaman();
     await seedIndikatorMutu();
-    // Panggil fungsi seed lainnya sesuai urutan dependensi
 
     console.log('✅ Semua data telah di-seed dengan sukses!');
   } catch (error) {
     console.error('❌ Terjadi kesalahan saat seeding:', error);
+    process.exit(1); // Force exit dengan error code
   } finally {
     await prisma.$disconnect();
+    process.exit(0); // Force exit dengan success code
   }
-};
+}
 
-runSeeds();
+// Jalankan main function
+main();

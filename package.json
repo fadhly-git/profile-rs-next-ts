@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "NODE_ENV=production node server.mjs",
+    "start": "cross-env NODE_ENV=production node server.mjs",
+    "start:win": "set NODE_ENV=production && node server.mjs",
     "lint": "next lint",
     "seed": "node --loader ts-node/esm --no-warnings prisma/seed.ts",
     "seed:dev": "dotenv -e .env -- ts-node-esm prisma/seed.ts",
@@ -87,6 +88,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "bcryptjs": "^3.0.2",
+    "cross-env": "^10.0.0",
     "dotenv": "^17.2.0",
     "eslint": "^9",
     "eslint-config-next": "15.4.2",
