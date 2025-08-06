@@ -14,8 +14,8 @@ export const seedHeroSections = async () => {
       cta_button_link_1: null,
       cta_button_text_2: null,
       cta_button_link_2: null,
-      created_at: new Date('2025-07-28T21:18:47'),
-      updated_at: new Date('2025-08-01T22:06:04'),
+      createdAt: new Date('2025-07-28T21:18:47'),
+      updatedAt: new Date('2025-08-01T22:06:04'),
     },
     {
       id: 2,
@@ -26,8 +26,8 @@ export const seedHeroSections = async () => {
       cta_button_link_1: '/hubungi-kami',
       cta_button_text_2: null,
       cta_button_link_2: null,
-      created_at: new Date('2025-07-31T06:41:36'),
-      updated_at: new Date('2025-08-04T03:48:50'),
+      createdAt: new Date('2025-07-31T06:41:36'),
+      updatedAt: new Date('2025-08-04T03:48:50'),
     },
   ];
 
@@ -42,8 +42,8 @@ export const seedHeroSections = async () => {
         cta_button_link_1: hero.cta_button_link_1,
         cta_button_text_2: hero.cta_button_text_2,
         cta_button_link_2: hero.cta_button_link_2,
-        createdAt: hero.created_at,
-        updatedAt: hero.updated_at,
+        createdAt: hero.createdAt,
+        updatedAt: hero.updatedAt,
       },
       create: { ...hero },
     });

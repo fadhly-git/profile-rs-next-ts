@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "NODE_ENV=production node server.mjs",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts",
-    "seed:dev": "dotenv -e .env -- ts-node prisma/seed.ts",
+    "seed": "node --loader ts-node/esm --no-warnings prisma/seed.ts",
+    "seed:dev": "dotenv -e .env -- ts-node-esm prisma/seed.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -89,6 +93,7 @@
     "prisma": "^6.12.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
     "tw-animate-css": "^1.3.5",
     "typescript": "^5.8.3"
   },

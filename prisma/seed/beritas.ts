@@ -7,7 +7,7 @@ export const seedBeritas = async () => {
   const beritasData = [
     {
       id_berita: BigInt(3),
-      id_user: BigInt(5),
+      id_user: BigInt(1),
       id_kategori: BigInt(2),
       bahasa: 'ID' as EnumBeritasBahasa,
       updater: 'Admin RS',
@@ -23,12 +23,12 @@ export const seedBeritas = async () => {
       hits: 20,
       urutan: 1,
       tanggal_post: new Date('2025-04-04T03:31:00.000Z'),
-      created_at: new Date('2025-08-01T21:35:23'),
-      updated_at: new Date('2025-08-05T03:38:47'),
+      createdAt: new Date('2025-08-01T21:35:23'),
+      updatedAt: new Date('2025-08-05T03:38:47'),
     },
     {
       id_berita: BigInt(4),
-      id_user: BigInt(5),
+      id_user: BigInt(1),
       id_kategori: BigInt(2),
       bahasa: 'ID' as EnumBeritasBahasa,
       updater: 'Admin RS',
@@ -44,8 +44,8 @@ export const seedBeritas = async () => {
       hits: 11,
       urutan: 2,
       tanggal_post: new Date('2025-03-31T07:38:00.000Z'),
-      created_at: new Date('2025-08-01T21:48:10'),
-      updated_at: new Date('2025-08-05T03:38:47'),
+      createdAt: new Date('2025-08-01T21:48:10'),
+      updatedAt: new Date('2025-08-05T03:38:47'),
     },
   ];
 
@@ -69,8 +69,8 @@ export const seedBeritas = async () => {
         hits: berita.hits,
         urutan: berita.urutan,
         tanggal_post: berita.tanggal_post,
-        createdAt: berita.created_at,
-        updatedAt: berita.updated_at,
+        createdAt: berita.createdAt,
+        updatedAt: berita.updatedAt,
       },
       create: { ...berita },
     });

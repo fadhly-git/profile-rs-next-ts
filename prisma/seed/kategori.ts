@@ -15,8 +15,8 @@ export const seedKategori = async () => {
       is_main_menu: true,
       urutan: 0,
       is_active: true,
-      created_at: new Date('2025-07-28T21:18:47'),
-      updated_at: new Date('2025-07-28T21:18:47'),
+      createdAt: new Date('2025-07-28T21:18:47'),
+      updatedAt: new Date('2025-07-28T21:18:47'),
     },
     {
       id_kategori: BigInt(2),
@@ -28,8 +28,8 @@ export const seedKategori = async () => {
       is_main_menu: true,
       urutan: 0,
       is_active: true,
-      created_at: new Date('2025-07-28T21:18:47'),
-      updated_at: new Date('2025-07-28T21:18:47'),
+      createdAt: new Date('2025-07-28T21:18:47'),
+      updatedAt: new Date('2025-07-28T21:18:47'),
     },
     {
       id_kategori: BigInt(3),
@@ -41,8 +41,8 @@ export const seedKategori = async () => {
       is_main_menu: true,
       urutan: null,
       is_active: true,
-      created_at: new Date('2025-07-28T22:33:14'),
-      updated_at: new Date('2025-07-28T22:33:14'),
+      createdAt: new Date('2025-07-28T22:33:14'),
+      updatedAt: new Date('2025-07-28T22:33:14'),
     },
     {
       id_kategori: BigInt(4),
@@ -54,8 +54,8 @@ export const seedKategori = async () => {
       is_main_menu: true,
       urutan: null,
       is_active: true,
-      created_at: new Date('2025-07-31T22:27:33'),
-      updated_at: new Date('2025-07-31T22:27:33'),
+      createdAt: new Date('2025-07-31T22:27:33'),
+      updatedAt: new Date('2025-07-31T22:27:33'),
     },
     {
       id_kategori: BigInt(5),
@@ -67,8 +67,8 @@ export const seedKategori = async () => {
       is_main_menu: true,
       urutan: null,
       is_active: true,
-      created_at: new Date('2025-08-01T02:51:30'),
-      updated_at: new Date('2025-08-01T02:51:30'),
+      createdAt: new Date('2025-08-01T02:51:30'),
+      updatedAt: new Date('2025-08-01T02:51:30'),
     },
   ];
 
@@ -83,8 +83,8 @@ export const seedKategori = async () => {
         is_main_menu: kategori.is_main_menu,
         urutan: kategori.urutan,
         is_active: kategori.is_active,
-        createdAt: kategori.created_at,
-        updatedAt: kategori.updated_at,
+        createdAt: kategori.createdAt,
+        updatedAt: kategori.updatedAt,
       },
       create: {
         id_kategori: kategori.id_kategori,
@@ -96,8 +96,8 @@ export const seedKategori = async () => {
         is_main_menu: kategori.is_main_menu,
         urutan: kategori.urutan,
         is_active: kategori.is_active,
-        createdAt: kategori.created_at,
-        updatedAt: kategori.updated_at,
+        createdAt: kategori.createdAt,
+        updatedAt: kategori.updatedAt,
       },
     });
   }
