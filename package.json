@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "NODE_ENV=production node server.mjs",
     "lint": "next lint",
-    "seed": "ts-node --compiler-options '{\"module\":\"commonjs\"}' prisma/seed.ts",
+    "seed": "ts-node prisma/seed.ts",
     "seed:dev": "dotenv -e .env -- ts-node prisma/seed.ts",
     "postinstall": "prisma generate"
   },
