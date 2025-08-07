@@ -90,7 +90,7 @@ export function JadwalDokterPage({ initialData, dokters }: JadwalDokterPageProps
 
     const columns: ColumnDef<JadwalDokter>[] = useMemo(() => [
         {
-            accessorKey: 'dokter',
+            accessorKey: 'dokter.nama_dokter', // Gunakan nested accessor
             header: 'Dokter',
             cell: ({ row }) => {
                 const dokter = row.original.dokter
@@ -119,7 +119,7 @@ export function JadwalDokterPage({ initialData, dokters }: JadwalDokterPageProps
                         </div>
                     </div>
                 )
-            },
+            }
         },
         {
             accessorKey: 'hari',
@@ -205,7 +205,7 @@ export function JadwalDokterPage({ initialData, dokters }: JadwalDokterPageProps
                     columns={columns}
                     data={initialData}
                     searchPlaceholder="Cari dokter..."
-                    searchColumn="nama_dokter"
+                    searchColumn="dokter.nama_dokter"
                     rowWrapper={rowWrapper}
                 />
             )}

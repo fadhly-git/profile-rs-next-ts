@@ -92,7 +92,7 @@ export default function PromotionsSection({ promotions }: PromotionsSectionProps
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-[#07b8b2] bg-opacity-10 rounded-full mb-6">
-            <Gift className="w-8 h-8 text-[#07b8b2]" />
+            <Gift className="w-8 h-8 text-white" />
           </div>
           
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">

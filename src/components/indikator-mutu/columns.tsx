@@ -54,8 +54,7 @@ export const createColumns = ({ onEdit, onDelete, onDetail }: ActionsProps): Col
         cell: ({ row }) => {
             const period = row.getValue("period") as string
             const badgeInfo = getPeriodBadgeInfo(period)
-            return
-            (
+            return (
                 <div className="space-y-1">
                     <Badge variant={badgeInfo.variant} className="text-xs">
                         {badgeInfo.text}
