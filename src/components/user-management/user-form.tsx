@@ -5,6 +5,7 @@ import * as React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { Eye, EyeOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -37,8 +38,18 @@ const userFormSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters").optional(),
+    confirmPassword: z.string().optional(),
     role: z.enum(["SUPER_ADMIN", "ADMIN", "MODERATOR", "USER"]),
     gambar: z.any().optional(),
+}).refine((data) => {
+    // Only validate password confirmation if password is provided
+    if (data.password && data.password.length > 0) {
+        return data.password === data.confirmPassword
+    }
+    return true
+}, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
 })
 
 interface UserFormProps {
@@ -50,6 +61,8 @@ interface UserFormProps {
 
 export function UserForm({ user, open, onOpenChange, onSuccess }: UserFormProps) {
     const [isLoading, setIsLoading] = React.useState(false)
+    const [showPassword, setShowPassword] = React.useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
     const [previewImage, setPreviewImage] = React.useState<string | null>(
         user?.gambar || null
     )
@@ -60,6 +73,7 @@ export function UserForm({ user, open, onOpenChange, onSuccess }: UserFormProps)
             name: user?.name || "",
             email: user?.email || "",
             password: "",
+            confirmPassword: "",
             role: user?.role || "USER",
         },
     })
@@ -70,6 +84,7 @@ export function UserForm({ user, open, onOpenChange, onSuccess }: UserFormProps)
                 name: user.name,
                 email: user.email,
                 password: "",
+                confirmPassword: "",
                 role: user.role,
             })
             setPreviewImage(user.gambar)
@@ -78,11 +93,15 @@ export function UserForm({ user, open, onOpenChange, onSuccess }: UserFormProps)
                 name: "",
                 email: "",
                 password: "",
+                confirmPassword: "",
                 role: "USER",
             })
             setPreviewImage(null)
         }
-    }, [user, form])
+        // Reset password visibility when dialog opens/closes
+        setShowPassword(false)
+        setShowConfirmPassword(false)
+    }, [user, form, open])
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -123,7 +142,9 @@ export function UserForm({ user, open, onOpenChange, onSuccess }: UserFormProps)
             onSuccess?.()
         } catch (error) {
             console.error('Form submission error:', error);
-            toast.error("Something went wrong")
+            toast.error("Something went wrong",{
+                description: error instanceof Error ? error.message : "Please try again later"
+            })
         } finally {
             setIsLoading(false)
         }
@@ -193,7 +214,65 @@ export function UserForm({ user, open, onOpenChange, onSuccess }: UserFormProps)
                                         Password {user && "(Leave blank to keep current)"}
                                     </FormLabel>
                                     <FormControl>
-                                        <Input type="password" placeholder="Enter password" {...field} />
+                                        <div className="relative">
+                                            <Input 
+                                                type={showPassword ? "text" : "password"} 
+                                                placeholder="Enter password" 
+                                                {...field} 
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                            >
+                                                {showPassword ? (
+                                                    <EyeOff className="h-4 w-4" />
+                                                ) : (
+                                                    <Eye className="h-4 w-4" />
+                                                )}
+                                                <span className="sr-only">
+                                                    {showPassword ? "Hide password" : "Show password"}
+                                                </span>
+                                            </Button>
+                                        </div>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="confirmPassword"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Confirm Password</FormLabel>
+                                    <FormControl>
+                                        <div className="relative">
+                                            <Input 
+                                                type={showConfirmPassword ? "text" : "password"} 
+                                                placeholder="Confirm password" 
+                                                {...field} 
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="sm"
+                                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                            >
+                                                {showConfirmPassword ? (
+                                                    <EyeOff className="h-4 w-4" />
+                                                ) : (
+                                                    <Eye className="h-4 w-4" />
+                                                )}
+                                                <span className="sr-only">
+                                                    {showConfirmPassword ? "Hide password" : "Show password"}
+                                                </span>
+                                            </Button>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

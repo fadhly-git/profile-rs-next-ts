@@ -52,6 +52,10 @@ export default function UserManagementPage() {
     }, [loadUsers])
 
     // Check if user can access this page - moved after hooks
+    const handleCreate = () => {
+        setSelectedUser(null)
+        setShowForm(true)
+    }
 
     const handleEdit = (user: UserTableData) => {
         setSelectedUser(user)
@@ -134,6 +138,7 @@ export default function UserManagementPage() {
                 showDeleted={showDeleted}
                 onShowDeletedChange={setShowDeleted}
                 onEdit={handleEdit}
+                onCreate={handleCreate}
                 onDelete={handleDelete}
                 onRestore={handleRestore}
                 onPermanentDelete={handlePermanentDelete}
