@@ -55,13 +55,13 @@ export default function HeroSectionComponent({ heroData }: HeroSectionProps) {
           )}
           <div className="absolute inset-0 bg-black/40" />
 
-          <div className="relative container mx-auto px-4 h-full flex items-center">
-            <div className="text-white max-w-2xl">
-              <h1 className="text-4xl lg:text-6xl font-bold mb-4 leading-tight">
+          <div className="relative container mx-auto px-4 h-full flex flex-col justify-end">
+            <div className="text-white max-w-2xl mb-16">
+              <h1 className="text-4xl lg:text-5xl font-bold mb-4 leading-tight">
                 {hero.headline}
               </h1>
               {hero.subheading && (
-                <p className="text-lg lg:text-xl mb-8 opacity-90">
+                <p className="text-lg lg:text-lg mb-8 opacity-90">
                   {hero.subheading}
                 </p>
               )}
