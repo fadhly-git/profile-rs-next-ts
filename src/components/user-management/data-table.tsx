@@ -48,6 +48,7 @@ interface DataTableProps<TData, TValue> {
     showDeleted: boolean
     onShowDeletedChange: (checked: boolean) => void
     onEdit: (user: UserTableData) => void
+    onCreate: () => void
     onDelete: (userId: string) => void
     onRestore: (userId: string) => void
     onPermanentDelete: (userId: string) => void
@@ -60,6 +61,7 @@ export function DataTable<TData, TValue>({
     showDeleted,
     onShowDeletedChange,
     onEdit,
+    onCreate,
     onDelete,
     onRestore,
     onPermanentDelete,
@@ -93,19 +95,7 @@ export function DataTable<TData, TValue>({
 
     // Handler untuk tombol Add User
     const handleAddUser = () => {
-        // Panggil onEdit dengan user kosong untuk mode create
-        onEdit({
-            id: '',
-            name: '',
-            email: '',
-            role: 'USER',
-            gambar: null,
-            status: 'active',
-            createdAt: null,
-            email_verified_at: null,
-            deleted_at: null,
-            updatedAt: null,
-        } as UserTableData)
+        onCreate()
     }
 
     return (
