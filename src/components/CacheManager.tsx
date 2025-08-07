@@ -2,12 +2,25 @@
 
 import { useCache } from '@/hooks/usecahce';
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export default function CacheManager() {
   const { clearCache, loading, message } = useCache();
   const [customPath, setCustomPath] = useState('');
   const [customTag, setCustomTag] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    if (message) {
+      toast(message, {
+        icon: '✅',
+        style: {
+          background: darkMode ? '#1f2937' : '#fff',
+          color: darkMode ? '#fff' : '#1f2937',
+        },
+      });
+    }
+  }, [message, darkMode]);
 
   // Load dark mode preference
   useEffect(() => {

@@ -73,6 +73,9 @@ export async function updateDokter(id: string, data: DokterFormData) {
         }
 
         revalidatePath("/admin/data-dokter")
+        revalidatePath(`/admin/data-dokter/${id}`)
+        revalidatePath('/layanan/jadwal-dokter')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error("Error updating dokter:", error)
@@ -123,6 +126,9 @@ export async function deleteDokter(id: string) {
         })
 
         revalidatePath("/admin/data-dokter")
+        revalidatePath(`/admin/data-dokter/${id}`)
+        revalidatePath('/layanan/jadwal-dokter')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error("Error deleting dokter:", error)

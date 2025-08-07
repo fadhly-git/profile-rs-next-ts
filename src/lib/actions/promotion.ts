@@ -45,6 +45,7 @@ export async function createPromotion(data: PromotionFormData) {
             }
         })
         revalidatePath('/admin/promosi')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error creating promotion:', error)
@@ -67,6 +68,7 @@ export async function updatePromotion(id: number, data: PromotionFormData) {
             }
         })
         revalidatePath('/admin/promosi')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error updating promotion:', error)
@@ -80,6 +82,7 @@ export async function deletePromotion(id: number) {
             where: { id }
         })
         revalidatePath('/admin/promosi')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error deleting promotion:', error)

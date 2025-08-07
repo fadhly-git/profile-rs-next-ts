@@ -62,6 +62,9 @@ export async function createKategoriAction(formData: FormData) {
         })
 
         revalidatePath("/admin/kategori")
+        revalidatePath("/admin/berita")
+        revalidatePath("/admin/halaman")
+        revalidatePath("/")
         return { success: true }
     } catch (error) {
         console.error("Error creating kategori:", error)
@@ -120,6 +123,9 @@ export async function updateKategoriAction(id: string, formData: FormData): Prom
         })
 
         revalidatePath("/admin/kategori")
+        revalidatePath("/admin/berita")
+        revalidatePath("/admin/halaman")
+        revalidatePath("/")
         return result!
 
     } catch (error) {
@@ -233,6 +239,9 @@ export async function updateKategoriActionWithOptions(id: string, formData: Form
         })
 
         revalidatePath("/admin/kategori")
+        revalidatePath("/admin/berita")
+        revalidatePath("/admin/halaman")
+        revalidatePath("/")
         return result!
 
     } catch (error: any) {

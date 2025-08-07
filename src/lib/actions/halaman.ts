@@ -13,6 +13,14 @@ export interface HalamanFormData {
     is_published: boolean
 }
 
+function getNameKategori(kategoriId: string | undefined | null) {
+    if (!kategoriId) return null;
+    return prisma.kategori.findUnique({
+        where: { id_kategori: BigInt(kategoriId) },
+        select: { nama_kategori: true },
+    });
+}
+
 export async function createHalaman(data: HalamanFormData) {
     try {
         await prisma.halaman.create({
@@ -26,7 +34,11 @@ export async function createHalaman(data: HalamanFormData) {
             },
         })
 
+        const nama_kategori = await getNameKategori(data.kategoriId);
+
         revalidatePath('/admin/halaman')
+        revalidatePath('/')
+        revalidatePath(`/${nama_kategori}/${data.slug}`)
         return { success: true }
     } catch (error) {
         console.error('Error creating halaman:', error)
@@ -48,6 +60,12 @@ export async function updateHalaman(id: string, data: HalamanFormData) {
             },
         })
 
+        const nama_kategori = await getNameKategori(data.kategoriId);
+
+        revalidatePath(`/${nama_kategori}/${data.slug}`)
+        revalidatePath(`/admin/halaman/${id}`)
+        revalidatePath('/')
+        revalidatePath(`/${data.slug}`)
         revalidatePath('/admin/halaman')
         return { success: true }
     } catch (error) {
@@ -63,6 +81,7 @@ export async function deleteHalaman(id: string) {
         })
 
         revalidatePath('/admin/halaman')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error deleting halaman:', error)

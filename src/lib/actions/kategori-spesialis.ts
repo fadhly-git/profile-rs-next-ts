@@ -40,6 +40,9 @@ export async function createSpesialis(data: { nama_spesialis: string; deskripsi?
         revalidatePath("/admin/jadwal-dokter")
         revalidatePath("/admin/dokter")
         revalidatePath("/admin/data-dokter")
+        revalidatePath("/admin/kategori-spesialis")
+        revalidatePath("/layanan/jadwal-dokter")
+        revalidatePath("/")
 
         return {
             ...spesialis,
@@ -71,8 +74,12 @@ export async function updateSpesialis(id: string, data: { nama_spesialis: string
             },
         })
 
+        revalidatePath("/admin/jadwal-dokter")
         revalidatePath("/admin/dokter")
         revalidatePath("/admin/data-dokter")
+        revalidatePath("/admin/kategori-spesialis")
+        revalidatePath("/layanan/jadwal-dokter")
+        revalidatePath("/")
 
         return {
             ...spesialis,
@@ -99,8 +106,12 @@ export async function deleteSpesialis(id: string) {
             where: { id: BigInt(id) },
         })
 
+        revalidatePath("/admin/jadwal-dokter")
         revalidatePath("/admin/dokter")
         revalidatePath("/admin/data-dokter")
+        revalidatePath("/admin/kategori-spesialis")
+        revalidatePath("/layanan/jadwal-dokter")
+        revalidatePath("/")
 
         return { success: true }
     } catch (error) {
