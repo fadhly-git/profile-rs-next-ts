@@ -379,8 +379,9 @@ export async function updateBeritaAction(id: string, formData: FormData) {
         // Revalidate cache
         revalidatePath('/admin/berita');
         revalidatePath(`/admin/berita/${id}`);
+        revalidatePath('/berita');
         revalidatePath(`/berita/${slug_berita}`);
-
+        revalidatePath('/');
     } catch (error) {
         console.error('Error updating berita:', error);
         throw new Error(error instanceof Error ? error.message : 'Gagal mengupdate berita');
@@ -396,4 +397,9 @@ export const deleteBeritaAction = async (id: string) => {
         },
     });
     revalidatePath("/admin/berita");
+    revalidatePath(`/admin/berita/${id}`);
+    revalidatePath('/berita');
+    revalidatePath(`/berita/${id}`);
+    revalidatePath("/");
+    return { success: true, message: "Berita berhasil dihapus" };
 };

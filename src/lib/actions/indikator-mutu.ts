@@ -113,6 +113,8 @@ export async function createIndikatorMutu(input: CreateIndikatorMutuInput) {
             }
         })
         revalidatePath('/admin/indikator-mutu')
+        revalidatePath('/')
+        revalidatePath(`/indikator-mutu`)
         return { success: true, message: 'Indikator mutu berhasil ditambahkan' }
     } catch (error) {
         console.error('Error creating indikator mutu:', error)
@@ -145,6 +147,8 @@ export async function updateIndikatorMutu(input: UpdateIndikatorMutuInput) {
             }
         })
         revalidatePath('/admin/indikator-mutu')
+        revalidatePath('/')
+        revalidatePath(`/indikator-mutu`)
         return { success: true, message: 'Indikator mutu berhasil diperbarui' }
     } catch (error) {
         console.error('Error updating indikator mutu:', error)
@@ -158,6 +162,8 @@ export async function deleteIndikatorMutu(id: number) {
             where: { id }
         })
         revalidatePath('/admin/indikator-mutu')
+        revalidatePath('/')
+        revalidatePath(`/indikator-mutu`)
         return { success: true, message: 'Indikator mutu berhasil dihapus' }
     } catch (error) {
         console.error('Error deleting indikator mutu:', error)

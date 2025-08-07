@@ -19,6 +19,7 @@ export async function createFeatureBlock(data: FeatureBlockFormData) {
         })
 
         revalidatePath('/admin/layanan')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error creating feature block:', error)
@@ -41,6 +42,7 @@ export async function updateFeatureBlock(id: number, data: FeatureBlockFormData)
         })
 
         revalidatePath('/admin/layanan')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error updating feature block:', error)
@@ -55,6 +57,7 @@ export async function deleteFeatureBlock(id: number) {
         })
 
         revalidatePath('/admin/layanan')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error deleting feature block:', error)
@@ -70,6 +73,7 @@ export async function toggleFeatureBlockStatus(id: number, is_active: boolean) {
         })
 
         revalidatePath('/admin/layanan')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error toggling status:', error)

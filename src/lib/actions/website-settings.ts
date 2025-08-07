@@ -42,6 +42,7 @@ export async function createWebsiteSettings(data: WebsiteSettingsInput) {
     })
     
     revalidatePath('/admin/website-settings')
+    revalidatePath('/')
     return { success: true, data: result }
   } catch (error) {
     console.error('Error creating website settings:', error)
@@ -60,6 +61,7 @@ export async function updateWebsiteSettings(id: number, data: WebsiteSettingsInp
     })
     
     revalidatePath('/admin/website-settings')
+    revalidatePath('/')
     return { success: true, data: result }
   } catch (error) {
     console.error('Error updating website settings:', error)
@@ -74,6 +76,7 @@ export async function deleteWebsiteSettings(id: number) {
     })
     
     revalidatePath('/admin/website-settings')
+    revalidatePath('/')
     return { success: true }
   } catch (error) {
     console.error('Error deleting website settings:', error)

@@ -26,6 +26,7 @@ export async function deleteHeroSectionAction(id: string) {
             where: { id: parseInt(id) }
         })
         revalidatePath('/admin/hero-section-or-banner')
+        revalidatePath('/')
     } catch (error) {
         console.error('Error deleting hero section:', error)
         throw new Error('Gagal menghapus hero section')
@@ -62,6 +63,7 @@ export async function createHeroSectionAction(formData: FormData) {
         })
 
         revalidatePath('/admin/hero-section-or-banner-or-banner')
+        revalidatePath('/')
     } catch (error) {
         console.error('Error creating hero section:', error)
         throw new Error(error instanceof Error ? error.message : 'Gagal membuat hero section')
@@ -125,8 +127,8 @@ export async function editHeroSectionAction(id: string, formData: FormData) {
         })
 
         // Revalidate cache
-        revalidatePath('/admin/hero-section-or-banner-or-banner')
         revalidatePath('/admin/hero-section-or-banner')
+        revalidatePath('/')
 
         return { success: true }
     } catch (error) {

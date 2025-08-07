@@ -46,6 +46,8 @@ export async function createJadwalDokter(data: CreateJadwalInput) {
         })
 
         revalidatePath('/admin/jadwal-dokter')
+        revalidatePath('/')
+        revalidatePath('/layanan/jadwal-dokter')
         return { success: true, message: 'Jadwal berhasil ditambahkan' }
     } catch (error) {
         console.error('Error creating jadwal dokter:', error)
@@ -70,6 +72,8 @@ export async function updateJadwalDokter(data: UpdateJadwalInput) {
         })
 
         revalidatePath('/admin/jadwal-dokter')
+        revalidatePath('/layanan/jadwal-dokter')
+        revalidatePath('/')
         return { success: true, message: 'Jadwal berhasil diperbarui' }
     } catch (error) {
         console.error('Error updating jadwal dokter:', error)
@@ -84,6 +88,8 @@ export async function deleteJadwalDokter(id: bigint) {
         })
 
         revalidatePath('/admin/jadwal-dokter')
+        revalidatePath('/layanan/jadwal-dokter')
+        revalidatePath('/')
         return { success: true, message: 'Jadwal berhasil dihapus' }
     } catch (error) {
         console.error('Error deleting jadwal dokter:', error)
@@ -99,6 +105,8 @@ export async function updateJadwalStatus(id: bigint, status: number) {
         })
 
         revalidatePath('/admin/jadwal-dokter')
+        revalidatePath('/layanan/jadwal-dokter')
+        revalidatePath('/')
         return { success: true, message: `Status jadwal berhasil ${status === 1 ? 'diaktifkan' : 'dinonaktifkan'}` }
     } catch (error) {
         console.error("Error update status: ", error)

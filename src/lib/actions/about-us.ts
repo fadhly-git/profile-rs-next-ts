@@ -39,6 +39,7 @@ export async function createAboutUs(data: AboutUsData) {
             data
         })
         revalidatePath('/app/admin/tentang-kami')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error creating about us section:', error)
@@ -53,6 +54,7 @@ export async function updateAboutUs(id: number, data: AboutUsData) {
             data
         })
         revalidatePath('/app/admin/tentang-kami')
+        revalidatePath('/')
         return { success: true }
     } catch (error) {
         console.error('Error updating about us section:', error)
@@ -66,6 +68,8 @@ export async function deleteAboutUs(id: number) {
             where: { id }
         })
         revalidatePath('/app/admin/tentang-kami')
+        revalidatePath('/')
+        return { success: true }
     } catch (error) {
         console.error('Error deleting about us section:', error)
         throw new Error('Gagal menghapus section About Us')
