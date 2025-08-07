@@ -58,7 +58,7 @@ export default async function AdminJadwalDokterPage() {
     }))
 
     return (
-        <Suspense fallback={<div className="p-6"><LoadingSpinner /></div>}>
+        <Suspense fallback={<LoadingSpinner />}>
             <JadwalDokterPage
                 initialData={jadwalData}
                 dokters={dokterData}

@@ -120,6 +120,8 @@ export function IndikatorMutuDataTable({ data, uniqueJuduls }: IndikatorMutuData
 
     const groupedData = groupDataByTitle(data)
 
+    console.log("Grouped Data:", groupedData)
+
     return (
         <>
             <div className="space-y-6">
