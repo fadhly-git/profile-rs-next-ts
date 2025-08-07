@@ -234,7 +234,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
     <>
       {/* Top Info Bar - Hidden on mobile for cleaner look */}
       {!isMobile && (
-        <div className="bg-[#07b8b2] text-white">
+        <div className="bg-[#07b8b2] text-white relative z-40 pointer-events-auto">
           <div className="mx-auto max-w-7xl px-4">
             <div className="flex items-center justify-between py-2 text-sm">
               {/* Contact Info */}
