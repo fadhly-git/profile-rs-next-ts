@@ -1,18 +1,18 @@
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
+import {
+  MapPin,
+  Phone,
+  Mail,
   Clock,
   Facebook,
-  Twitter,
   Instagram,
   Youtube,
   ChevronRight,
   MessageSquare,
   Send
 } from 'lucide-react'
+import { TiktokIcon } from '@/components/ui/Footer'
 import { KritikSaranForm } from '@/components/forms/kritik-saran-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -22,18 +22,18 @@ import { Button } from '@/components/ui/button'
 export function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
   return (
     <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-6" aria-label="Breadcrumb">
-      <Link 
-        href="/" 
+      <Link
+        href="/"
         className="hover:text-[#07b8b2] transition-colors flex items-center"
       >
         <span>Beranda</span>
       </Link>
-      
+
       {items.map((item, index) => (
         <div key={index} className="flex items-center space-x-2">
           <ChevronRight className="w-4 h-4 text-gray-400" />
           {item.href && index < items.length - 1 ? (
-            <Link 
+            <Link
               href={item.href}
               className="hover:text-[#07b8b2] transition-colors"
             >
@@ -49,13 +49,13 @@ export function Breadcrumb({ items }: { items: { label: string; href?: string }[
 }
 
 // Contact Info Card Component
-function ContactInfoCard({ 
-  icon: Icon, 
-  title, 
-  content, 
+function ContactInfoCard({
+  icon: Icon,
+  title,
+  content,
   href,
-  isExternal = false 
-}: { 
+  isExternal = false
+}: {
   icon: React.ElementType
   title: string
   content: string | null
@@ -68,7 +68,7 @@ function ContactInfoCard({
     if (href) {
       if (isExternal) {
         return (
-          <a 
+          <a
             href={href}
             target="_blank"
             rel="noopener noreferrer"
@@ -95,7 +95,7 @@ function ContactInfoCard({
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0">
               <div className="w-10 h-10 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center group-hover:bg-[#07b8b2] transition-colors">
-                <Icon className="w-6 h-6 text-[#07b8b2] group-hover:text-white text-white/90 transition-colors" />
+                <Icon className="w-6 h-6  group-hover:text-white text-white/90 transition-colors" />
               </div>
             </div>
             <div className="flex-1 min-w-0">
@@ -114,7 +114,7 @@ function ContactInfoCard({
 function SocialMediaLinks({ settings }: { settings: any }) {
   const socialLinks = [
     { icon: Facebook, url: settings.facebook_url, name: 'Facebook' },
-    { icon: Twitter, url: settings.twitter_url, name: 'Twitter' },
+    { icon: TiktokIcon, url: settings.twitter_url, name: 'TikTok' },
     { icon: Instagram, url: settings.instagram_url, name: 'Instagram' },
     { icon: Youtube, url: settings.youtube_url, name: 'YouTube' }
   ].filter(link => link.url)
@@ -163,23 +163,23 @@ function GoogleMapsSection({ mapsUrl }: { mapsUrl: string }) {
   // Extract iframe src from the full HTML if needed
   const getIframeSrc = (url: string) => {
     // If it's already a direct URL, return as is
-    if (url.startsWith('https://www.google.com/maps/embed') || 
-        url.startsWith('https://maps.google.com/')) {
+    if (url.startsWith('https://www.google.com/maps/embed') ||
+      url.startsWith('https://maps.google.com/')) {
       return url
     }
-    
+
     // If it's HTML with iframe, extract src using regex
     const srcMatch = url.match(/src=["']([^"']*)["']/i)
     if (srcMatch && srcMatch[1]) {
       return srcMatch[1]
     }
-    
+
     // Fallback: if still contains iframe tags, try to extract any google maps URL
     const googleMapsMatch = url.match(/https:\/\/(?:www\.)?google\.com\/maps\/embed[^"'\s>]*/i)
     if (googleMapsMatch) {
       return googleMapsMatch[0]
     }
-    
+
     return url
   }
 
@@ -239,12 +239,12 @@ export default async function KontakKamiPage() {
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           <Breadcrumb items={breadcrumbItems} />
-          
+
           {/* Header Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">Kontak Kami</h1>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Kami siap membantu Anda. Hubungi kami melalui berbagai cara berikut atau 
+              Kami siap membantu Anda. Hubungi kami melalui berbagai cara berikut atau
               sampaikan kritik dan saran untuk pelayanan yang lebih baik.
             </p>
           </div>
@@ -260,7 +260,7 @@ export default async function KontakKamiPage() {
                     title="Alamat"
                     content={settings?.address ?? null}
                   />
-                  
+
                   <ContactInfoCard
                     icon={Phone}
                     title="Telepon"
@@ -268,7 +268,7 @@ export default async function KontakKamiPage() {
                     href={settings?.phone ? `tel:${settings.phone}` : undefined}
                     isExternal={true}
                   />
-                  
+
                   <ContactInfoCard
                     icon={Mail}
                     title="Email"
@@ -276,7 +276,7 @@ export default async function KontakKamiPage() {
                     href={settings?.email ? `mailto:${settings.email}` : undefined}
                     isExternal={true}
                   />
-                  
+
                   <ContactInfoCard
                     icon={Clock}
                     title="Jam Operasional"
@@ -345,7 +345,7 @@ export default async function KontakKamiPage() {
     )
   } catch (error) {
     console.error('Error loading contact page:', error)
-    
+
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center p-8">
