@@ -158,12 +158,12 @@ export const JadwalDokterTable: React.FC<JadwalDokterTableProps> = ({ data }) =>
                       {/* Nama Dokter */}
                       <div className="p-4 border-b border-gray-200 bg-gray-100">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-full bg-[#07b8b2] flex items-center justify-center">
-                            <Avatar className="h-8 w-8">
+                          <div className="w-14 h-14 rounded-full bg-[#07b8b2] flex items-center justify-center">
+                            <Avatar className="h-13 w-13">
                               {dokter.photo ? (
                                 <AvatarImage src={dokter.photo} alt={dokter.nama_dokter} />
                               ) : (
-                                <User className="w-6 h-6 text-white" />
+                                <User className="w-10 h-10 text-white" />
                               )}
                             </Avatar>
                           </div>
@@ -318,8 +318,8 @@ export const JadwalDokterTable: React.FC<JadwalDokterTableProps> = ({ data }) =>
                               <TableCell className="py-4">
                                 {showName ? (
                                   <div className="flex items-center space-x-4">
-                                    <div className="w-12 h-12 rounded-full bg-red-100 border-2 border-red-200 flex items-center justify-center">
-                                      <Avatar className="h-8 w-8">
+                                    <div className="w-14 h-14 rounded-full bg-red-100 border-2 border-red-200 flex items-center justify-center">
+                                      <Avatar className="h-13 w-13">
                                         {dokter.photo ? (
                                           <AvatarImage src={dokter.photo} alt={dokter.nama_dokter} />
                                         ) : (
@@ -362,8 +362,8 @@ export const JadwalDokterTable: React.FC<JadwalDokterTableProps> = ({ data }) =>
                             <TableCell className="py-4">
                               {showName ? (
                                 <div className="flex items-center space-x-4">
-                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#07b8b2] to-[#06a0a0] flex items-center justify-center shadow-md">
-                                    <Avatar className="h-8 w-8">
+                                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#07b8b2] to-[#06a0a0] flex items-center justify-center shadow-md">
+                                    <Avatar className="h-13 w-13">
                                       {dokter.photo ? (
                                         <AvatarImage src={dokter.photo} alt={dokter.nama_dokter} />
                                       ) : (
