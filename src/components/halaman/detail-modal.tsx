@@ -25,7 +25,7 @@ export function DetailModal({ halaman, open, onOpenChange }: DetailModalProps) {
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogContent className="!max-w-4xl max-h-[80vh]">
                 <DialogHeader>
                     <DialogTitle>Detail Halaman</DialogTitle>
                 </DialogHeader>
