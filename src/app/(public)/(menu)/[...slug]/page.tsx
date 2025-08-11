@@ -15,7 +15,9 @@ import {
     Users,
     Clock,
     Tag,
-    X
+    X,
+    Info,
+    TrendingUp
 } from 'lucide-react'
 import { Suspense } from 'react'
 import { ShareButton } from '@/components/landing/shared-button'
@@ -75,8 +77,8 @@ function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
             </Link>
 
             {items.map((item, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                <div key={index} className="flex items-center space-x-2 min-w-0">
+                    <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                     {item.href && index < items.length - 1 ? (
                         <Link
                             href={item.href}
@@ -85,7 +87,15 @@ function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
                             {item.label}
                         </Link>
                     ) : (
-                        <span className="text-gray-900 font-medium">{item.label}</span>
+                        <span
+                            className={`text-gray-900 font-medium ${index === items.length - 1
+                                ? 'truncate max-w-[120px] sm:max-w-[200px] md:max-w-[300px]'
+                                : ''
+                                }`}
+                            title={item.label}
+                        >
+                            {item.label}
+                        </span>
                     )}
                 </div>
             ))}
@@ -346,11 +356,11 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
             }),
             prisma.halaman.findUnique({
                 where: { slug: lastSegment },
-                select: { 
-                    judul: true, 
-                    konten: true, 
-                    gambar: true, 
-                    createdAt: true, 
+                select: {
+                    judul: true,
+                    konten: true,
+                    gambar: true,
+                    createdAt: true,
                     updatedAt: true,
                     kategori: {
                         select: { nama_kategori: true, slug_kategori: true }
@@ -359,10 +369,10 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
             }),
             prisma.beritas.findFirst({
                 where: { slug_berita: lastSegment },
-                select: { 
-                    judul_berita: true, 
-                    isi: true, 
-                    gambar: true, 
+                select: {
+                    judul_berita: true,
+                    isi: true,
+                    gambar: true,
                     thumbnail: true,
                     keywords: true, // 👈 Tambahkan keywords
                     tanggal_post: true,
@@ -488,7 +498,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
             const newsImage = newsItem.gambar || newsItem.thumbnail || defaultMetadata.defaultImage
             const categoryName = newsItem.kategori?.nama_kategori
             const authorName = newsItem.user?.name || defaultMetadata.siteName
-            
+
             // 👈 Gunakan keywords dari database + tambahan keywords default
             const keywordsArray = []
             if (newsItem.keywords) {
@@ -499,7 +509,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
             keywordsArray.push('RS PKU Muhammadiyah Boja')
             keywordsArray.push('rumah sakit')
             keywordsArray.push('kesehatan')
-            
+
             const finalKeywords = keywordsArray.filter(Boolean).join(', ')
 
             return {
@@ -579,7 +589,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
 
     } catch (error) {
         console.error('Error generating metadata:', error)
-        
+
         // Error fallback metadata
         return {
             title: 'Error - RS PKU Muhammadiyah Boja',
@@ -623,7 +633,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
         if (fullPath === 'hubungi-kami') {
             return <KontakKami />
         }
-        
+
         if (fullPath === 'layanan/jadwal-dokter') {
             return <JadwalDokter />
         }
@@ -703,15 +713,15 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                 )}
                             </div>
 
-                            {/* Content Grid - Modified to 2 columns */}
-                            <div className="grid gap-8 lg:grid-cols-2">
-                                {/* Main Content */}
-                                <div className="space-y-8">
+                            {/* Content Grid - Improved 2 columns layout */}
+                            <div className="grid gap-8 lg:grid-cols-3">
+                                {/* Main Content - Takes 2/3 width */}
+                                <div className="lg:col-span-2 space-y-8">
                                     {/* Subkategori */}
                                     {category.children.length > 0 && (
                                         <section>
                                             <div className="flex items-center space-x-2 mb-6">
-                                                <Users className="w-5 h-5 text-white" />
+                                                <Users className="w-5 h-5 text-[#07b8b2]" />
                                                 <h2 className="text-xl font-semibold text-gray-900">Subkategori</h2>
                                             </div>
                                             <div className="grid gap-4 sm:grid-cols-2">
@@ -734,18 +744,19 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                         <section>
                                             <div className="flex items-center justify-between mb-6">
                                                 <div className="flex items-center space-x-2">
-                                                    <Newspaper className="w-5 h-5 text-white" />
+                                                    <Newspaper className="w-5 h-5 text-[#07b8b2]" />
                                                     <h2 className="text-xl font-semibold text-gray-900">Berita Terkait</h2>
                                                 </div>
                                                 <Link
                                                     href={`/${category.slug_kategori}?type=berita`}
-                                                    className="text-[#07b8b2] hover:text-teal-700 text-sm font-medium transition-colors"
+                                                    className="text-[#07b8b2] hover:text-teal-700 text-sm font-medium transition-colors flex items-center space-x-1"
                                                 >
-                                                    Lihat semua
+                                                    <span>Lihat semua</span>
+                                                    <ChevronRight className="w-4 h-4" />
                                                 </Link>
                                             </div>
-                                            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                                                {category.beritas.map(berita => (
+                                            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+                                                {category.beritas.slice(0, 4).map(berita => (
                                                     <NewsCard
                                                         key={berita.id_berita.toString()}
                                                         title={berita.judul_berita}
@@ -762,41 +773,39 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                     )}
 
                                     {/* Halaman di kategori (jika tidak ada subkategori) */}
-                                    {category.children.length === 0 && category.Halaman.length > 0 && (
+                                    { category.Halaman.length > 0 && (
                                         <section>
-                                            <div className="flex items-center justify-between mb-6">
-                                                <div className="flex items-center space-x-2">
-                                                    <FileText className="w-5 h-5 text-white" />
-                                                    <h2 className="text-xl font-semibold text-gray-900">Halaman</h2>
-                                                </div>
+                                            <div className="flex items-center space-x-2 mb-6">
+                                                <FileText className="w-5 h-5 text-[#07b8b2]" />
+                                                <h2 className="text-xl font-semibold text-gray-900">Halaman</h2>
                                             </div>
                                             <div className="grid gap-4">
                                                 {category.Halaman.map(halaman => (
                                                     <Link
                                                         key={halaman.id_halaman.toString()}
                                                         href={`/${category.slug_kategori}/${halaman.slug}`}
-                                                        className="block p-6 bg-white rounded-xl border border-gray-200 hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300"
+                                                        className="block p-6 bg-white rounded-xl border border-gray-200 hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300 group"
                                                     >
                                                         <div className="flex items-start space-x-4">
                                                             <div className="flex-shrink-0">
-                                                                <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
+                                                                <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center group-hover:bg-[#07b8b2] group-hover:bg-opacity-20 transition-colors">
                                                                     <FileText className="w-6 h-6 text-white" />
                                                                 </div>
                                                             </div>
                                                             <div className="flex-1 min-w-0">
-                                                                <h3 className="font-semibold text-gray-900 hover:text-[#07b8b2] transition-colors line-clamp-1">
+                                                                <h3 className="font-semibold text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-1">
                                                                     {halaman.judul}
                                                                 </h3>
                                                                 {halaman.konten && (
-                                                                    <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-                                                                        {halaman.konten.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                                                                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                                                                        {halaman.konten.replace(/<[^>]*>/g, '').substring(0, 120)}...
                                                                     </p>
                                                                 )}
-                                                                <div className="mt-3 flex items-center justify-between">
-                                                                    <span className="text-xs text-gray-500">
+                                                                <div className="mt-4 flex items-center justify-between">
+                                                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                                                                         {new Date(halaman.createdAt).toLocaleDateString('id-ID')}
                                                                     </span>
-                                                                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                                                                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#07b8b2] transition-colors" />
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -807,40 +816,93 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                     )}
                                 </div>
 
-                                {/* Sidebar - hanya berita terkait yang tersisa */}
+                                {/* Sidebar - Takes 1/3 width */}
                                 <div className="space-y-6">
                                     {/* Berita Terpopuler */}
-                                    {category.beritas.length > 3 && (
-                                        <div className="bg-white rounded-xl border border-gray-200 p-6">
-                                            <div className="flex items-center space-x-2 mb-4">
-                                                <Newspaper className="w-5 h-5 text-white" />
+                                    {category.beritas.length > 0 && (
+                                        <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-6">
+                                            <div className="flex items-center space-x-2 mb-6">
+                                                <TrendingUp className="w-5 h-5 text-[#07b8b2]" />
                                                 <h3 className="font-semibold text-gray-900">Berita Terpopuler</h3>
                                             </div>
-                                            <div className="space-y-3">
-                                                {category.beritas.slice(0, 3).map(berita => (
-                                                    <Link
-                                                        key={berita.id_berita.toString()}
-                                                        href={`/${category.slug_kategori}/${berita.slug_berita}`}
-                                                        className="block p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                                                    >
-                                                        <h4 className="text-sm font-medium text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-2">
-                                                            {berita.judul_berita}
-                                                        </h4>
-                                                        <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
-                                                            <div className="flex items-center space-x-1">
-                                                                <Calendar className="w-3 h-3" />
-                                                                <span>{berita.tanggal_post ? new Date(berita.tanggal_post).toLocaleDateString('id-ID') : '-'}</span>
+                                            <div className="space-y-4">
+                                                {category.beritas
+                                                    .sort((a, b) => (b.hits || 0) - (a.hits || 0))
+                                                    .slice(0, 5)
+                                                    .map((berita, index) => (
+                                                        <Link
+                                                            key={berita.id_berita.toString()}
+                                                            href={`/${category.slug_kategori}/${berita.slug_berita}`}
+                                                            className="block p-4 rounded-lg hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-200"
+                                                        >
+                                                            <div className="flex items-start space-x-3">
+                                                                <div className="flex-shrink-0">
+                                                                    <div className="w-8 h-8 bg-[#07b8b2] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                                                        {index + 1}
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <h4 className="text-sm font-medium text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-2 leading-relaxed">
+                                                                        {berita.judul_berita}
+                                                                    </h4>
+                                                                    <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
+                                                                        <div className="flex items-center space-x-1">
+                                                                            <Calendar className="w-3 h-3" />
+                                                                            <span>{berita.tanggal_post ? new Date(berita.tanggal_post).toLocaleDateString('id-ID') : '-'}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center space-x-1">
+                                                                            <Eye className="w-3 h-3" />
+                                                                            <span>{berita.hits || 0}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div className="flex items-center space-x-1">
-                                                                <Eye className="w-3 h-3" />
-                                                                <span>{berita.hits || 0} views</span>
-                                                            </div>
-                                                        </div>
-                                                    </Link>
-                                                ))}
+                                                        </Link>
+                                                    ))}
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Info Kategori */}
+                                    {category.keterangan && (
+                                        <div className="bg-gradient-to-br from-[#07b8b2] to-teal-600 rounded-xl p-6 text-white">
+                                            <div className="flex items-center space-x-2 mb-4">
+                                                <Info className="w-5 h-5" />
+                                                <h3 className="font-semibold">Tentang {category.nama_kategori}</h3>
+                                            </div>
+                                            <p className="text-sm leading-relaxed opacity-90">
+                                                {category.keterangan}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Quick Stats */}
+                                    <div className="bg-white rounded-xl border border-gray-200 p-6">
+                                        <h3 className="font-semibold text-gray-900 mb-4">Statistik</h3>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <span className="text-sm text-gray-600 flex items-center space-x-2">
+                                                    <FileText className="w-4 h-4" />
+                                                    <span>Total Halaman</span>
+                                                </span>
+                                                <span className="font-semibold text-[#07b8b2]">{category.Halaman?.length || 0}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                                <span className="text-sm text-gray-600 flex items-center space-x-2">
+                                                    <Newspaper className="w-4 h-4" />
+                                                    <span>Total Berita</span>
+                                                </span>
+                                                <span className="font-semibold text-[#07b8b2]">{category.beritas?.length || 0}</span>
+                                            </div>
+                                            <div className="flex items-center justify-between py-2">
+                                                <span className="text-sm text-gray-600 flex items-center space-x-2">
+                                                    <Users className="w-4 h-4" />
+                                                    <span>Subkategori</span>
+                                                </span>
+                                                <span className="font-semibold text-[#07b8b2]">{category.children?.length || 0}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
