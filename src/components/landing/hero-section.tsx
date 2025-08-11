@@ -102,7 +102,7 @@ export default function HeroSectionComponent({ heroData }: HeroSectionProps) {
         <>
           <button
             onClick={prevSlide}
-            className="fixed left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200 z-[9999] backdrop-blur-sm"
+            className="fixed left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-all duration-200 z-[90] backdrop-blur-sm"
             onMouseEnter={() => setIsAutoPlaying(false)}
             onMouseLeave={() => setIsAutoPlaying(true)}
             style={{ position: 'absolute' }}

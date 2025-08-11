@@ -165,17 +165,6 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
     }
   }, [isMobile, isMobileMenuOpen]);
 
-  // // Auto-expand active mobile submenu
-  // useEffect(() => {
-  //   if (isMobile && isMounted) {
-  //     const activeCategory = orderedMenuCategories.find(category => isCategoryActive(category));
-  //     if (activeCategory && (activeCategory.children.length > 0 || activeCategory.Halaman.length > 0)) {
-  //       setActiveMobileSubmenu(activeCategory.id_kategori);
-  //     }
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [isMobile, pathname, orderedMenuCategories, isMounted]);
-
   const handleMouseEnter = (categoryId: number) => {
     if (isMobile) return;
     if (dropdownTimeoutRef.current) {
@@ -211,7 +200,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
     const iconClass = "w-4 h-4";
     switch (platform) {
       case 'facebook':
-        return <Facebook className={iconClass} />;
+        return <Facebook className={`${iconClass}`} />;
       case 'twitter':
         return <TiktokIcon className={iconClass} />;
       case 'instagram':
@@ -224,10 +213,10 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
   };
 
   const socialLinks = [
-    { url: websiteSettings?.facebook_url, platform: 'facebook' },
-    { url: websiteSettings?.twitter_url, platform: 'twitter' },
-    { url: websiteSettings?.instagram_url, platform: 'instagram' },
-    { url: websiteSettings?.youtube_url, platform: 'youtube' },
+    { url: websiteSettings?.facebook_url, platform: 'facebook', bgColor: 'bg-blue-500', name: 'Facebook' },
+    { url: websiteSettings?.twitter_url, platform: 'twitter', bgColor: 'bg-sky-50', name: 'TikTok' },
+    { url: websiteSettings?.instagram_url, platform: 'instagram', bgColor: 'bg-gradient-to-r from-purple-500 to-pink-500', name: 'Instagram' },
+    { url: websiteSettings?.youtube_url, platform: 'youtube', bgColor: 'bg-red-500', name: 'YouTube' },
   ].filter(link => link.url);
 
   return (
@@ -294,10 +283,15 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                       href={social.url!}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="p-1.5 rounded-full hover:bg-white hover:bg-opacity-20 transition-all duration-200"
+                      className={`group relative p-1.5 rounded-xl transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 ${social.bgColor} shadow-lg hover:shadow-xl`}
                       aria-label={`Follow us on ${social.platform}`}
                     >
                       {getSocialIcon(social.platform)}
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                        {social.name}
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-2 border-r-2 border-t-2 border-transparent border-t-black"></div>
+                      </div>
                     </Link>
                   ))}
                 </div>
@@ -502,7 +496,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
       {/* Mobile Menu */}
       {isMobile && (
         <div
-          className={`fixed inset-0 z-50 transition-all duration-300 ${isMobileMenuOpen ? 'visible' : 'invisible'
+          className={`fixed inset-0 z-1000 transition-all duration-300 ${isMobileMenuOpen ? 'visible' : 'invisible'
             }`}
         >
           {/* Backdrop */}
@@ -550,7 +544,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                   href="/"
                   onClick={closeMobileMenu}
                   className={`flex items-center px-6 py-4 transition-colors border-b border-gray-50 ${isMounted && pathname === '/'
-                    ? 'bg-teal-50 text-[#07b8b2] border-r-4 border-r-[#07b8b2]'
+                    ? 'bg-teal-50 text-[#07b8b2] border-r-4'
                     : 'text-gray-700 hover:bg-teal-50 hover:text-[#07b8b2]'
                     }`}
                 >
@@ -575,8 +569,8 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                       <button
                         onClick={() => toggleMobileSubmenu(category.id_kategori)}
                         className={`w-full flex items-center justify-between text-sm px-6 py-4 transition-colors text-left ${isActive
-                            ? 'text-[#07b8b2] bg-teal-50'
-                            : 'text-gray-700 hover:text-[#07b8b2] hover:bg-gray-50'
+                          ? 'text-[#07b8b2] bg-teal-50'
+                          : 'text-gray-700 hover:text-[#07b8b2] hover:bg-gray-50'
                           }`}
                       >
                         <span className="font-medium">{category.nama_kategori}</span>
@@ -591,8 +585,8 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                         href={`/${category.slug_kategori}`}
                         onClick={closeMobileMenu}
                         className={`flex items-center text-sm px-6 py-4 transition-colors ${isActive
-                            ? 'text-[#07b8b2] bg-teal-50'
-                            : 'text-gray-700 hover:text-[#07b8b2] hover:bg-gray-50'
+                          ? 'text-[#07b8b2] bg-teal-50'
+                          : 'text-gray-700 hover:text-[#07b8b2] hover:bg-gray-50'
                           }`}
                       >
                         <span className="font-medium">{category.nama_kategori}</span>
@@ -615,8 +609,8 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                                 href={`/${category.slug_kategori}/${halaman.slug}`}
                                 onClick={closeMobileMenu}
                                 className={`flex items-center px-8 py-3 text-sm transition-colors ${pageActive
-                                    ? 'text-[#07b8b2] bg-white'
-                                    : 'text-gray-600 hover:text-[#07b8b2] hover:bg-white'
+                                  ? 'text-[#07b8b2] bg-white'
+                                  : 'text-gray-600 hover:text-[#07b8b2] hover:bg-white'
                                   }`}
                               >
                                 <div className={`w-2 h-2 rounded-full mr-3 ${pageActive ? 'bg-[#07b8b2]' : 'bg-gray-300'
@@ -630,8 +624,8 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                           {category.children.map((child) => (
                             <div key={child.id_kategori}>
                               <div className={`px-8 py-2 text-xs font-semibold uppercase tracking-wider ${isChildCategoryActive(child)
-                                  ? 'text-[#07b8b2]'
-                                  : 'text-gray-500'
+                                ? 'text-[#07b8b2]'
+                                : 'text-gray-500'
                                 }`}>
                                 {child.nama_kategori}
                               </div>
@@ -644,8 +638,8 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                                     href={`/${child.slug_kategori}/${halaman.slug}`}
                                     onClick={closeMobileMenu}
                                     className={`flex items-center px-10 py-2.5 text-sm transition-colors ${pageActive
-                                        ? 'text-[#07b8b2] bg-white'
-                                        : 'text-gray-600 hover:text-[#07b8b2] hover:bg-white'
+                                      ? 'text-[#07b8b2] bg-white'
+                                      : 'text-gray-600 hover:text-[#07b8b2] hover:bg-white'
                                       }`}
                                   >
                                     <div className={`w-1.5 h-1.5 rounded-full mr-3 ${pageActive ? 'bg-[#07b8b2]' : 'bg-gray-400'
@@ -679,25 +673,28 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                 {websiteSettings.email && (
                   <Link
                     href={`mailto:${websiteSettings.email}`}
-                    className="flex items-center space-x-3 text-sm text-gray-600 hover:text-[#07b8b2] transition-colors"
+                    className="flex items-center space-x-3 text-sm text-gray-600 hover:text-[#07b8b2] transition-colors group"
+                    title={websiteSettings.email}
                   >
-                    <div className="w-8 h-8 bg-[#07b8b2] bg-opacity-10 rounded-full flex items-center justify-center">
+                    <div className="w-8 h-8 bg-[#07b8b2] bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
                       <Mail className="w-4 h-4 text-white" />
                     </div>
-                    <span>{websiteSettings.email}</span>
+                    <span className="truncate min-w-0">
+                      {websiteSettings.email}
+                    </span>
                   </Link>
                 )}
 
                 {/* Social Links */}
                 {socialLinks.length > 0 && (
-                  <div className="flex items-center space-x-2 pt-2">
+                  <div className="flex items-center space-x-2 pt-2 text-white">
                     {socialLinks.map((social, index) => (
                       <Link
                         key={index}
                         href={social.url!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="w-8 h-8 bg-[#07b8b2] bg-opacity-10 rounded-full flex items-center justify-center text-[#fff] hover:bg-opacity-20 transition-colors"
+                        className={`group relative p-3 rounded-xl transition-all duration-300 transform hover:scale-110 hover:-translate-y-1 ${social.bgColor} shadow-lg hover:shadow-xl`}
                       >
                         {getSocialIcon(social.platform)}
                       </Link>
