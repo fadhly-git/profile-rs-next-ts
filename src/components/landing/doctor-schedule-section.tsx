@@ -17,16 +17,16 @@ interface DoctorScheduleSectionProps {
 const groupConsecutiveDays = (days: string[]): string[] => {
   const dayOrder = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
   const sortedDays = days.sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
-  
+
   if (sortedDays.length <= 1) return sortedDays;
-  
+
   const groups: string[][] = [];
   let currentGroup = [sortedDays[0]];
-  
+
   for (let i = 1; i < sortedDays.length; i++) {
     const currentIndex = dayOrder.indexOf(sortedDays[i]);
     const prevIndex = dayOrder.indexOf(sortedDays[i - 1]);
-    
+
     if (currentIndex === prevIndex + 1) {
       currentGroup.push(sortedDays[i]);
     } else {
@@ -35,8 +35,8 @@ const groupConsecutiveDays = (days: string[]): string[] => {
     }
   }
   groups.push(currentGroup);
-  
-  return groups.map(group => 
+
+  return groups.map(group =>
     group.length > 1 ? `${group[0]} - ${group[group.length - 1]}` : group[0]
   );
 };
@@ -58,12 +58,12 @@ export default function DoctorScheduleSection({ doctorsWithSchedule }: DoctorSch
       days: Array<{ hari: string; status: number }>;
       hasInactive: boolean;
     }> = {};
-    
+
     doctor.JadwalDokters.forEach(schedule => {
       const jamMulai = formatTimeFromDate(new Date(schedule.jam_mulai));
       const jamSelesai = formatTimeFromDate(new Date(schedule.jam_selesai));
       const timeKey = `${jamMulai}-${jamSelesai}`;
-      
+
       if (!scheduleGroups[timeKey]) {
         scheduleGroups[timeKey] = {
           jam_mulai: jamMulai,
@@ -72,12 +72,12 @@ export default function DoctorScheduleSection({ doctorsWithSchedule }: DoctorSch
           hasInactive: false
         };
       }
-      
+
       scheduleGroups[timeKey].days.push({
         hari: schedule.hari,
         status: schedule.status
       });
-      
+
       if (schedule.status === 0) {
         scheduleGroups[timeKey].hasInactive = true;
       }
@@ -87,7 +87,7 @@ export default function DoctorScheduleSection({ doctorsWithSchedule }: DoctorSch
     const schedules: ProcessedSchedule[] = Object.values(scheduleGroups).map(group => {
       const activeDays = group.days.filter(day => day.status === 1);
       const inactiveDays = group.days.filter(day => day.status === 0);
-      
+
       return {
         jam_mulai: group.jam_mulai,
         jam_selesai: group.jam_selesai,
@@ -114,7 +114,7 @@ export default function DoctorScheduleSection({ doctorsWithSchedule }: DoctorSch
 
   useEffect(() => {
     if (totalSlides <= 1) return;
-    
+
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
     }, 6000);
@@ -202,7 +202,7 @@ export default function DoctorScheduleSection({ doctorsWithSchedule }: DoctorSch
                                     {schedule.jam_mulai} - {schedule.jam_selesai}
                                   </span>
                                 </div>
-                                
+
                                 {schedule.activeDays.length > 0 && (
                                   <div className="flex items-start space-x-2 mb-1">
                                     <Calendar className="w-4 h-4 text-gray-600 mt-0.5" />
@@ -219,7 +219,7 @@ export default function DoctorScheduleSection({ doctorsWithSchedule }: DoctorSch
                                     </div>
                                   </div>
                                 )}
-                                
+
                                 {schedule.inactiveDays.length > 0 && (
                                   <div className="flex items-start space-x-2">
                                     <Calendar className="w-4 h-4 text-red-500 mt-0.5" />
@@ -256,7 +256,7 @@ export default function DoctorScheduleSection({ doctorsWithSchedule }: DoctorSch
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
-              
+
               <button
                 onClick={nextSlide}
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 bg-white shadow-lg hover:shadow-xl text-gray-600 hover:text-[#07b8b2] p-3 rounded-full transition-all duration-200 border"
@@ -273,9 +273,8 @@ export default function DoctorScheduleSection({ doctorsWithSchedule }: DoctorSch
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                    index === currentSlide ? 'bg-[#07b8b2] w-6' : 'bg-gray-300'
-                  }`}
+                  className={`w-2 h-2 rounded-full transition-all duration-200 ${index === currentSlide ? 'bg-[#07b8b2] w-6' : 'bg-gray-300'
+                    }`}
                 />
               ))}
             </div>

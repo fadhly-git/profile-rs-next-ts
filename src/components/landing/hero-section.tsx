@@ -43,6 +43,7 @@ export default function HeroSectionComponent({ heroData }: HeroSectionProps) {
           key={hero.id}
           className={`absolute inset-0 transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'
             }`}
+          style={{ willChange: 'opacity' }}
         >
           {hero.background_image && (
             <Image

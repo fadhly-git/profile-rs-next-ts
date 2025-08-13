@@ -37,7 +37,7 @@ export default function ServicesSection({ services }: ServicesSectionProps) {
               <Card
                 key={service.id}
                 className="group hover:shadow-xl transition-all duration-500 border-0 shadow-md hover:-translate-y-1 bg-gradient-to-br from-white to-gray-50/50 overflow-hidden break-inside-avoid mb-4 lg:mb-6"
-                style={{ height: heightClass }}
+                style={{ height: heightClass, willChange: 'transform' }}
               >
                 <CardContent className="p-6">
                   {/* Icon/Image Container */}
