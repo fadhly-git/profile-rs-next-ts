@@ -180,63 +180,73 @@
   }
 }
 
-/* Tambahkan ke file globals.css untuk styling editor */
-.ProseMirror {
-  outline: none;
-  min-height: 400px;
-  padding: 1rem;
+.prose {
+  @apply leading-relaxed;
 }
 
-.ProseMirror p.is-editor-empty:first-child::before {
-  color: #adb5bd;
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  @apply font-semibold mt-8 mb-4;
 }
 
-.ProseMirror table {
-  @apply border-collapse border border-foreground w-full;
+.prose h1 { @apply text-2xl; }
+.prose h2 { @apply text-xl; }
+.prose h3 { @apply text-lg; }
+
+.prose p {
+  @apply mb-4;
 }
 
-.ProseMirror table td,
-.ProseMirror table th {
-  @apply border border-foreground p-2;
+/* Perbaikan untuk lists */
+.prose ul, .prose ol {
+  @apply mb-4 pl-6;
 }
 
-.ProseMirror table th {
-  @apply font-semibold;
+.prose ul {
+  list-style-type: disc; /* Tambahkan bullet points */
 }
 
-.ProseMirror pre {
-  @apply bg-secondary-foreground p-4 rounded-lg overflow-x-auto;
+.prose ol {
+  list-style-type: decimal; /* Tambahkan numbering */
 }
 
-.ProseMirror blockquote {
-  @apply border-l-4 border-muted-foreground pl-4 italic;
+.prose ul ul {
+  list-style-type: circle; /* Nested bullets */
 }
 
-.ProseMirror img {
-  @apply max-w-full h-auto rounded-lg;
+.prose ol ol {
+  list-style-type: lower-alpha; /* Nested numbering */
 }
 
-.ProseMirror a {
-  @apply text-blue-600 hover:text-blue-800 underline;
+.prose li {
+  @apply mb-2;
+  display: list-item; /* Pastikan display sebagai list item */
 }
 
-.ProseMirror ul,
-.ProseMirror ol {
-  @apply pl-6;
+/* Hilangkan margin pada paragraf dalam list item */
+.prose li p {
+  @apply mb-1;
 }
 
-.ProseMirror h1 {
-  @apply text-3xl font-bold mb-4;
+.prose li p:last-child {
+  @apply mb-0;
 }
 
-.ProseMirror h2 {
-  @apply text-2xl font-bold mb-3;
+.prose blockquote {
+  @apply border-l-4 border-[#07b8b2] pl-4 italic bg-gray-50 py-2 my-4;
 }
 
-.ProseMirror h3 {
-  @apply text-xl font-bold mb-2;
+.prose img {
+  @apply rounded-lg mx-auto my-6;
+}
+
+.prose table {
+  @apply w-full border-collapse border border-gray-300 my-6;
+}
+
+.prose th, .prose td {
+  @apply border border-gray-300 px-4 py-2;
+}
+
+.prose th {
+  @apply bg-gray-50 font-semibold;
 }
