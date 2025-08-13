@@ -434,7 +434,7 @@ const Header: React.FC<HeaderProps> = ({ websiteSettings, menuCategories }) => {
                             {category.children.map((child, index) => (
                               <div key={child.id_kategori}>
                                 {(category.Halaman.length > 0 || index > 0) && (
-                                  <div className="border-t border-gray-100 my-1" />
+                                  <div className="border-t border-[#07b8b2]/70 my-1" />
                                 )}
                                 <div className={`flex items-center px-6 py-2.5 text-sm transition-colors group ${isChildCategoryActive(child)
                                   ? 'bg-teal-50 text-[#07b8b2] border-r-2 border-[#07b8b2]'

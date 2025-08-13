@@ -4,6 +4,23 @@ import { twMerge } from "tailwind-merge"
 import { format } from "date-fns"
 import { id } from "date-fns/locale"
 
+export function createExcerpt(content: string, maxLength: number = 100): string {
+  // Remove HTML tags if any
+  const cleanContent = content.replace(/<[^>]*>/g, '');
+
+  if (cleanContent.length <= maxLength) {
+    return cleanContent;
+  }
+
+  // Cut at word boundary
+  const truncated = cleanContent.substring(0, maxLength);
+  const lastSpaceIndex = truncated.lastIndexOf(' ');
+
+  return lastSpaceIndex > 0
+    ? truncated.substring(0, lastSpaceIndex) + '...'
+    : truncated + '...';
+}
+
 export function formatPeriod(period: string | null): string {
   if (!period) return '-'
 

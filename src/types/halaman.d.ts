@@ -22,3 +22,26 @@ export interface KategoriType {
     slug_kategori: string
     parent_id?: string | null
 }
+
+export interface Halaman {
+  id_halaman: bigint;
+  judul: string;
+  slug: string;
+  konten: string;
+  gambar: string | null;
+  menuId: bigint | null;
+  kategoriId: bigint | null;
+  is_published: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  kategori?: {
+    id_kategori: bigint;
+    nama_kategori: string;
+    slug_kategori: string;
+  } | null;
+}
+
+export interface RoomInfoSectionProps {
+  roomInfoPages: Halaman[];
+  autoSlide?: boolean;
+}

@@ -3,7 +3,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-
+import { Halaman } from '@/types/halaman'
 export interface HalamanFormData {
     judul: string
     slug: string
@@ -11,6 +11,36 @@ export interface HalamanFormData {
     gambar?: string
     kategoriId?: string
     is_published: boolean
+}
+
+export async function getRoomInfoPages(): Promise<Halaman[]> {
+  try {
+    const pages = await prisma.halaman.findMany({
+      where: {
+        is_published: true,
+        kategori: {
+          slug_kategori: 'info-kamar-rawat-inap'
+        }
+      },
+      include: {
+        kategori: {
+          select: {
+            id_kategori: true,
+            nama_kategori: true,
+            slug_kategori: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return pages;
+  } catch (error) {
+    console.error('Error fetching room info pages:', error);
+    return [];
+  }
 }
 
 function getNameKategori(kategoriId: string | undefined | null) {
