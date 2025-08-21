@@ -5,6 +5,9 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+
+// Force dynamic rendering for search functionality
+export const dynamic = 'force-dynamic'
 import {
     Calendar,
     Eye,
@@ -17,42 +20,104 @@ import {
     Tag,
     X,
     Info,
-    TrendingUp
+    TrendingUp,
+    Search
 } from 'lucide-react'
 import { Suspense } from 'react'
 import { ShareButton } from '@/components/landing/shared-button'
+import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent } from "@/components/ui/card"
+import BeritaPagination from '@/components/berita-pagination'
+// import CategoryPageClient from '@/components/kategori/CategoryPageClient'
 import KontakKami from '@/app/(public)/(menu)/hubungi-kami/page'
 import JadwalDokter from '@/app/(public)/(menu)/layanan/jadwal-dokter/page'
 import IndikatorMutuPage from '@/app/(public)/(menu)/indikator-mutu/page'
+
 // Update type untuk params yang async
 type PageParams = Promise<{
     slug?: string[]
 }>
 
-// Loading Components
+type SearchParams = Promise<{
+    [key: string]: string | string[] | undefined
+}>
+
+// Loading Components with shadcn/ui
 function PageSkeleton() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="container mx-auto px-4 py-8 max-w-7xl">
-                <div className="animate-pulse">
+                <div className="space-y-6">
                     {/* Breadcrumb skeleton */}
-                    <div className="flex items-center space-x-2 mb-6">
-                        <div className="h-4 bg-gray-200 rounded w-16"></div>
-                        <div className="h-4 bg-gray-200 rounded w-4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                    <div className="flex items-center space-x-2">
+                        <Skeleton className="h-4 w-16" />
+                        <Skeleton className="h-4 w-4" />
+                        <Skeleton className="h-4 w-24" />
                     </div>
 
                     {/* Title skeleton */}
-                    <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <Skeleton className="h-8 w-3/4" />
 
                     {/* Content skeleton */}
-                    <div className="space-y-3">
-                        <div className="h-4 bg-gray-200 rounded"></div>
-                        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                        <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+                    <div className="space-y-4">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-5/6" />
+                        <Skeleton className="h-4 w-4/6" />
                     </div>
                 </div>
             </div>
+        </div>
+    )
+}
+
+function NewsCardSkeleton() {
+    return (
+        <Card className="overflow-hidden">
+            <div className="aspect-video">
+                <Skeleton className="w-full h-full" />
+            </div>
+            <CardContent className="p-4 sm:p-6">
+                <div className="space-y-3">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-6 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <div className="flex items-center space-x-4">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-4 w-16" />
+                    </div>
+                    <Skeleton className="h-10 w-full" />
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+function CategoryCardSkeleton() {
+    return (
+        <Card>
+            <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                    <Skeleton className="w-12 h-12 rounded-xl" />
+                    <div className="flex-1 space-y-2">
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-3 w-16" />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+function LoadingGrid({ count = 6, type = 'news' }: { count?: number; type?: 'news' | 'category' }) {
+    return (
+        <div className={`grid gap-6 ${type === 'news' ? 'sm:grid-cols-1 lg:grid-cols-2' : 'sm:grid-cols-2'}`}>
+            {Array.from({ length: count }).map((_, index) => (
+                <div key={index}>
+                    {type === 'news' ? <NewsCardSkeleton /> : <CategoryCardSkeleton />}
+                </div>
+            ))}
         </div>
     )
 }
@@ -103,7 +168,7 @@ function Breadcrumb({ items }: { items: { label: string; href?: string }[] }) {
     )
 }
 
-// Modified Category Card Component
+// Modified Category Card Component using shadcn/ui
 function CategoryCard({
     title,
     description,
@@ -120,35 +185,37 @@ function CategoryCard({
     isClickable?: boolean
 }) {
     const cardContent = (
-        <div className={`p-6 bg-white rounded-xl border border-gray-200 ${isClickable ? 'hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300 cursor-pointer' : ''}`}>
-            <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
-                        <Icon className="w-6 h-6 text-white" />
+        <Card className={`${isClickable ? 'hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300 cursor-pointer' : ''}`}>
+            <CardContent className="p-6">
+                <div className="flex items-start space-x-4">
+                    <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
+                            <Icon className="w-6 h-6 text-white" />
+                        </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 line-clamp-1">
+                            {title}
+                        </h3>
+                        {description && (
+                            <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                                {description}
+                            </p>
+                        )}
+                        {count !== undefined && (
+                            <p className="mt-2 text-xs text-gray-500">
+                                {count} item{count !== 1 ? 's' : ''}
+                            </p>
+                        )}
+                        {isClickable && (
+                            <div className="mt-2">
+                                <ChevronRight className="w-5 h-5 text-gray-400" />
+                            </div>
+                        )}
                     </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900 line-clamp-1">
-                        {title}
-                    </h3>
-                    {description && (
-                        <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-                            {description}
-                        </p>
-                    )}
-                    {count !== undefined && (
-                        <p className="mt-2 text-xs text-gray-500">
-                            {count} item{count !== 1 ? 's' : ''}
-                        </p>
-                    )}
-                    {isClickable && (
-                        <div className="mt-2">
-                            <ChevronRight className="w-5 h-5 text-gray-400" />
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     )
 
     if (isClickable) {
@@ -162,7 +229,7 @@ function CategoryCard({
     return <div>{cardContent}</div>
 }
 
-// News/Article Card Component
+// News/Article Card Component using shadcn/ui
 function NewsCard({
     title,
     excerpt,
@@ -181,7 +248,7 @@ function NewsCard({
     category?: string
 }) {
     return (
-        <article className="group bg-white rounded-xl border border-gray-200 hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300 overflow-hidden">
+        <Card className="group hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300 overflow-hidden">
             {image && (
                 <div className="aspect-video bg-gray-100 overflow-hidden">
                     <Image
@@ -194,7 +261,7 @@ function NewsCard({
                 </div>
             )}
 
-            <div className="p-4 sm:p-6">
+            <CardContent className="p-4 sm:p-6">
                 {category && (
                     <div className="flex items-center space-x-2 mb-3">
                         <Tag className="w-4 h-4 text-[#07b8b2]" />
@@ -250,8 +317,8 @@ function NewsCard({
                         </Link>
                     </div>
                 </div>
-            </div>
-        </article>
+            </CardContent>
+        </Card>
     )
 }
 
@@ -312,7 +379,7 @@ export async function generateStaticParams() {
     }
 }
 
-export async function generateMetadata({ params }: { params: PageParams }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: PageParams; searchParams: SearchParams }): Promise<Metadata> {
     try {
         const resolvedParams = await params
         const path = resolvedParams.slug || []
@@ -374,7 +441,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
                     isi: true,
                     gambar: true,
                     thumbnail: true,
-                    keywords: true, // 👈 Tambahkan keywords
+                    keywords: true,
                     tanggal_post: true,
                     updatedAt: true,
                     hits: true,
@@ -491,7 +558,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
             }
         }
 
-        // News metadata - DIPERBAIKI DENGAN KEYWORDS
+        // News metadata
         if (newsItem) {
             const newsTitle = `${newsItem.judul_berita} - ${defaultMetadata.siteName}`
             const newsDescription = newsItem.isi?.replace(/<[^>]*>/g, '').substring(0, 160) || `${newsItem.judul_berita} - Berita terbaru dari RS PKU Muhammadiyah Boja`
@@ -499,7 +566,6 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
             const categoryName = newsItem.kategori?.nama_kategori
             const authorName = newsItem.user?.name || defaultMetadata.siteName
 
-            // 👈 Gunakan keywords dari database + tambahan keywords default
             const keywordsArray = []
             if (newsItem.keywords) {
                 keywordsArray.push(newsItem.keywords)
@@ -509,13 +575,18 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
             keywordsArray.push('RS PKU Muhammadiyah Boja')
             keywordsArray.push('rumah sakit')
             keywordsArray.push('kesehatan')
+            keywordsArray.push('boja')
+            keywordsArray.push('Muhammadiyah')
+            keywordsArray.push('PKU Boja')
+            keywordsArray.push('RS Boja')
+            keywordsArray.push('PKU Muhammadiyah')
 
             const finalKeywords = keywordsArray.filter(Boolean).join(', ')
 
             return {
                 title: newsTitle,
                 description: newsDescription,
-                keywords: finalKeywords, // 👈 Gunakan keywords yang sudah digabung
+                keywords: finalKeywords,
                 authors: [{ name: authorName }],
                 creator: authorName,
                 publisher: defaultMetadata.siteName,
@@ -558,9 +629,7 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
                     'article:section': categoryName || 'Berita',
                     'article:author': authorName,
                     'article:tag': categoryName || 'berita',
-                    // 👈 Gunakan keywords dari database untuk news_keywords
                     'news_keywords': newsItem.keywords || `${newsItem.judul_berita}, ${categoryName || 'berita'}, RS PKU Muhammadiyah Boja`,
-                    // 👈 Tambahkan meta keywords khusus untuk berita
                     'keywords': finalKeywords
                 }
             }
@@ -590,7 +659,6 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
     } catch (error) {
         console.error('Error generating metadata:', error)
 
-        // Error fallback metadata
         return {
             title: 'Error - RS PKU Muhammadiyah Boja',
             description: 'Terjadi kesalahan pada sistem. Silakan coba lagi nanti.',
@@ -613,11 +681,79 @@ export async function generateMetadata({ params }: { params: PageParams }): Prom
     }
 }
 
-export default async function DynamicPage({ params }: { params: PageParams }) {
+export default async function DynamicPage({ params, searchParams }: { params: PageParams; searchParams: SearchParams }) {
     try {
         const resolvedParams = await params
+        const resolvedSearchParams = await searchParams
         const path = resolvedParams.slug || []
         const lastSegment = path[path.length - 1]
+
+        // Extract search parameters
+        const currentPage = Number(resolvedSearchParams.page) || 1
+        const searchTerm = resolvedSearchParams.search as string || ''
+        const yearFilter = resolvedSearchParams.tahun as string || ''
+        const monthFilter = resolvedSearchParams.bulan as string || ''
+        const sortBy = resolvedSearchParams.sort as string || 'terbaru'
+        const itemsPerPage = 10
+
+        // Helper function untuk filtering berita
+        const filterBerita = (beritas: any[], searchTerm: string, yearFilter: string, monthFilter: string, sortBy: string) => {
+            let filtered = [...beritas]
+
+            // Filter by search term
+            if (searchTerm) {
+                filtered = filtered.filter(berita =>
+                    berita.judul_berita.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    berita.isi?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    berita.keywords?.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+            }
+
+            // Filter by year
+            if (yearFilter) {
+                filtered = filtered.filter(berita => {
+                    if (!berita.tanggal_post) return false
+                    const year = new Date(berita.tanggal_post).getFullYear().toString()
+                    return year === yearFilter
+                })
+            }
+
+            // Filter by month
+            if (monthFilter && yearFilter) {
+                filtered = filtered.filter(berita => {
+                    if (!berita.tanggal_post) return false
+                    const month = (new Date(berita.tanggal_post).getMonth() + 1).toString()
+                    return month === monthFilter
+                })
+            }
+
+            // Sort
+            switch (sortBy) {
+                case 'terlama':
+                    filtered.sort((a, b) => new Date(a.tanggal_post || 0).getTime() - new Date(b.tanggal_post || 0).getTime())
+                    break
+                case 'terpopuler':
+                    filtered.sort((a, b) => (b.hits || 0) - (a.hits || 0))
+                    break
+                case 'judul':
+                    filtered.sort((a, b) => a.judul_berita.localeCompare(b.judul_berita))
+                    break
+                default: // terbaru
+                    filtered.sort((a, b) => new Date(b.tanggal_post || 0).getTime() - new Date(a.tanggal_post || 0).getTime())
+            }
+
+            return filtered
+        }
+
+        // Helper function untuk filtering halaman
+        const filterHalaman = (halamanList: any[], searchTerm: string) => {
+            if (!searchTerm) return halamanList
+
+            return halamanList.filter(halaman =>
+                halaman.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                halaman.konten?.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        }
 
         if (!lastSegment) {
             return notFound()
@@ -655,7 +791,6 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                 beritas: {
                     where: { status_berita: 'publish' },
                     orderBy: { tanggal_post: 'desc' },
-                    take: 9
                 },
                 Halaman: {
                     where: { is_published: true },
@@ -665,6 +800,23 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
         })
 
         if (category) {
+            // Apply filters to berita and halaman
+            const filteredBerita = filterBerita(category.beritas, searchTerm, yearFilter, monthFilter, sortBy)
+            const filteredHalaman = filterHalaman(category.Halaman, searchTerm)
+
+            // Pagination for berita
+            const totalBerita = filteredBerita.length
+            const totalPagesBerita = Math.ceil(totalBerita / itemsPerPage)
+            const startIndex = (currentPage - 1) * itemsPerPage
+            const paginatedBerita = filteredBerita.slice(startIndex, startIndex + itemsPerPage)
+
+            // Get all categories for filter dropdown
+            // const allCategories = await prisma.kategori.findMany({
+            //     where: { is_active: true },
+            //     select: { id_kategori: true, nama_kategori: true, slug_kategori: true },
+            //     orderBy: { nama_kategori: 'asc' }
+            // })
+
             const breadcrumbItems = []
 
             if (category.parent) {
@@ -685,33 +837,45 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                             <Breadcrumb items={breadcrumbItems} />
 
                             {/* Header Section */}
-                            <div className="bg-white rounded-xl border border-gray-200 p-8 mb-8">
-                                <div className="flex items-center space-x-3 mb-4">
-                                    <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
-                                        <FileText className="w-6 h-6 text-white" />
+                            <Card className="mb-8">
+                                <CardContent className="p-8">
+                                    <div className="flex items-center space-x-3 mb-4">
+                                        <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center">
+                                            <FileText className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div>
+                                            <h1 className="text-3xl font-bold text-gray-900">{category.nama_kategori}</h1>
+                                            {category.parent && (
+                                                <p className="text-sm text-gray-600 mt-1">
+                                                    Bagian dari{' '}
+                                                    <Link
+                                                        href={`/${category.parent.slug_kategori}`}
+                                                        className="text-[#07b8b2] hover:text-teal-700 transition-colors"
+                                                    >
+                                                        {category.parent.nama_kategori}
+                                                    </Link>
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h1 className="text-3xl font-bold text-gray-900">{category.nama_kategori}</h1>
-                                        {category.parent && (
-                                            <p className="text-sm text-gray-600 mt-1">
-                                                Bagian dari{' '}
-                                                <Link
-                                                    href={`/${category.parent.slug_kategori}`}
-                                                    className="text-[#07b8b2] hover:text-teal-700 transition-colors"
-                                                >
-                                                    {category.parent.nama_kategori}
-                                                </Link>
-                                            </p>
-                                        )}
-                                    </div>
-                                </div>
 
-                                {category.keterangan && (
-                                    <div className="text-gray-600 leading-relaxed">
-                                        <div dangerouslySetInnerHTML={{ __html: category.keterangan }} />
-                                    </div>
-                                )}
-                            </div>
+                                    {category.keterangan && (
+                                        <div className="text-gray-600 leading-relaxed">
+                                            <div dangerouslySetInnerHTML={{ __html: category.keterangan }} />
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+
+                            {/* Search and Filter Component with Client Side Logic */}
+                            {/* <CategoryPageClient
+                                category={category}
+                                allCategories={allCategories.map(cat => ({
+                                    id_kategori: cat.id_kategori.toString(),
+                                    nama_kategori: cat.nama_kategori,
+                                    slug_kategori: cat.slug_kategori
+                                }))}
+                            /> */}
 
                             {/* Content Grid - Improved 2 columns layout */}
                             <div className="grid gap-8 lg:grid-cols-3">
@@ -724,18 +888,20 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                                 <Users className="w-5 h-5 text-[#07b8b2]" />
                                                 <h2 className="text-xl font-semibold text-gray-900">Subkategori</h2>
                                             </div>
-                                            <div className="grid gap-4 sm:grid-cols-2">
-                                                {category.children.map(child => (
-                                                    <CategoryCard
-                                                        key={child.id_kategori.toString()}
-                                                        title={child.nama_kategori}
-                                                        description={child.keterangan || undefined}
-                                                        href={`/${child.slug_kategori}`}
-                                                        icon={FileText}
-                                                        count={child.Halaman?.length}
-                                                    />
-                                                ))}
-                                            </div>
+                                            <Suspense fallback={<LoadingGrid count={4} type="category" />}>
+                                                <div className="grid gap-4 sm:grid-cols-2">
+                                                    {category.children.map(child => (
+                                                        <CategoryCard
+                                                            key={child.id_kategori.toString()}
+                                                            title={child.nama_kategori}
+                                                            description={child.keterangan || undefined}
+                                                            href={`/${child.slug_kategori}`}
+                                                            icon={FileText}
+                                                            count={child.Halaman?.length}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </Suspense>
                                         </section>
                                     )}
 
@@ -745,70 +911,122 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                             <div className="flex items-center justify-between mb-6">
                                                 <div className="flex items-center space-x-2">
                                                     <Newspaper className="w-5 h-5 text-[#07b8b2]" />
-                                                    <h2 className="text-xl font-semibold text-gray-900">Berita Terkait</h2>
+                                                    <h2 className="text-xl font-semibold text-gray-900">
+                                                        {(searchTerm || yearFilter || monthFilter) ? 'Hasil Pencarian Berita' : 'Berita Terkait'}
+                                                    </h2>
                                                 </div>
-                                                <Link
-                                                    href={`/${category.slug_kategori}?type=berita`}
-                                                    className="text-[#07b8b2] hover:text-teal-700 text-sm font-medium transition-colors flex items-center space-x-1"
-                                                >
-                                                    <span>Lihat semua</span>
-                                                    <ChevronRight className="w-4 h-4" />
-                                                </Link>
+                                                {!searchTerm && !yearFilter && !monthFilter && (
+                                                    <Link
+                                                        href={`/${category.slug_kategori}?type=berita`}
+                                                        className="text-[#07b8b2] hover:text-teal-700 text-sm font-medium transition-colors flex items-center space-x-1"
+                                                    >
+                                                        <span>Lihat semua</span>
+                                                        <ChevronRight className="w-4 h-4" />
+                                                    </Link>
+                                                )}
                                             </div>
-                                            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-                                                {category.beritas.slice(0, 4).map(berita => (
-                                                    <NewsCard
-                                                        key={berita.id_berita.toString()}
-                                                        title={berita.judul_berita}
-                                                        excerpt={berita.isi}
-                                                        href={`/${category.slug_kategori}/${berita.slug_berita}`}
-                                                        date={berita.tanggal_post}
-                                                        views={berita.hits}
-                                                        image={berita.thumbnail}
-                                                        category={category.nama_kategori}
-                                                    />
-                                                ))}
-                                            </div>
+
+                                            {filteredBerita.length > 0 ? (
+                                                <>
+                                                    <Suspense fallback={<LoadingGrid count={4} type="news" />}>
+                                                        <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+                                                            {paginatedBerita.map(berita => (
+                                                                <NewsCard
+                                                                    key={berita.id_berita.toString()}
+                                                                    title={berita.judul_berita}
+                                                                    excerpt={berita.isi}
+                                                                    href={`/${category.slug_kategori}/${berita.slug_berita}`}
+                                                                    date={berita.tanggal_post}
+                                                                    views={berita.hits}
+                                                                    image={berita.thumbnail}
+                                                                    category={category.nama_kategori}
+                                                                />
+                                                            ))}
+                                                        </div>
+                                                    </Suspense>
+
+                                                    {/* Pagination Component */}
+                                                    {totalBerita > itemsPerPage && (
+                                                        <div className="mt-8">
+                                                            <Suspense fallback={<Skeleton className="h-16 w-full" />}>
+                                                                <BeritaPagination
+                                                                    currentPage={currentPage}
+                                                                    totalPages={totalPagesBerita}
+                                                                    totalItems={totalBerita}
+                                                                    itemsPerPage={itemsPerPage}
+                                                                    basePath={`/${category.slug_kategori}`}
+                                                                />
+                                                            </Suspense>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (searchTerm || yearFilter || monthFilter || sortBy !== 'terbaru') && (
+                                                <Card className="p-8 text-center">
+                                                    <div className="flex flex-col items-center space-y-4">
+                                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                                                            <Search className="w-8 h-8 text-gray-400" />
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">Tidak ada berita ditemukan</h3>
+                                                            <p className="text-gray-600 mb-4">
+                                                                Coba ubah kata kunci pencarian atau filter yang Anda gunakan.
+                                                            </p>
+                                                            <Link
+                                                                href={`/${category.slug_kategori}`}
+                                                                className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-[#07b8b2] border border-[#07b8b2] rounded-lg hover:bg-[#07b8b2] hover:text-white transition-colors"
+                                                            >
+                                                                Reset Filter
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                </Card>
+                                            )}
                                         </section>
                                     )}
 
-                                    {/* Halaman di kategori (jika tidak ada subkategori) */}
-                                    { category.Halaman.length > 0 && (
+                                    {/* Halaman di kategori */}
+                                    {filteredHalaman.length > 0 && (
                                         <section>
                                             <div className="flex items-center space-x-2 mb-6">
                                                 <FileText className="w-5 h-5 text-[#07b8b2]" />
-                                                <h2 className="text-xl font-semibold text-gray-900">Halaman</h2>
+                                                <h2 className="text-xl font-semibold text-gray-900">
+                                                    {searchTerm ? 'Hasil Pencarian Halaman' : 'Halaman'}
+                                                </h2>
                                             </div>
                                             <div className="grid gap-4">
-                                                {category.Halaman.map(halaman => (
+                                                {filteredHalaman.map(halaman => (
                                                     <Link
                                                         key={halaman.id_halaman.toString()}
                                                         href={`/${category.slug_kategori}/${halaman.slug}`}
-                                                        className="block p-6 bg-white rounded-xl border border-gray-200 hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300 group"
+                                                        className="block"
                                                     >
-                                                        <div className="flex items-start space-x-4">
-                                                            <div className="flex-shrink-0">
-                                                                <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center group-hover:bg-[#07b8b2] group-hover:bg-opacity-20 transition-colors">
-                                                                    <FileText className="w-6 h-6 text-white" />
+                                                        <Card className="hover:border-[#07b8b2] hover:shadow-lg transition-all duration-300 group">
+                                                            <CardContent className="p-6">
+                                                                <div className="flex items-start space-x-4">
+                                                                    <div className="flex-shrink-0">
+                                                                        <div className="w-12 h-12 bg-[#07b8b2] bg-opacity-10 rounded-xl flex items-center justify-center group-hover:bg-[#07b8b2] group-hover:bg-opacity-20 transition-colors">
+                                                                            <FileText className="w-6 h-6 text-white" />
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h3 className="font-semibold text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-1">
+                                                                            {halaman.judul}
+                                                                        </h3>
+                                                                        {halaman.konten && (
+                                                                            <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                                                                                {halaman.konten.replace(/<[^>]*>/g, '').substring(0, 120)}...
+                                                                            </p>
+                                                                        )}
+                                                                        <div className="mt-4 flex items-center justify-between">
+                                                                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                                                                {new Date(halaman.createdAt).toLocaleDateString('id-ID')}
+                                                                            </span>
+                                                                            <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#07b8b2] transition-colors" />
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <h3 className="font-semibold text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-1">
-                                                                    {halaman.judul}
-                                                                </h3>
-                                                                {halaman.konten && (
-                                                                    <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-                                                                        {halaman.konten.replace(/<[^>]*>/g, '').substring(0, 120)}...
-                                                                    </p>
-                                                                )}
-                                                                <div className="mt-4 flex items-center justify-between">
-                                                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                                                                        {new Date(halaman.createdAt).toLocaleDateString('id-ID')}
-                                                                    </span>
-                                                                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#07b8b2] transition-colors" />
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                            </CardContent>
+                                                        </Card>
                                                     </Link>
                                                 ))}
                                             </div>
@@ -820,47 +1038,49 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                 <div className="space-y-6">
                                     {/* Berita Terpopuler */}
                                     {category.beritas.length > 0 && (
-                                        <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-6">
-                                            <div className="flex items-center space-x-2 mb-6">
-                                                <TrendingUp className="w-5 h-5 text-[#07b8b2]" />
-                                                <h3 className="font-semibold text-gray-900">Berita Terpopuler</h3>
-                                            </div>
-                                            <div className="space-y-4">
-                                                {category.beritas
-                                                    .sort((a, b) => (b.hits || 0) - (a.hits || 0))
-                                                    .slice(0, 5)
-                                                    .map((berita, index) => (
-                                                        <Link
-                                                            key={berita.id_berita.toString()}
-                                                            href={`/${category.slug_kategori}/${berita.slug_berita}`}
-                                                            className="block p-4 rounded-lg hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-200"
-                                                        >
-                                                            <div className="flex items-start space-x-3">
-                                                                <div className="flex-shrink-0">
-                                                                    <div className="w-8 h-8 bg-[#07b8b2] text-white rounded-full flex items-center justify-center text-sm font-bold">
-                                                                        {index + 1}
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h4 className="text-sm font-medium text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-2 leading-relaxed">
-                                                                        {berita.judul_berita}
-                                                                    </h4>
-                                                                    <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
-                                                                        <div className="flex items-center space-x-1">
-                                                                            <Calendar className="w-3 h-3" />
-                                                                            <span>{berita.tanggal_post ? new Date(berita.tanggal_post).toLocaleDateString('id-ID') : '-'}</span>
-                                                                        </div>
-                                                                        <div className="flex items-center space-x-1">
-                                                                            <Eye className="w-3 h-3" />
-                                                                            <span>{berita.hits || 0}</span>
+                                        <Card className="sticky top-6">
+                                            <CardContent className="p-6">
+                                                <div className="flex items-center space-x-2 mb-6">
+                                                    <TrendingUp className="w-5 h-5 text-[#07b8b2]" />
+                                                    <h3 className="font-semibold text-gray-900">Berita Terpopuler</h3>
+                                                </div>
+                                                <div className="space-y-4">
+                                                    {category.beritas
+                                                        .sort((a, b) => (b.hits || 0) - (a.hits || 0))
+                                                        .slice(0, 5)
+                                                        .map((berita, index) => (
+                                                            <Link
+                                                                key={berita.id_berita.toString()}
+                                                                href={`/${category.slug_kategori}/${berita.slug_berita}`}
+                                                                className="block p-4 rounded-lg hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-200"
+                                                            >
+                                                                <div className="flex items-start space-x-3">
+                                                                    <div className="flex-shrink-0">
+                                                                        <div className="w-8 h-8 bg-[#07b8b2] text-white rounded-full flex items-center justify-center text-sm font-bold">
+                                                                            {index + 1}
                                                                         </div>
                                                                     </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <h4 className="text-sm font-medium text-gray-900 group-hover:text-[#07b8b2] transition-colors line-clamp-2 leading-relaxed">
+                                                                            {berita.judul_berita}
+                                                                        </h4>
+                                                                        <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">
+                                                                            <div className="flex items-center space-x-1">
+                                                                                <Calendar className="w-3 h-3" />
+                                                                                <span>{berita.tanggal_post ? new Date(berita.tanggal_post).toLocaleDateString('id-ID') : '-'}</span>
+                                                                            </div>
+                                                                            <div className="flex items-center space-x-1">
+                                                                                <Eye className="w-3 h-3" />
+                                                                                <span>{berita.hits || 0}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        </Link>
-                                                    ))}
-                                            </div>
-                                        </div>
+                                                            </Link>
+                                                        ))}
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                     )}
 
                                     {/* Info Kategori */}
@@ -877,32 +1097,34 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                     )}
 
                                     {/* Quick Stats */}
-                                    <div className="bg-white rounded-xl border border-gray-200 p-6">
-                                        <h3 className="font-semibold text-gray-900 mb-4">Statistik</h3>
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                                <span className="text-sm text-gray-600 flex items-center space-x-2">
-                                                    <FileText className="w-4 h-4" />
-                                                    <span>Total Halaman</span>
-                                                </span>
-                                                <span className="font-semibold text-[#07b8b2]">{category.Halaman?.length || 0}</span>
+                                    <Card>
+                                        <CardContent className="p-6">
+                                            <h3 className="font-semibold text-gray-900 mb-4">Statistik</h3>
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                                    <span className="text-sm text-gray-600 flex items-center space-x-2">
+                                                        <FileText className="w-4 h-4" />
+                                                        <span>Total Halaman</span>
+                                                    </span>
+                                                    <span className="font-semibold text-[#07b8b2]">{category.Halaman?.length || 0}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                                    <span className="text-sm text-gray-600 flex items-center space-x-2">
+                                                        <Newspaper className="w-4 h-4" />
+                                                        <span>Total Berita</span>
+                                                    </span>
+                                                    <span className="font-semibold text-[#07b8b2]">{category.beritas?.length || 0}</span>
+                                                </div>
+                                                <div className="flex items-center justify-between py-2">
+                                                    <span className="text-sm text-gray-600 flex items-center space-x-2">
+                                                        <Users className="w-4 h-4" />
+                                                        <span>Subkategori</span>
+                                                    </span>
+                                                    <span className="font-semibold text-[#07b8b2]">{category.children?.length || 0}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                                <span className="text-sm text-gray-600 flex items-center space-x-2">
-                                                    <Newspaper className="w-4 h-4" />
-                                                    <span>Total Berita</span>
-                                                </span>
-                                                <span className="font-semibold text-[#07b8b2]">{category.beritas?.length || 0}</span>
-                                            </div>
-                                            <div className="flex items-center justify-between py-2">
-                                                <span className="text-sm text-gray-600 flex items-center space-x-2">
-                                                    <Users className="w-4 h-4" />
-                                                    <span>Subkategori</span>
-                                                </span>
-                                                <span className="font-semibold text-[#07b8b2]">{category.children?.length || 0}</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        </CardContent>
+                                    </Card>
                                 </div>
                             </div>
                         </div>
@@ -937,9 +1159,9 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                         <div className="container mx-auto px-4 py-8 max-w-7xl">
                             <Breadcrumb items={breadcrumbItems} />
 
-                            <article className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                            <Card className="overflow-hidden">
                                 {/* Header */}
-                                <div className="p-8 border-b border-gray-100">
+                                <CardContent className="p-8 border-b border-gray-100">
                                     <div className="flex items-center space-x-2 mb-4">
                                         {page.kategori && (
                                             <>
@@ -969,10 +1191,10 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                             title={page.judul}
                                         />
                                     </div>
-                                </div>
+                                </CardContent>
 
                                 {/* Content */}
-                                <div className="p-8">
+                                <CardContent className="p-8">
                                     {page.gambar && (
                                         <div className="mb-8 rounded-xl overflow-hidden">
                                             <Image
@@ -989,8 +1211,8 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                         className="prose prose-gray max-w-none prose-headings:text-gray-900 prose-a:text-[#07b8b2] prose-a:no-underline hover:prose-a:text-teal-700"
                                         dangerouslySetInnerHTML={{ __html: page.konten }}
                                     />
-                                </div>
-                            </article>
+                                </CardContent>
+                            </Card>
 
                             {/* Back Button */}
                             <div className="mt-8">
@@ -1045,9 +1267,9 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                         <div className="container mx-auto px-4 py-8 max-w-7xl">
                             <Breadcrumb items={breadcrumbItems} />
 
-                            <article className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                            <Card className="overflow-hidden">
                                 {/* Header */}
-                                <div className="p-4 sm:p-8 border-b border-gray-100">
+                                <CardContent className="p-4 sm:p-8 border-b border-gray-100">
                                     <div className="flex items-center space-x-2 mb-4">
                                         {newsItem.kategori && (
                                             <>
@@ -1127,7 +1349,7 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                             title={newsItem.judul_berita}
                                         />
                                     </div>
-                                </div>
+                                </CardContent>
 
                                 {/* Featured Image */}
                                 {newsItem.gambar && (
@@ -1145,13 +1367,13 @@ export default async function DynamicPage({ params }: { params: PageParams }) {
                                 )}
 
                                 {/* Content */}
-                                <div className="p-4 sm:p-8">
+                                <CardContent className="p-4 sm:p-8">
                                     <div
                                         className="prose prose-gray max-w-none prose-headings:text-gray-900 prose-a:text-[#07b8b2] prose-a:no-underline hover:prose-a:text-teal-700 prose-sm sm:prose-base"
                                         dangerouslySetInnerHTML={{ __html: newsItem.isi }}
                                     />
-                                </div>
-                            </article>
+                                </CardContent>
+                            </Card>
 
                             {/* Back Button */}
                             <div className="mt-8">
