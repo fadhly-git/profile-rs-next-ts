@@ -810,13 +810,6 @@ export default async function DynamicPage({ params, searchParams }: { params: Pa
             const startIndex = (currentPage - 1) * itemsPerPage
             const paginatedBerita = filteredBerita.slice(startIndex, startIndex + itemsPerPage)
 
-            // Get all categories for filter dropdown
-            // const allCategories = await prisma.kategori.findMany({
-            //     where: { is_active: true },
-            //     select: { id_kategori: true, nama_kategori: true, slug_kategori: true },
-            //     orderBy: { nama_kategori: 'asc' }
-            // })
-
             const breadcrumbItems = []
 
             if (category.parent) {
