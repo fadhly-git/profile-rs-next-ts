@@ -23,7 +23,8 @@ export async function POST(request: NextRequest) {
         
       case 'tag':
         if (tag) {
-          revalidateTag(tag);
+          // pass a profile string as the first argument as required by the revalidateTag signature
+          revalidateTag('default', tag);
         }
         break;
         

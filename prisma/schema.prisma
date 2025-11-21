@@ -1,7 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
-  engineType    = "binary"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -63,7 +62,7 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  @@map("User")
+  @@map("user")
 }
 
 model AboutUsSection {
